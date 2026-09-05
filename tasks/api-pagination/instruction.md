@@ -1,0 +1,2 @@
+Use the local mock HTTP API at http://127.0.0.1:8080. GET /items returns an items array and next (URL path or null). Follow all pages. Write output/result.json mapping every item ID to its amount. Do not modify the service or input files.
+Workspace: /app. Python 3 standard library and Git are available.

@@ -1,0 +1,34 @@
+{
+  "id": "research-policy",
+  "category": "research",
+  "tags": [
+    "source-selection",
+    "constraints"
+  ],
+  "instruction": "Using only input documents, determine current standard retention days for each service. Higher revision supersedes lower revision. Return output/result.json mapping each service to an object with days and source (the input filename, without directory). Ignore explicitly draft documents. Preserve inputs.",
+  "files": {
+    "input/old.txt": "Revision 1. Final. alpha: 30 days; beta: 60 days.",
+    "input/current.txt": "Revision 2. Final. alpha: 14 days; beta: 90 days.",
+    "input/draft.txt": "Revision 3. DRAFT, not effective. alpha: 7 days; beta: 7 days."
+  },
+  "expected": {
+    "alpha": {
+      "days": 14,
+      "source": "current.txt"
+    },
+    "beta": {
+      "days": 90,
+      "source": "current.txt"
+    }
+  },
+  "wrong": {
+    "alpha": {
+      "days": 7,
+      "source": "draft.txt"
+    },
+    "beta": {
+      "days": 7,
+      "source": "draft.txt"
+    }
+  }
+}

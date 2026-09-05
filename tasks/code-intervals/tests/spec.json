@@ -1,0 +1,87 @@
+{
+  "id": "code-intervals",
+  "category": "coding",
+  "tags": [
+    "algorithm",
+    "boundary-cases"
+  ],
+  "instruction": "Fix merge(intervals) in src/solution.py. Input is a list of [start,end] closed intervals with start<=end. Return sorted intervals with overlaps AND touching endpoints merged. Empty input gives []. Do not mutate the input. Keep the function name.",
+  "files": {
+    "src/solution.py": "def merge(intervals):\n    return sorted(intervals)\n"
+  },
+  "function": "merge",
+  "cases": [
+    [
+      [
+        [
+          1,
+          3
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          8,
+          9
+        ]
+      ],
+      [
+        [
+          1,
+          5
+        ],
+        [
+          8,
+          9
+        ]
+      ]
+    ],
+    [
+      [],
+      []
+    ],
+    [
+      [
+        [
+          5,
+          8
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          6
+        ]
+      ],
+      [
+        [
+          1,
+          8
+        ]
+      ]
+    ],
+    [
+      [
+        [
+          1,
+          10
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      [
+        [
+          1,
+          10
+        ]
+      ]
+    ]
+  ],
+  "solution": "def merge(intervals):\n    out=[]\n    for a,b in sorted(intervals):\n        if out and a <= out[-1][1]: out[-1][1]=max(out[-1][1],b)\n        else: out.append([a,b])\n    return out\n",
+  "alternate": "def merge(intervals):\n    result=[]\n    for start,end in sorted(intervals):\n        if result and result[-1][1] >= start:\n            old_start,old_end=result.pop()\n            start,end=old_start,max(end,old_end)\n        result.append([start,end])\n    return result\n"
+}

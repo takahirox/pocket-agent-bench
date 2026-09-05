@@ -1,0 +1,37 @@
+{
+  "id": "code-slug",
+  "category": "coding",
+  "tags": [
+    "bug-fix",
+    "boundary-cases"
+  ],
+  "instruction": "Fix src/solution.py: slug(text) must lowercase ASCII text, replace each run of non-[a-z0-9] characters with one hyphen, and strip leading/trailing hyphens. Return empty string when nothing remains. Keep the public function name. Do not hard-code particular inputs.",
+  "files": {
+    "src/solution.py": "def slug(text):\n    return text.lower().replace(' ', '-')\n"
+  },
+  "function": "slug",
+  "cases": [
+    [
+      " Hello, WORLD! ",
+      "hello-world"
+    ],
+    [
+      "a---b___c",
+      "a-b-c"
+    ],
+    [
+      "!!!",
+      ""
+    ],
+    [
+      "x9",
+      "x9"
+    ],
+    [
+      " A / B ",
+      "a-b"
+    ]
+  ],
+  "solution": "import re\ndef slug(text):\n    return re.sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')\n",
+  "alternate": "import re\ndef slug(text):\n    return '-'.join(re.findall('[a-z0-9]+', text.lower()))\n"
+}

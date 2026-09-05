@@ -1,0 +1,28 @@
+schema_version = "1.4"
+[task]
+name = "pocket/event-reconciliation"
+version = "1.0.0"
+[metadata]
+category = "data"
+tags = ["ordering", "cross-file"]
+source = "pocket-original"
+human_reviewed = false
+capabilities = ["filesystem", "python"]
+network_enforcement = "compose-internal-model-proxy-v1"
+[agent]
+user = "agent"
+timeout_sec = 240.0
+[verifier]
+user = "root"
+timeout_sec = 45.0
+environment_mode = "separate"
+[verifier.environment]
+network_mode = "public"
+cpus = 2
+memory_mb = 2048
+[environment]
+# Egress is enforced by the internal Compose network and model-only proxy.
+network_mode = "public"
+cpus = 2
+memory_mb = 2048
+build_timeout_sec = 600.0

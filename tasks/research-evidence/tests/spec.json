@@ -1,0 +1,22 @@
+{
+  "id": "research-evidence",
+  "category": "research",
+  "tags": [
+    "evidence",
+    "abstention"
+  ],
+  "instruction": "Read input/report.txt. Write output/result.json with keys launch_date, owner, budget. Use explicitly confirmed facts only; use JSON null when not confirmed. Dates must be YYYY-MM-DD. Preserve the input.",
+  "files": {
+    "input/report.txt": "Confirmed owner: Mira. Confirmed launch date: 2026-04-09. A $5000 budget was proposed but never approved. There is no confirmed budget."
+  },
+  "expected": {
+    "launch_date": "2026-04-09",
+    "owner": "Mira",
+    "budget": null
+  },
+  "wrong": {
+    "launch_date": "2026-04-09",
+    "owner": "Mira",
+    "budget": 5000
+  }
+}

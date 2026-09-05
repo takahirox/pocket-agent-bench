@@ -1,0 +1,6 @@
+FROM pocket-agent-bench-runtime:0.1
+COPY --chown=agent:agent input/ /app/input/
+COPY --chown=agent:agent src/ /app/src/
+COPY mock_api.py bootstrap.py smoke.py /opt/pocket/
+WORKDIR /app
+ENTRYPOINT ["python", "/opt/pocket/bootstrap.py"]

@@ -1,0 +1,21 @@
+{
+  "id": "event-reconciliation",
+  "category": "data",
+  "tags": [
+    "ordering",
+    "cross-file"
+  ],
+  "instruction": "Combine the arrays in input/*.json. For each entity, select the event with greatest numeric version, regardless of file or row order. Omit entities whose selected event has deleted=true. Write output/result.json mapping remaining entity IDs to the selected value. Preserve inputs.",
+  "files": {
+    "input/a.json": "[{\"id\":\"A\",\"version\":2,\"value\":\"new\",\"deleted\":false},{\"id\":\"B\",\"version\":1,\"value\":\"old\",\"deleted\":false}]",
+    "input/b.json": "[{\"id\":\"A\",\"version\":1,\"value\":\"old\",\"deleted\":false},{\"id\":\"B\",\"version\":3,\"deleted\":true},{\"id\":\"C\",\"version\":1,\"value\":\"keep\",\"deleted\":false}]"
+  },
+  "expected": {
+    "A": "new",
+    "C": "keep"
+  },
+  "wrong": {
+    "A": "old",
+    "C": "keep"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "id": "research-dependencies",
+  "category": "research",
+  "tags": [
+    "planning",
+    "cross-file"
+  ],
+  "instruction": "Read the prerequisite rules in input/*.txt. Write output/result.json as an array containing each task A,B,C,D exactly once in an execution order satisfying every prerequisite. Any valid order is accepted. Preserve inputs.",
+  "files": {
+    "input/team1.txt": "A must finish before C. B must finish before C.",
+    "input/team2.txt": "C must finish before D."
+  },
+  "expected": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "alternate_result": [
+    "B",
+    "A",
+    "C",
+    "D"
+  ],
+  "wrong": [
+    "A",
+    "C",
+    "B",
+    "D"
+  ],
+  "edges": [
+    [
+      "A",
+      "C"
+    ],
+    [
+      "B",
+      "C"
+    ],
+    [
+      "C",
+      "D"
+    ]
+  ]
+}

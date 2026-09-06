@@ -52,7 +52,10 @@ class ConnectedAgent(BaseAgent):
 
     def check_stop(self):
         if self.stop_file and self.stop_file.exists():
-            raise RuntimeError("Usage limit previously reached; operator action required")
+            reason = self.stop_file.read_text().strip()
+            raise RuntimeError(
+                f"Experiment previously stopped ({reason}); operator action required"
+            )
 
     async def setup(self, environment):
         self.check_stop()
@@ -144,11 +147,17 @@ class ConnectedAgent(BaseAgent):
             finally:
                 request["operation"] = "cleanup"
                 request_file.write_text(json.dumps(request))
-                cleaned = await controller_call(
-                    self.profile["argv"], request_file, control / "cleanup.json", 60
-                )
-                if cleaned["outcome"] != "cleaned":
-                    raise RuntimeError("Controller cleanup not confirmed")
+                try:
+                    cleaned = await controller_call(
+                        self.profile["argv"], request_file, control / "cleanup.json", 60
+                    )
+                    if cleaned["outcome"] != "cleaned":
+                        raise RuntimeError("Controller cleanup not confirmed")
+                except BaseException:
+                    if self.stop_file:
+                        self.stop_file.parent.mkdir(parents=True, exist_ok=True)
+                        self.stop_file.write_text("cleanup_unconfirmed\n")
+                    raise
             after = snapshot(workspace)
             if {k: v for k, v in after.items() if k.startswith("input/")} != {
                 k: v for k, v in public.items() if k.startswith("input/")
@@ -283,6 +292,7 @@ class ConnectedAgent(BaseAgent):
         context.metadata = {
             **self.identity,
             "connection_outcome": response["outcome"],
+            "execution_exit_code": response.get("execution_exit_code"),
             "agent_seconds_limit": self.seconds,
             "agent_seconds_used": time.monotonic() - started,
             "usage_complete": all(k in usage for k in ("input_tokens", "output_tokens")),

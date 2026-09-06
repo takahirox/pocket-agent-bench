@@ -96,7 +96,8 @@ interactive API access. Compare this system-plus-transport condition honestly.
 
 Connected profiles currently require concurrency 1. Once quota is reported, the
 shared job gate prevents subsequent setup/model calls; scheduled but unrun trials
-remain in the report. This is not a token or dollar cap. Native model retries
+remain in the report. Unconfirmed controller cleanup also stops subsequent trials
+and retains recovery evidence. This is not a token or dollar cap. Native model retries
 inside a CLI remain that CLI's responsibility. Unknown usage/cost remains unknown.
 
 Reports use exact profile identities (even two profiles of the same system), retain

@@ -101,3 +101,33 @@ def test_host_cleanup_even_after_timeout_or_protocol_error(tmp_path, behavior):
     with pytest.raises((TimeoutError, ValueError)):
         asyncio.run(agent.run("task", PublicEnvironment(tmp_path / "empty"), SimpleNamespace()))
     assert not (tmp_path / "resource").exists()
+
+
+def test_unconfirmed_cleanup_retains_evidence_and_stops_next_trial(tmp_path, monkeypatch):
+    from pocket_bench import interface
+
+    profile = controller_fixture(tmp_path)
+    control = tmp_path / "control"
+    control.mkdir()
+    monkeypatch.setattr(interface.tempfile, "mkdtemp", lambda **kwargs: str(control))
+
+    async def invoke(argv, request, response, seconds):
+        if json.loads(request.read_text())["operation"] == "cleanup":
+            raise RuntimeError("unconfirmed")
+        return {"protocol": PROTOCOL, "outcome": "completed"}
+
+    monkeypatch.setattr(connected_agent, "controller_call", invoke)
+    agent = ConnectedAgent(
+        logs_dir=tmp_path / "logs",
+        profile_file=profile,
+        profile_name="example",
+        allow_host_controller=True,
+        stop_file=tmp_path / "stop",
+    )
+    agent.logs_dir.mkdir()
+    with pytest.raises(RuntimeError, match="unconfirmed"):
+        asyncio.run(agent.run("task", PublicEnvironment(tmp_path / "empty"), SimpleNamespace()))
+    recovery = json.loads((agent.logs_dir / "controller-recovery.json").read_text())
+    assert recovery["cleanup"] == "unconfirmed" and control.exists()
+    with pytest.raises(RuntimeError, match="cleanup_unconfirmed"):
+        agent.check_stop()

@@ -171,7 +171,7 @@ def test_quota_gate_prevents_later_model_call(tmp_path):
         asyncio.run(agent.run("task", Environment(), SimpleNamespace()))
     assert stop.exists()
     environment = Environment()
-    with pytest.raises(RuntimeError, match="previously reached"):
+    with pytest.raises(RuntimeError, match="previously stopped"):
         asyncio.run(agent.run("next task", environment, SimpleNamespace()))
     assert environment.commands == []
 

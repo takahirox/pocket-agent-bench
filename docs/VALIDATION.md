@@ -1,5 +1,55 @@
 # Validation and initial measurements
 
+## Native generic-interface diagnostic (2026-09-06)
+
+`employee-native-v1-20260906` exercised all twelve tasks through the new generic
+`pocket-agent-v1` host-controller interface and the product-owned Fleet adapter.
+One attempt per task, concurrency 1, `gpt-5.6-luna`, effort `low`, 180 seconds per
+agent phase. The run took 12m42s. No hidden grader, task input or instruction was
+changed from the separately preserved corrected baseline (`4fad7ae`).
+
+| Category | Success | Failure | Unscorable |
+| --- | ---: | ---: | ---: |
+| Data | 3 | 0 | 0 |
+| Research | 1 | 2 | 0 |
+| Coding | 0 | 3 | 0 |
+| API | 0 | 3 | 0 |
+| Total | 4 | 8 | 0 |
+
+These are **raw integration-diagnostic results, not a fair capability score**.
+Every failed trial returned Fleet status `failed`, with no accepted candidate
+exported. A later model-free product-side reproduction found that its public-check
+command wrote bytecode in a protected directory; running that command could cause
+Fleet to reject an otherwise valid candidate. The product now disables that
+side effect and records its stable graph failure code. The original trial metadata
+does not identify each rejection cause, so not all eight failures can conclusively
+be assigned to that defect. No model rerun or retrospective grade rewriting occurred.
+
+Evaluated benchmark commit: `3230575`; product commit: `b64b808`. Product implementation
+digest: `f886f07ea03f3a543c2702b08386e12030066467b8993e12fc9ec6972e9032ff`.
+Task/verifier runtime:
+`sha256:2446176326e8dfdf83d730bd9bafc696799d75f13fa5b469ea8adea672d50010`.
+Product worker runtime (Linux arm64, Codex 0.144.4):
+`sha256:d71061257e875361e1bf9baf2f0c2db51c0fb88828c33d53b00ee97ee3783993`.
+The old Fleet package embedded in the task image was not used. The product's
+`docs/benchmark-adapter.md` documents its settings and post-run fix. Local operator
+paths/authentication stay private; the benchmark contains no product controller.
+
+All twelve cleanups were confirmed. Median agent phase: 48.7s. Observed input tokens:
+878,729 (including 653,568 cached); output tokens: 13,227. Dollar cost is unknown.
+No reset tickets, purchases, model/provider fallback or automatic score-improving
+reruns were used. One trial per task, a changed product runtime and a known connection
+defect preclude superiority claims against the historical single/team baselines.
+
+Before this run, model-free CLI and host-controller Docker probes both produced a
+deliberately wrong output and were independently graded failure rather than
+unscorable, validating the transport/grader distinction. Interface unit tests also
+cover profile identity, protected inputs, timeout cleanup and fail-closed quota gates.
+See [all twelve sanitized results](../examples/employee-native-v1.json) and
+[connection instructions](AGENT-INTERFACE.md). Agent success is never a reward input.
+
+## Earlier diagnostic measurements
+
 Validation date: 2026-09-05. This is an automatically validated **initial diagnostic
 suite**, not a human-certified benchmark or a statistically reliable leaderboard.
 
@@ -104,7 +154,8 @@ configuration. Six trials per configuration do not establish general superiority
 The optional manifest changes what the **system + adapter** can do; it is not proof
 that unmodified standalone Fleet can execute arbitrary process proposals.
 
-Reproduce the corrected API subset:
+Historical command for the corrected API subset (requires the archived adapter
+revision and runtime; `fleet-single` is no longer an active built-in profile):
 
 ```sh
 uv run pocket-bench run --name my-corrected-api \

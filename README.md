@@ -9,10 +9,17 @@ Twelve intentionally small original tasks cover data processing, coding, local-d
 research and mock API workflows. Tasks and graders are automatically tested, not
 human-certified. See [the goal](docs/GOAL.md) and [evaluation design](docs/DESIGN.md).
 
-The [initial real comparison](docs/VALIDATION.md) ran 72 trials: Codex single 24/24,
-Codex team 23/24, and the optional My AI Employee configuration 17/24. These are
-small-suite observations, not general product rankings. A [shareable measured JSON
-summary](examples/baseline-v2.json) is included; complete traces remain local.
+The [initial real comparison](docs/VALIDATION.md) ran 72 trials, but a later audit
+found benchmark-adapter defects affecting all six My AI Employee API trials. Those
+six are invalidated for comparison; **the original 17/24 is not a fair product score**.
+Original evidence is retained. A [shareable measured JSON summary](examples/baseline-v2.json)
+is included; complete traces remain local. This small suite is not a product ranking.
+
+The corrected API-only comparison ran 18 fresh trials: Codex single **5/6**, Codex
+team **6/6**, and My AI Employee + corrected adapter **3/6**. Fleet's remaining
+three failures are malformed patch proposals with no native repair turn, not the
+old networking defect. See [results and root causes](docs/VALIDATION.md#corrected-api-comparison)
+and [shareable JSON](examples/api-corrected-v1.json). My AI Employee itself was not changed.
 
 ## Quick start
 
@@ -117,10 +124,22 @@ are gitignored; review/redact before sharing.
 
 The Fleet adapter transparently preserves native worker stdout while recording JSONL
 usage. It sets the internal model proxy environment, disables implicit native subagent
-spawning/web search, and enables local service access inside the worker's workspace
-sandbox. The outer Docker network still blocks non-model internet destinations.
+spawning/web search, and enables local service access while keeping Fleet's command
+filesystem read-only. One shared policy builder drives both actual worker settings
+and the model-free preflight (loopback access plus filesystem write policy).
+The outer Docker network still blocks non-model internet destinations.
 Team analysts cannot call APIs; only the coordinator operates services, avoiding
 duplicate side effects from analysis sessions.
+
+API tasks expose the same optional `pocket-python-v1` execution transport to all
+configurations: the agent explicitly authors `output/execute.json` with
+`{"script":"src/any_name.py"}`. After its final response, the adapter runs that
+program once as the task's unprivileged user, within the remaining aggregate time.
+No source filename is guessed, no answer is supplied, and internal structural
+checks never execute API operations. Alternatively, an agent can call the service
+directly and omit the manifest. The final private grader and trusted service audit
+remain the authority for success. This evaluates **agent + adapter**, not the
+standalone product's ability to execute arbitrary process proposals.
 
 For another agent, implement Harbor's `BaseAgent` interface and run the same tasks:
 

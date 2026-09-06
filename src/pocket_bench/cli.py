@@ -75,12 +75,24 @@ async def run_job(args):
                 "adapter_sha256": hashlib.sha256(
                     b"".join(
                         Path(__file__).with_name(n).read_bytes()
-                        for n in ("agents.py", "boundary_probe.py", "sandbox_probe.py")
+                        for n in (
+                            "agents.py",
+                            "boundary_probe.py",
+                            "sandbox_probe.py",
+                            "codex_policy.py",
+                            "fleet_wrapper.py",
+                            "execution.py",
+                            "smoke.py",
+                        )
                     )
                 ).hexdigest(),
                 "profiles": profiles,
                 "attempts": args.attempts,
                 "tasks": specs,
+                "public_instructions": {
+                    s["id"]: (root / "tasks" / s["id"] / "instruction.md").read_text()
+                    for s in specs
+                },
                 "configuration": config.model_dump(mode="json"),
                 "suite": json.loads((root / "suite/manifest.json").read_text()),
                 "runtime": json.loads((root / "local/runtime.json").read_text())
@@ -140,6 +152,8 @@ def main():
     inv = sub.add_parser("invalidate", help="Attach a reason; preserve the original trial evidence")
     inv.add_argument("job", type=Path)
     inv.add_argument("--reason", required=True)
+    inv.add_argument("--conditions", help="Limit to comma-separated exact condition names")
+    inv.add_argument("--tasks", help="Limit to comma-separated task IDs (AND with conditions)")
     r = sub.add_parser("run", help="Run a versioned experiment; consumes configured model access")
     r.add_argument("--name")
     r.add_argument("--tasks", help="Comma-separated task IDs; default all")
@@ -180,7 +194,14 @@ def main():
             p.error("Job directory does not exist")
         with (a.job / "pocket-invalidation.json").open("x") as f:
             json.dump(
-                {"reason": a.reason, "created_at": datetime.now(UTC).isoformat()}, f, indent=2
+                {
+                    "reason": a.reason,
+                    "created_at": datetime.now(UTC).isoformat(),
+                    "conditions": a.conditions.split(",") if a.conditions else None,
+                    "tasks": a.tasks.split(",") if a.tasks else None,
+                },
+                f,
+                indent=2,
             )
         print("Invalidation recorded; regenerate the report to display it.")
     elif a.command == "report":

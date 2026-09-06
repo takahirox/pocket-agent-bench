@@ -1,7 +1,7 @@
 schema_version = "1.4"
 [task]
 name = "pocket/api-pagination"
-version = "1.0.0"
+version = "1.1.0"
 [metadata]
 category = "api"
 tags = ["pagination", "tool-use"]
@@ -9,6 +9,7 @@ source = "pocket-original"
 human_reviewed = false
 capabilities = ["filesystem", "python", "http-loopback"]
 network_enforcement = "compose-internal-model-proxy-v1"
+execution_transport = "pocket-python-v1"
 [agent]
 user = "agent"
 timeout_sec = 240.0

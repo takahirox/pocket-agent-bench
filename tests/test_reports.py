@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from pocket_bench.report import generate, normalize, summarize
 
 
@@ -74,6 +76,31 @@ def test_invalidation_retains_original_grade(tmp_path):
     rows = normalize(root)
     assert all(r["status"] == "unscorable" for r in rows)
     assert rows[0]["original_status"] == "failure"
+
+
+@pytest.mark.parametrize(
+    "conditions,tasks,matched",
+    [
+        (["pocket-codex/single"], ["x"], True),
+        (["my-ai-employee/single"], ["x"], False),
+        (["pocket-codex/single"], ["other"], False),
+    ],
+)
+def test_selective_invalidation_preserves_unaffected_trials(tmp_path, conditions, tasks, matched):
+    root = job(tmp_path)
+    (root / "pocket-invalidation.json").write_text(
+        json.dumps(
+            {
+                "reason": "adapter defect",
+                "conditions": conditions,
+                "tasks": tasks,
+            }
+        )
+    )
+    rows = normalize(root)
+    assert len(rows) == 2
+    assert (rows[0]["status"] == "unscorable") == matched
+    assert ("original_status" in rows[0]) == matched
 
 
 def test_incomplete_usage_not_presented_as_full_total():

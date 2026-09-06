@@ -15,8 +15,12 @@ from pathlib import Path
 
 from harbor.agents.base import BaseAgent
 
+from pocket_bench.codex_policy import permission_args
+
 
 class CodexAgent(BaseAgent):
+    command_policy = "workspace-write"
+
     def __init__(self, *args, mode="single", effort="low", agent_seconds=180, **kwargs):
         super().__init__(*args, **kwargs)
         if mode not in ("single", "team"):
@@ -55,11 +59,12 @@ class CodexAgent(BaseAgent):
             raise RuntimeError(
                 "Isolation preflight failed: " + (probe.stderr or probe.stdout or "unknown")
             )
-        await environment.upload_file(
-            Path(__file__).with_name("sandbox_probe.py"), "/opt/pocket/sandbox_probe.py"
-        )
+        for name in ("sandbox_probe.py", "codex_policy.py", "execution.py"):
+            await environment.upload_file(Path(__file__).with_name(name), f"/opt/pocket/{name}")
         probe = await environment.exec(
-            command="python -I /opt/pocket/sandbox_probe.py", user="agent", timeout_sec=15
+            command=f"python -I /opt/pocket/sandbox_probe.py {self.command_policy}",
+            user="agent",
+            timeout_sec=15,
         )
         (self.logs_dir / "sandbox.json").write_text(probe.stdout or "{}")
         if probe.return_code:
@@ -93,10 +98,7 @@ class CodexAgent(BaseAgent):
             "features.multi_agent=false",
             "-c",
             'web_search="disabled"',
-            "-c",
-            "sandbox_workspace_write.network_access=true",
-            "--sandbox",
-            "read-only" if readonly else "workspace-write",
+            *permission_args("read-only" if readonly else self.command_policy),
             "-o",
             f"/logs/agent/{role}.txt",
             "--",
@@ -164,8 +166,29 @@ class CodexAgent(BaseAgent):
                 )
             else:
                 await self.invoke(environment, instruction, "single", self.agent_seconds)
+            await self.execute_declared(environment)
         finally:
             await self.collect(environment, context)
+
+    async def execute_declared(self, environment):
+        remaining = max(0, self.agent_seconds - sum(e["duration_seconds"] for e in self.events))
+        started = time.time()
+        r = await environment.exec(
+            command=f"python -I /opt/pocket/execution.py {remaining}",
+            cwd="/app",
+            user="agent",
+            timeout_sec=max(1, remaining) + 1,
+        )
+        self.events.append(
+            {
+                "role": "declared-execution",
+                "kind": "transport",
+                "exit_code": r.return_code,
+                "started_at": started,
+                "duration_seconds": time.time() - started,
+                "remaining_seconds": remaining,
+            }
+        )
 
     async def collect(self, environment, context):
         self.logs_dir.mkdir(parents=True, exist_ok=True)
@@ -190,7 +213,7 @@ class CodexAgent(BaseAgent):
             "agent_seconds_limit": self.agent_seconds,
             "agent_seconds_used": sum(e["duration_seconds"] for e in self.events),
             "usage_complete": bool(usage)
-            and len(usage) >= len(self.events)
+            and len(usage) >= sum(e.get("kind") != "transport" for e in self.events)
             and not any(e.get("error") for e in self.events),
             "cost_basis": "unknown-subscription",
             "budget_enforcement": "per-role timeout; aggregate agent-seconds upper bound",
@@ -200,6 +223,8 @@ class CodexAgent(BaseAgent):
 
 
 class FleetAgent(CodexAgent):
+    command_policy = "readonly-network"
+
     @staticmethod
     def name():
         return "my-ai-employee"
@@ -260,28 +285,9 @@ class FleetAgent(CodexAgent):
             },
         }
         with tempfile.TemporaryDirectory(prefix="pocket-config-") as d:
-            wrapper = Path(d) / "pocket-codex"
-            wrapper.write_text("""#!/usr/local/bin/python
-import os,subprocess,sys,uuid
-from pathlib import Path
-env=dict(os.environ, HTTPS_PROXY="http://model-proxy:3128", HTTP_PROXY="http://model-proxy:3128", NO_PROXY="localhost,127.0.0.1")
-name="fleet-worker-"+uuid.uuid4().hex
-args=sys.argv[1:]
-final=Path("/logs/agent/"+name+".txt")
-is_model="exec" in args
-if is_model:
-    i=args.index("exec")+1
-    args[i:i]=["--json","--output-last-message",str(final),"-c","features.multi_agent=false","-c","sandbox_workspace_write.network_access=true","-c",'web_search="disabled"']
-with open("/logs/agent/"+name+".jsonl","wb") as log, open("/logs/agent/"+name+".stderr","wb") as err:
-    proc=subprocess.Popen(["/usr/local/bin/codex",*args],stdout=subprocess.PIPE,stderr=err,env=env)
-    for line in proc.stdout:
-        log.write(line);log.flush()
-        if not is_model:sys.stdout.buffer.write(line);sys.stdout.buffer.flush()
-    code=proc.wait()
-    if is_model and final.exists():sys.stdout.buffer.write(final.read_bytes());sys.stdout.buffer.flush()
-    sys.exit(code)
-""")
-            await environment.upload_file(wrapper, "/usr/local/bin/pocket-codex")
+            await environment.upload_file(
+                Path(__file__).with_name("fleet_wrapper.py"), "/usr/local/bin/pocket-codex"
+            )
             await environment.exec(command="chmod 755 /usr/local/bin/pocket-codex", user="root")
             for name, value, target in (
                 ("project.json", project, "/app/.fleet/project.yaml"),
@@ -355,9 +361,14 @@ with open("/logs/agent/"+name+".jsonl","wb") as log, open("/logs/agent/"+name+".
                     command=cmd + " > /logs/agent/candidate.patch", user="agent"
                 )
                 if r.return_code == 0:
-                    await environment.exec(
+                    applied = await environment.exec(
                         command="git apply /logs/agent/candidate.patch", cwd="/app", user="agent"
                     )
+                    if applied.return_code:
+                        raise RuntimeError(
+                            "Fleet candidate materialization failed: " + (applied.stderr or "")
+                        )
+            await self.execute_declared(environment)
         except Exception as e:
             if not self.events:
                 self.events.append(

@@ -26,7 +26,7 @@ def test_native_network_and_single_session_configuration(tmp_path):
     cmd = env.commands[0]
     assert "sandbox_workspace_write.network_access=true" in cmd["command"]
     assert "features.multi_agent=false" in cmd["command"]
-    assert "--sandbox workspace-write" in cmd["command"]
+    assert 'sandbox_mode="workspace-write"' in cmd["command"]
     assert cmd["user"] == "agent" and cmd["timeout_sec"] == 90
 
 
@@ -36,7 +36,7 @@ def test_team_budget_and_handoff(tmp_path):
     asyncio.run(agent.run("task", env, context))
     invocations = [c for c in env.commands if c["command"].startswith("codex exec")]
     assert sorted(c["timeout_sec"] for c in invocations) == [30, 30, 120]
-    assert sum("--sandbox read-only" in c["command"] for c in invocations) == 2
+    assert sum('sandbox_mode="read-only"' in c["command"] for c in invocations) == 2
     assert "Analyst 1: analyst report" in invocations[-1]["command"]
     assert context.metadata["usage_complete"] is False
 

@@ -86,7 +86,14 @@ def normalize(job_path):
             status = "failure"
         outputs = {}
         for p in sorted((trial / "agent").glob("*")) if (trial / "agent").exists() else []:
-            if p.is_file() and p.suffix in (".txt", ".json", ".stderr", ".patch", ".jsonl"):
+            if p.is_file() and p.suffix in (
+                ".txt",
+                ".json",
+                ".stdout",
+                ".stderr",
+                ".patch",
+                ".jsonl",
+            ):
                 outputs[p.name] = p.read_text(errors="replace")[:100_000]
         artifacts = {}
         for p in sorted((trial / "artifacts/app").rglob("*")):
@@ -176,11 +183,16 @@ def normalize(job_path):
                 )
     invalid = read(job_path / "pocket-invalidation.json")
     for r in rows:
+        r["instruction"] = plan.get("public_instructions", {}).get(r["task"], r["instruction"])
         r["provenance"] = {
             k: plan.get(k) for k in ("version", "adapter_sha256", "runtime", "suite")
         }
     if invalid:
         for r in rows:
+            if invalid.get("conditions") and r["condition"] not in invalid["conditions"]:
+                continue
+            if invalid.get("tasks") and r["task"] not in invalid["tasks"]:
+                continue
             r["original_status"] = r["status"]
             r["status"] = "unscorable"
             r["invalidation"] = invalid

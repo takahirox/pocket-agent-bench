@@ -15,7 +15,8 @@ with sync_playwright() as p:
     page.goto(report.as_uri())
     assert page.locator("#trials tr").count() > 0
     initial = page.locator("#trials tr").count()
-    page.locator("#category").select_option("data")
+    category = page.locator('#category option:not([value=""])').first.get_attribute("value")
+    page.locator("#category").select_option(category)
     assert 0 < page.locator("#trials tr").count() <= initial
     page.locator("#trials button").first.click()
     assert page.locator("dialog").is_visible()

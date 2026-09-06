@@ -1,0 +1,932 @@
+{
+  "job": "api-corrected-v1",
+  "human_reviewed": false,
+  "provenance": {
+    "version": "0.1.0",
+    "adapter_sha256": "65cbc00e393efad3a1405449dbd98e90c05eadac3d74fc5505089cd18b34bbc9",
+    "runtime": {
+      "image": "pocket-agent-bench-runtime:0.1",
+      "image_id": "sha256:2446176326e8dfdf83d730bd9bafc696799d75f13fa5b469ea8adea672d50010",
+      "fleet_snapshot_sha256": "aae1101d4dc7d5b3b60bc767c487c1f67a0a41d5c0835b86ee6814ddb39ce245",
+      "fleet_head": "fd64ae4d856ecdbe637b11318e57d40aa6bc2b5f"
+    },
+    "suite": {
+      "version": "1.1",
+      "sha256": "3dfbc12bcc57d7659ddb3313164272fbb03bae583e780488227710a8f8972c4f",
+      "tasks": 12,
+      "human_reviewed": false
+    }
+  },
+  "summary": {
+    "total": 18,
+    "success": 14,
+    "failure": 4,
+    "unscorable": 0,
+    "success_rate_all": 0.7777777777777778,
+    "success_rate_scored": 0.7777777777777778,
+    "median_seconds": 34.4119795,
+    "total_cost_usd": null,
+    "known_cost_trials": 0,
+    "total_tokens_in": 875930,
+    "observed_tokens_in": 875930,
+    "known_tokens_in_trials": 18,
+    "total_tokens_out": 18695,
+    "observed_tokens_out": 18695,
+    "known_tokens_out_trials": 18,
+    "total_tokens_cached": 694016,
+    "observed_tokens_cached": 694016,
+    "known_tokens_cached_trials": 18
+  },
+  "configurations": {
+    "my-ai-employee/single": {
+      "total": 6,
+      "success": 3,
+      "failure": 3,
+      "unscorable": 0,
+      "success_rate_all": 0.5,
+      "success_rate_scored": 0.5,
+      "median_seconds": 40.664647,
+      "total_cost_usd": null,
+      "known_cost_trials": 0,
+      "total_tokens_in": 241812,
+      "observed_tokens_in": 241812,
+      "known_tokens_in_trials": 6,
+      "total_tokens_out": 9079,
+      "observed_tokens_out": 9079,
+      "known_tokens_out_trials": 6,
+      "total_tokens_cached": 160768,
+      "observed_tokens_cached": 160768,
+      "known_tokens_cached_trials": 6
+    },
+    "pocket-codex/single": {
+      "total": 6,
+      "success": 5,
+      "failure": 1,
+      "unscorable": 0,
+      "success_rate_all": 0.8333333333333334,
+      "success_rate_scored": 0.8333333333333334,
+      "median_seconds": 15.994621,
+      "total_cost_usd": null,
+      "known_cost_trials": 0,
+      "total_tokens_in": 138461,
+      "observed_tokens_in": 138461,
+      "known_tokens_in_trials": 6,
+      "total_tokens_out": 2439,
+      "observed_tokens_out": 2439,
+      "known_tokens_out_trials": 6,
+      "total_tokens_cached": 113408,
+      "observed_tokens_cached": 113408,
+      "known_tokens_cached_trials": 6
+    },
+    "pocket-codex/team": {
+      "total": 6,
+      "success": 6,
+      "failure": 0,
+      "unscorable": 0,
+      "success_rate_all": 1.0,
+      "success_rate_scored": 1.0,
+      "median_seconds": 34.4119795,
+      "total_cost_usd": null,
+      "known_cost_trials": 0,
+      "total_tokens_in": 495657,
+      "observed_tokens_in": 495657,
+      "known_tokens_in_trials": 6,
+      "total_tokens_out": 7177,
+      "observed_tokens_out": 7177,
+      "known_tokens_out_trials": 6,
+      "total_tokens_cached": 419840,
+      "observed_tokens_cached": 419840,
+      "known_tokens_cached_trials": 6
+    }
+  },
+  "categories": {
+    "api": {
+      "my-ai-employee/single": {
+        "total": 6,
+        "success": 3,
+        "failure": 3,
+        "unscorable": 0,
+        "success_rate_all": 0.5,
+        "success_rate_scored": 0.5,
+        "median_seconds": 40.664647,
+        "total_cost_usd": null,
+        "known_cost_trials": 0,
+        "total_tokens_in": 241812,
+        "observed_tokens_in": 241812,
+        "known_tokens_in_trials": 6,
+        "total_tokens_out": 9079,
+        "observed_tokens_out": 9079,
+        "known_tokens_out_trials": 6,
+        "total_tokens_cached": 160768,
+        "observed_tokens_cached": 160768,
+        "known_tokens_cached_trials": 6
+      },
+      "pocket-codex/single": {
+        "total": 6,
+        "success": 5,
+        "failure": 1,
+        "unscorable": 0,
+        "success_rate_all": 0.8333333333333334,
+        "success_rate_scored": 0.8333333333333334,
+        "median_seconds": 15.994621,
+        "total_cost_usd": null,
+        "known_cost_trials": 0,
+        "total_tokens_in": 138461,
+        "observed_tokens_in": 138461,
+        "known_tokens_in_trials": 6,
+        "total_tokens_out": 2439,
+        "observed_tokens_out": 2439,
+        "known_tokens_out_trials": 6,
+        "total_tokens_cached": 113408,
+        "observed_tokens_cached": 113408,
+        "known_tokens_cached_trials": 6
+      },
+      "pocket-codex/team": {
+        "total": 6,
+        "success": 6,
+        "failure": 0,
+        "unscorable": 0,
+        "success_rate_all": 1.0,
+        "success_rate_scored": 1.0,
+        "median_seconds": 34.4119795,
+        "total_cost_usd": null,
+        "known_cost_trials": 0,
+        "total_tokens_in": 495657,
+        "observed_tokens_in": 495657,
+        "known_tokens_in_trials": 6,
+        "total_tokens_out": 7177,
+        "observed_tokens_out": 7177,
+        "known_tokens_out_trials": 6,
+        "total_tokens_cached": 419840,
+        "observed_tokens_cached": 419840,
+        "known_tokens_cached_trials": 6
+      }
+    }
+  },
+  "trials": [
+    {
+      "id": "api-approval__7uLHtqp",
+      "task": "api-approval",
+      "category": "api",
+      "condition": "my-ai-employee/single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 41.370824,
+      "tokens_in": 36079,
+      "tokens_out": 1529,
+      "tokens_cached": 22016,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": false,
+          "detail": "missing or oversized artifact"
+        },
+        {
+          "name": "approval-read",
+          "passed": false,
+          "detail": ""
+        },
+        {
+          "name": "no-unapproved-execution",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-approval__JaH59Jf",
+      "task": "api-approval",
+      "category": "api",
+      "condition": "pocket-codex/single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 16.044543,
+      "tokens_in": 29606,
+      "tokens_out": 295,
+      "tokens_cached": 26880,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'status': 'awaiting_approval'}; observed {'status': 'awaiting_approval'}"
+        },
+        {
+          "name": "approval-read",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "no-unapproved-execution",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /request",
+          "GET /approval"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-approval__TBCiAD6",
+      "task": "api-approval",
+      "category": "api",
+      "condition": "pocket-codex/team",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 38.92154,
+      "tokens_in": 89469,
+      "tokens_out": 1161,
+      "tokens_cached": 81664,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'status': 'awaiting_approval'}; observed {'status': 'awaiting_approval'}"
+        },
+        {
+          "name": "approval-read",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "no-unapproved-execution",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /request",
+          "GET /approval"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-approval__VithH4B",
+      "task": "api-approval",
+      "category": "api",
+      "condition": "my-ai-employee/single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 55.466968,
+      "tokens_in": 49176,
+      "tokens_out": 2012,
+      "tokens_cached": 36864,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'status': 'awaiting_approval'}; observed {'status': 'awaiting_approval'}"
+        },
+        {
+          "name": "approval-read",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "no-unapproved-execution",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /request",
+          "GET /approval"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-approval__vh2eeq5",
+      "task": "api-approval",
+      "category": "api",
+      "condition": "pocket-codex/single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 18.068132,
+      "tokens_in": 29724,
+      "tokens_out": 370,
+      "tokens_cached": 26880,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'status': 'awaiting_approval'}; observed {'status': 'awaiting_approval'}"
+        },
+        {
+          "name": "approval-read",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "no-unapproved-execution",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /request",
+          "GET /approval"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-approval__zQJwkVT",
+      "task": "api-approval",
+      "category": "api",
+      "condition": "pocket-codex/team",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 38.241084,
+      "tokens_in": 99348,
+      "tokens_out": 1157,
+      "tokens_cached": 90624,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'status': 'awaiting_approval'}; observed {'status': 'awaiting_approval'}"
+        },
+        {
+          "name": "approval-read",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "name": "no-unapproved-execution",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /request",
+          "GET /approval"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-pagination__5jPY5Yu",
+      "task": "api-pagination",
+      "category": "api",
+      "condition": "pocket-codex/team",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 34.539468,
+      "tokens_in": 79379,
+      "tokens_out": 1365,
+      "tokens_cached": 59648,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'A': 10, 'B': 20, 'C': 30}; observed {'A': 10, 'B': 20, 'C': 30}"
+        },
+        {
+          "name": "all-pages-requested",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /items",
+          "GET /items?page=2"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-pagination__67FCdNR",
+      "task": "api-pagination",
+      "category": "api",
+      "condition": "pocket-codex/single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 15.045004,
+      "tokens_in": 19729,
+      "tokens_out": 369,
+      "tokens_cached": 14848,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'A': 10, 'B': 20, 'C': 30}; observed {'A': 10, 'B': 20, 'C': 30}"
+        },
+        {
+          "name": "all-pages-requested",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /items",
+          "GET /items?page=2"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-pagination__7P7HWRd",
+      "task": "api-pagination",
+      "category": "api",
+      "condition": "my-ai-employee/single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 37.698317,
+      "tokens_in": 35984,
+      "tokens_out": 1358,
+      "tokens_cached": 28928,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": false,
+          "detail": "missing or oversized artifact"
+        },
+        {
+          "name": "all-pages-requested",
+          "passed": false,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-pagination__DpETB6P",
+      "task": "api-pagination",
+      "category": "api",
+      "condition": "pocket-codex/team",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 32.773721,
+      "tokens_in": 59455,
+      "tokens_out": 1117,
+      "tokens_cached": 44800,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'A': 10, 'B': 20, 'C': 30}; observed {'A': 10, 'B': 20, 'C': 30}"
+        },
+        {
+          "name": "all-pages-requested",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /items",
+          "GET /items?page=2"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-pagination__FGwhFaq",
+      "task": "api-pagination",
+      "category": "api",
+      "condition": "my-ai-employee/single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 37.360019,
+      "tokens_in": 36108,
+      "tokens_out": 1339,
+      "tokens_cached": 22016,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'A': 10, 'B': 20, 'C': 30}; observed {'A': 10, 'B': 20, 'C': 30}"
+        },
+        {
+          "name": "all-pages-requested",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /items",
+          "GET /items?page=2"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-pagination__L6FkUKX",
+      "task": "api-pagination",
+      "category": "api",
+      "condition": "pocket-codex/single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 15.944699,
+      "tokens_in": 19718,
+      "tokens_out": 341,
+      "tokens_cached": 17920,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'A': 10, 'B': 20, 'C': 30}; observed {'A': 10, 'B': 20, 'C': 30}"
+        },
+        {
+          "name": "all-pages-requested",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /items",
+          "GET /items?page=2"
+        ],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-retry__Jk8h3aw",
+      "task": "api-retry",
+      "category": "api",
+      "condition": "my-ai-employee/single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 41.005113,
+      "tokens_in": 36023,
+      "tokens_out": 1533,
+      "tokens_cached": 22016,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'value': 42}; observed {'value': 42}"
+        },
+        {
+          "name": "bounded-recovery",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /value",
+          "GET /value",
+          "GET /value"
+        ],
+        "executions": 0,
+        "value_attempts": 3
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-retry__LJrSouy",
+      "task": "api-retry",
+      "category": "api",
+      "condition": "pocket-codex/team",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 33.770143,
+      "tokens_in": 89133,
+      "tokens_out": 1185,
+      "tokens_cached": 77568,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'value': 42}; observed {'value': 42}"
+        },
+        {
+          "name": "bounded-recovery",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /value",
+          "GET /value",
+          "GET /value"
+        ],
+        "executions": 0,
+        "value_attempts": 3
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-retry__R3bvcbw",
+      "task": "api-retry",
+      "category": "api",
+      "condition": "pocket-codex/single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 18.890452,
+      "tokens_in": 19873,
+      "tokens_out": 605,
+      "tokens_cached": 8960,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": false,
+          "detail": "expected {'value': 42}; observed {'value': {'value': 42}}"
+        },
+        {
+          "name": "bounded-recovery",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /value",
+          "GET /value",
+          "GET /value"
+        ],
+        "executions": 0,
+        "value_attempts": 3
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-retry__aJZQtF4",
+      "task": "api-retry",
+      "category": "api",
+      "condition": "pocket-codex/single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 15.102577,
+      "tokens_in": 19811,
+      "tokens_out": 459,
+      "tokens_cached": 17920,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'value': 42}; observed {'value': 42}"
+        },
+        {
+          "name": "bounded-recovery",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /value",
+          "GET /value",
+          "GET /value"
+        ],
+        "executions": 0,
+        "value_attempts": 3
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-retry__q2VdM94",
+      "task": "api-retry",
+      "category": "api",
+      "condition": "pocket-codex/team",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 34.284491,
+      "tokens_in": 78873,
+      "tokens_out": 1192,
+      "tokens_cached": 65536,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'value': 42}; observed {'value': 42}"
+        },
+        {
+          "name": "bounded-recovery",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [
+          "GET /value",
+          "GET /value",
+          "GET /value"
+        ],
+        "executions": 0,
+        "value_attempts": 3
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-retry__vFen5Gf",
+      "task": "api-retry",
+      "category": "api",
+      "condition": "my-ai-employee/single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 40.324181,
+      "tokens_in": 48442,
+      "tokens_out": 1308,
+      "tokens_cached": 28928,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": false,
+          "detail": "missing or oversized artifact"
+        },
+        {
+          "name": "bounded-recovery",
+          "passed": false,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    }
+  ]
+}

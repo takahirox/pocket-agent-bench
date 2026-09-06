@@ -53,6 +53,30 @@ def test_every_scheduled_trial_counts(tmp_path):
     assert s["total_cost_usd"] is None and s["success_rate_all"] == 0
 
 
+def test_custom_profiles_same_agent_and_mode_are_not_collapsed(tmp_path):
+    root = job(tmp_path)
+    plan = json.loads((root / "pocket-plan.json").read_text())
+    plan["profiles"] = ["experimental-a", "experimental-b"]
+    plan["attempts"] = 1
+    plan["profile_metadata"] = {
+        name: {"agent": "unrelated-system", "mode": "single"} for name in plan["profiles"]
+    }
+    (root / "pocket-plan.json").write_text(json.dumps(plan))
+    path = root / "x__one/result.json"
+    result = json.loads(path.read_text())
+    result["config"]["agent"] = {
+        "import_path": "pocket_bench.connected_agent:ConnectedAgent",
+        "kwargs": {"profile_name": "experimental-a"},
+    }
+    result["agent_info"] = {"name": "connected-agent"}
+    path.write_text(json.dumps(result))
+    rows = normalize(root)
+    assert len(rows) == 2
+    assert {row["condition"] for row in rows} == {"experimental-a", "experimental-b"}
+    assert {row["agent"] for row in rows} == {"unrelated-system"}
+    assert [row["status"] for row in rows] == ["failure", "unscorable"]
+
+
 def test_partial_result_not_duplicated(tmp_path):
     root = job(tmp_path)
     t = root / "x__one"

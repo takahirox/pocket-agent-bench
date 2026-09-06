@@ -36,12 +36,12 @@ uv run pocket-bench build
 uv run pocket-bench doctor
 ```
 
-To also evaluate My AI Employee, build with the optional `--fleet ../my-ai-employee`
-argument. My AI Employee is not required for Codex-only runs or the core suite.
-The optional image build snapshots only My AI Employee's source/package files. It does not copy
-its databases, credentials, worktrees or other project files. The snapshot digest, Git
-HEAD and built image ID are recorded in `local/runtime.json`; existing local source
-changes are preserved and included in the evaluated snapshot.
+For other CLIs, see [the common agent interface](docs/AGENT-INTERFACE.md).
+The optional `--install-project PATH` build argument includes an explicitly selected
+Python agent project's metadata and source, not its databases or credentials.
+External orchestrators use product-owned host controllers. For My AI Employee's
+new isolated workflow, use its `fleet-bench` controller; do not embed a Docker socket
+or use the old `fleet-single` proposal-mode adapter.
 
 Run the automated verifier tests and reference/no-op controls without any model calls:
 
@@ -191,3 +191,11 @@ uv run pocket-bench report results/jobs/baseline --output results/invalidated-re
 Regrading cannot recover a missing artifact, an API action that was never recorded, or
 an interrupted task. Those trials remain unscorable. New task instructions require a
 new agent run, not merely regrading old outputs.
+# Agent connections
+
+See [the common agent interface](docs/AGENT-INTERFACE.md) for configuration-only CLI
+connections and explicitly trusted, product-owned external controllers. Tasks and
+graders remain independent of the system being evaluated. Legacy `fleet-single`
+commands below describe historical runs; use the product-owned controller for the
+new isolated workflow. The runtime builder's old `--fleet` option is now the generic
+`--install-project` option.

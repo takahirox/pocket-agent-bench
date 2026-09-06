@@ -26,15 +26,46 @@ async def run_job(args):
             raise ValueError(f"Unknown tasks: {sorted(missing)}")
         specs = [s for s in specs if s["id"] in names]
     profiles = args.profiles.split(",")
+    from pocket_bench.interface import load_profiles, public_profile
+
+    connections = (
+        load_profiles(args.profile_file, args.allow_host_controller)
+        if getattr(args, "profile_file", None)
+        else {}
+    )
+    profile_metadata = {
+        name: public_profile({"agent": name, **value})
+        for name, value in connections.items()
+        if name in profiles
+    }
+    if connections and args.concurrency != 1:
+        raise ValueError(
+            "Connected profiles currently require concurrency=1 for quota-stop ordering"
+        )
     agents = []
     for name in profiles:
         if name in ("oracle", "nop"):
             agents.append({"name": name})
-        elif name in ("codex-single", "codex-team", "fleet-single"):
+        elif name in connections:
             agents.append(
                 {
-                    "import_path": "pocket_bench.agents:"
-                    + ("FleetAgent" if name.startswith("fleet") else "CodexAgent"),
+                    "import_path": "pocket_bench.connected_agent:ConnectedAgent",
+                    "model_name": args.model,
+                    "kwargs": {
+                        "profile_file": str(Path(args.profile_file).resolve()),
+                        "profile_name": name,
+                        "allow_host_controller": args.allow_host_controller,
+                        "agent_seconds": args.agent_seconds,
+                        "effort": args.effort,
+                        "profile_sha256": profile_metadata[name]["sha256"],
+                    },
+                    "override_timeout_sec": args.agent_seconds + 90,
+                }
+            )
+        elif name in ("codex-single", "codex-team"):
+            agents.append(
+                {
+                    "import_path": "pocket_bench.agents:" + "CodexAgent",
                     "model_name": args.model,
                     "kwargs": {
                         "mode": "team" if name.endswith("team") else "single",
@@ -45,13 +76,19 @@ async def run_job(args):
                 }
             )
         else:
-            raise ValueError(f"Unknown profile {name}")
+            raise ValueError(
+                f"Unknown profile {name}; load operator connections with --profile-file. "
+                "Legacy fleet-single has moved to the product repository."
+            )
     jobs = root / "results/jobs"
     name = args.name or datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     if not name or Path(name).name != name or name in (".", ".."):
         raise ValueError("Job name must be a single directory name")
     if (jobs / name).exists():
         raise ValueError("Job already exists; use a new name to preserve evidence")
+    for agent in agents:
+        if agent.get("import_path") == "pocket_bench.connected_agent:ConnectedAgent":
+            agent["kwargs"]["stop_file"] = str(jobs / name / "pocket-usage-stop")
     config = JobConfig.model_validate(
         {
             "job_name": name,
@@ -75,12 +112,28 @@ async def run_job(args):
                 "adapter_sha256": hashlib.sha256(
                     b"".join(
                         Path(__file__).with_name(n).read_bytes()
-                        for n in ("agents.py", "boundary_probe.py", "sandbox_probe.py")
+                        for n in (
+                            "agents.py",
+                            "boundary_probe.py",
+                            "sandbox_probe.py",
+                            "codex_policy.py",
+                            "execution.py",
+                            "smoke.py",
+                            "interface.py",
+                            "connected_agent.py",
+                            "workspace_transport.py",
+                            "quiesce.py",
+                        )
                     )
                 ).hexdigest(),
                 "profiles": profiles,
+                "profile_metadata": profile_metadata,
                 "attempts": args.attempts,
                 "tasks": specs,
+                "public_instructions": {
+                    s["id"]: (root / "tasks" / s["id"] / "instruction.md").read_text()
+                    for s in specs
+                },
                 "configuration": config.model_dump(mode="json"),
                 "suite": json.loads((root / "suite/manifest.json").read_text()),
                 "runtime": json.loads((root / "local/runtime.json").read_text())
@@ -140,10 +193,18 @@ def main():
     inv = sub.add_parser("invalidate", help="Attach a reason; preserve the original trial evidence")
     inv.add_argument("job", type=Path)
     inv.add_argument("--reason", required=True)
+    inv.add_argument("--conditions", help="Limit to comma-separated exact condition names")
+    inv.add_argument("--tasks", help="Limit to comma-separated task IDs (AND with conditions)")
     r = sub.add_parser("run", help="Run a versioned experiment; consumes configured model access")
     r.add_argument("--name")
     r.add_argument("--tasks", help="Comma-separated task IDs; default all")
     r.add_argument("--profiles", default="codex-single,codex-team")
+    r.add_argument("--profile-file", type=Path, help="Operator-owned pocket-agent-v1 JSON profiles")
+    r.add_argument(
+        "--allow-host-controller",
+        action="store_true",
+        help="Trust explicitly configured host orchestration code (never model code)",
+    )
     r.add_argument("--model", default="gpt-5.6-luna")
     r.add_argument("--effort", default="low")
     r.add_argument("--attempts", type=int, default=2)
@@ -180,7 +241,14 @@ def main():
             p.error("Job directory does not exist")
         with (a.job / "pocket-invalidation.json").open("x") as f:
             json.dump(
-                {"reason": a.reason, "created_at": datetime.now(UTC).isoformat()}, f, indent=2
+                {
+                    "reason": a.reason,
+                    "created_at": datetime.now(UTC).isoformat(),
+                    "conditions": a.conditions.split(",") if a.conditions else None,
+                    "tasks": a.tasks.split(",") if a.tasks else None,
+                },
+                f,
+                indent=2,
             )
         print("Invalidation recorded; regenerate the report to display it.")
     elif a.command == "report":

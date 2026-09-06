@@ -18,6 +18,8 @@ def regrade(source, destination, suite_root):
     destination.mkdir(parents=True)
     plan = read(source / "pocket-plan.json", {})
     (destination / "pocket-plan.json").write_text(json.dumps(plan, indent=2))
+    if (source / "pocket-invalidation.json").exists():
+        shutil.copy(source / "pocket-invalidation.json", destination / "pocket-invalidation.json")
     for trial in sorted(source.iterdir()):
         original = read(trial / "result.json") if trial.is_dir() else None
         if original is None:

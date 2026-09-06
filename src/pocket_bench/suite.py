@@ -5,6 +5,8 @@ import json
 import shutil
 from pathlib import Path
 
+from pocket_bench.execution import CONTRACT
+
 
 def catalog(root):
     return json.loads((Path(root) / "suite/catalog.json").read_text())
@@ -25,6 +27,7 @@ def build(root):
         (task / "instruction.md").write_text(
             spec["instruction"]
             + "\nWorkspace: /app. Python 3 standard library and Git are available.\n"
+            + (CONTRACT if spec.get("api") else "")
         )
         metadata = {
             "category": spec["category"],
@@ -34,11 +37,12 @@ def build(root):
             "capabilities": ["filesystem", "python"]
             + (["http-loopback"] if spec.get("api") else []),
             "network_enforcement": "compose-internal-model-proxy-v1",
+            "execution_transport": "pocket-python-v1" if spec.get("api") else "none",
         }
         config = (
             'schema_version = "1.4"\n[task]\nname = "pocket/'
             + spec["id"]
-            + '"\nversion = "1.0.0"\n'
+            + '"\nversion = "1.1.0"\n'
             + "[metadata]\n"
             + "\n".join(
                 f"{k} = {json.dumps(v) if not isinstance(v, bool) else str(v).lower()}"
@@ -49,10 +53,10 @@ def build(root):
             + '[environment]\n# Egress is enforced by the internal Compose network and model-only proxy.\nnetwork_mode = "public"\ncpus = 2\nmemory_mb = 2048\nbuild_timeout_sec = 600.0\n'
         )
         (task / "task.toml").write_text(config)
-        for name in ("mock_api.py", "bootstrap.py", "model_proxy.py", "smoke.py"):
+        for name in ("mock_api.py", "bootstrap.py", "model_proxy.py", "smoke.py", "execution.py"):
             shutil.copy(Path(__file__).with_name(name), task / "environment" / name)
         (task / "environment/Dockerfile").write_text(
-            'FROM pocket-agent-bench-runtime:0.1\nCOPY --chown=agent:agent input/ /app/input/\nCOPY --chown=agent:agent src/ /app/src/\nCOPY mock_api.py bootstrap.py smoke.py /opt/pocket/\nWORKDIR /app\nENTRYPOINT ["python", "/opt/pocket/bootstrap.py"]\n'
+            'FROM pocket-agent-bench-runtime:0.1\nCOPY --chown=agent:agent input/ /app/input/\nCOPY --chown=agent:agent src/ /app/src/\nCOPY mock_api.py bootstrap.py smoke.py execution.py /opt/pocket/\nWORKDIR /app\nENTRYPOINT ["python", "/opt/pocket/bootstrap.py"]\n'
         )
         (task / "environment/Proxy.Dockerfile").write_text(
             'FROM python:3.12-slim-bookworm\nCOPY model_proxy.py /proxy.py\nUSER 65534\nCMD ["python", "-I", "/proxy.py"]\n'
@@ -122,11 +126,12 @@ networks:
     digest = hashlib.sha256(
         (root / "suite/catalog.json").read_bytes()
         + Path(__file__).with_name("grader.py").read_bytes()
+        + Path(__file__).with_name("execution.py").read_bytes()
     ).hexdigest()
     (root / "suite/manifest.json").write_text(
         json.dumps(
             {
-                "version": "1",
+                "version": "1.1",
                 "sha256": digest,
                 "tasks": len(catalog(root)),
                 "human_reviewed": False,

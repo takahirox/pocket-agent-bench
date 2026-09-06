@@ -9,16 +9,29 @@ Twelve intentionally small original tasks cover data processing, coding, local-d
 research and mock API workflows. Tasks and graders are automatically tested, not
 human-certified. See [the goal](docs/GOAL.md) and [evaluation design](docs/DESIGN.md).
 
-The [initial real comparison](docs/VALIDATION.md) ran 72 trials: Codex single 24/24,
-Codex team 23/24, and the optional My AI Employee configuration 17/24. These are
-small-suite observations, not general product rankings. A [shareable measured JSON
-summary](examples/baseline-v2.json) is included; complete traces remain local.
+The [initial real comparison](docs/VALIDATION.md) ran 72 trials, but a later audit
+found benchmark-adapter defects affecting all six My AI Employee API trials. Those
+six are invalidated for comparison; **the original 17/24 is not a fair product score**.
+Original evidence is retained. A [shareable measured JSON summary](examples/baseline-v2.json)
+is included; complete traces remain local. This small suite is not a product ranking.
+
+The corrected API-only comparison ran 18 fresh trials: Codex single **5/6**, Codex
+team **6/6**, and My AI Employee + corrected adapter **3/6**. Fleet's remaining
+three failures are malformed patch proposals with no native repair turn, not the
+old networking defect. See [results and root causes](docs/VALIDATION.md#corrected-api-comparison)
+and [shareable JSON](examples/api-corrected-v1.json). That historical experiment did
+not change My AI Employee itself.
+
+The new generic host interface has also completed all 12 tasks using a product-owned
+native controller: 4 successes, 8 failures. A post-run controller defect was reproduced
+and fixed; this is an integration diagnostic, **not a fair product score**. See
+[the complete validation](docs/VALIDATION.md#native-generic-interface-diagnostic-2026-09-06).
 
 ## Quick start
 
-Requirements: Python 3.12+, `uv`, Docker with Compose, and a Codex login (`codex login`).
-The current real adapters use subscription-authenticated Codex. The benchmark core and
-task format do not require a particular agent or model provider.
+Requirements: Python 3.12+, `uv`, and Docker with Compose. The bundled Codex profiles
+also need a Codex login (`codex login`); configured agent connections use their own
+explicitly supplied authentication. The core and task format are provider-independent.
 
 ```sh
 git clone git@github.com:takahirox/pocket-agent-bench.git
@@ -29,12 +42,12 @@ uv run pocket-bench build
 uv run pocket-bench doctor
 ```
 
-To also evaluate My AI Employee, build with the optional `--fleet ../my-ai-employee`
-argument. My AI Employee is not required for Codex-only runs or the core suite.
-The optional image build snapshots only My AI Employee's source/package files. It does not copy
-its databases, credentials, worktrees or other project files. The snapshot digest, Git
-HEAD and built image ID are recorded in `local/runtime.json`; existing local source
-changes are preserved and included in the evaluated snapshot.
+For other CLIs, see [the common agent interface](docs/AGENT-INTERFACE.md).
+The optional `--install-project PATH` build argument includes an explicitly selected
+Python agent project's metadata and source, not its databases or credentials.
+External orchestrators use product-owned host controllers. For My AI Employee's
+new isolated workflow, use its `fleet-bench` controller; do not embed a Docker socket
+or use the old `fleet-single` proposal-mode adapter.
 
 Run the automated verifier tests and reference/no-op controls without any model calls:
 
@@ -56,16 +69,17 @@ Run the full repeated comparison:
 uv run pocket-bench run --name baseline --attempts 2 --concurrency 1 --agent-seconds 180
 ```
 
-After building the optional Fleet image, include it explicitly:
+To run an explicitly trusted external controller, create its ignored local profile
+following [the interface contract](docs/AGENT-INTERFACE.md), then run:
 
 ```sh
-uv run python scripts/build_runtime.py --fleet ../my-ai-employee
-uv run pocket-bench run --name baseline-with-fleet \
-  --profiles codex-single,codex-team,fleet-single --attempts 2 --agent-seconds 180
+uv run pocket-bench run --name connected-agent \
+  --profile-file local/connections.json --allow-host-controller \
+  --profiles my-agent-single --attempts 1 --concurrency 1 --agent-seconds 180
 ```
 
 Default model: `gpt-5.6-luna`, effort `low`; override with `--model` and `--effort`.
-The default profiles are Codex single/team; Fleet is an explicit optional integration.
+The default profiles are Codex single/team; other systems are explicit connections.
 Keep these equal when comparing orchestration. `--agent-seconds` is an aggregate
 upper bound on agent invocation time, **not a token or dollar cap**. The single agent
 receives the whole allocation; each of two concurrent analysts receives 1/6, and the
@@ -108,21 +122,30 @@ are gitignored; review/redact before sharing.
 - `codex-team`: two independent read-only analytical sessions, with their final
   messages passed to an integrating native Codex session. This is one specific team
   design, not a claim about all multi-agent systems.
-- `fleet-single`: actual `fleet work` fixed-routing runtime with its native Codex
-  worker and mediation. It returns a candidate patch; the adapter materializes that
-  patch only in the disposable task repository for independent grading. It never
-  promotes into a real user repository. A public structural smoke check supplies
-  Fleet's required internal evidence; it contains no hidden expected answers.
+- Configured profiles: an ordinary CLI or a product-owned host controller, labeled
+  `single` or `team`. The label describes the system; it does not create a team.
 - `oracle`, `nop`: sanity controls only; never counted as real agent comparisons.
 
-The Fleet adapter transparently preserves native worker stdout while recording JSONL
-usage. It sets the internal model proxy environment, disables implicit native subagent
-spawning/web search, and enables local service access inside the worker's workspace
-sandbox. The outer Docker network still blocks non-model internet destinations.
-Team analysts cannot call APIs; only the coordinator operates services, avoiding
-duplicate side effects from analysis sessions.
+The old built-in `fleet-single` proposal adapter is no longer active; historical
+results retain that name. Its integration source belongs to the product repository.
+For bundled Codex profiles, the outer Docker network blocks non-model internet
+destinations. Team analysts cannot call APIs; only the coordinator operates services,
+avoiding duplicate side effects from analysis sessions. Host controllers must isolate
+their own model tools and are explicitly trusted host code, not a sandboxed plugin.
 
-For another agent, implement Harbor's `BaseAgent` interface and run the same tasks:
+API tasks expose the same optional `pocket-python-v1` execution transport to all
+configurations: the agent explicitly authors `output/execute.json` with
+`{"script":"src/any_name.py"}`. After its final response, the adapter runs that
+program once as the task's unprivileged user, within the remaining aggregate time.
+No source filename is guessed, no answer is supplied, and internal structural
+checks never execute API operations. Alternatively, an agent can call the service
+directly and omit the manifest. The final private grader and trusted service audit
+remain the authority for success. This evaluates **agent + adapter**, not the
+standalone product's ability to execute arbitrary process proposals.
+
+For another CLI, use a configuration-only connection. An unusual external orchestrator
+can implement the [common file protocol](docs/AGENT-INTERFACE.md) in its own repository.
+Alternatively, use Harbor's `BaseAgent` interface directly with the same tasks:
 
 ```sh
 uv run harbor run -p tasks/sales-dedup --agent your_package.adapter:YourAgent \
@@ -172,3 +195,11 @@ uv run pocket-bench report results/jobs/baseline --output results/invalidated-re
 Regrading cannot recover a missing artifact, an API action that was never recorded, or
 an interrupted task. Those trials remain unscorable. New task instructions require a
 new agent run, not merely regrading old outputs.
+# Agent connections
+
+See [the common agent interface](docs/AGENT-INTERFACE.md) for configuration-only CLI
+connections and explicitly trusted, product-owned external controllers. Tasks and
+graders remain independent of the system being evaluated. Legacy `fleet-single`
+commands below describe historical runs; use the product-owned controller for the
+new isolated workflow. The runtime builder's old `--fleet` option is now the generic
+`--install-project` option.

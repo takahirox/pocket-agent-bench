@@ -6,8 +6,8 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
  && apt-get update && apt-get install -y --no-install-recommends git ca-certificates procps \
  && npm install -g @openai/codex@0.144.4 \
  && useradd -m -u 1000 agent
-COPY fleet /opt/fleet
-RUN if [ -f /opt/fleet/pyproject.toml ]; then pip install --no-cache-dir /opt/fleet; fi
+COPY project /opt/agent-project
+RUN if [ -f /opt/agent-project/pyproject.toml ]; then pip install --no-cache-dir /opt/agent-project; fi
 WORKDIR /app
 RUN mkdir -p /app/input /app/output /app/src /logs/agent /logs/verifier /var/lib/pocket \
  && chown -R agent:agent /app /logs/agent \

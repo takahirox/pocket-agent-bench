@@ -1,0 +1,610 @@
+{
+  "job": "employee-native-v1-20260906",
+  "human_reviewed": false,
+  "provenance": {
+    "version": "0.1.0",
+    "adapter_sha256": "da577afd65697565d8a97cfa2f6223d725364a728d1d0efb649cd7cc74cc0b3b",
+    "runtime": {
+      "image": "pocket-agent-bench-runtime:0.1",
+      "image_id": "sha256:2446176326e8dfdf83d730bd9bafc696799d75f13fa5b469ea8adea672d50010",
+      "fleet_snapshot_sha256": "aae1101d4dc7d5b3b60bc767c487c1f67a0a41d5c0835b86ee6814ddb39ce245",
+      "fleet_head": "fd64ae4d856ecdbe637b11318e57d40aa6bc2b5f",
+      "note": "Unchanged original task/verifier runtime; embedded historical Fleet is not invoked by the new host controller."
+    },
+    "suite": {
+      "version": "1.1",
+      "sha256": "3dfbc12bcc57d7659ddb3313164272fbb03bae583e780488227710a8f8972c4f",
+      "tasks": 12,
+      "human_reviewed": false
+    }
+  },
+  "summary": {
+    "total": 12,
+    "success": 4,
+    "failure": 8,
+    "unscorable": 0,
+    "success_rate_all": 0.3333333333333333,
+    "success_rate_scored": 0.3333333333333333,
+    "median_seconds": 48.6552085,
+    "total_cost_usd": null,
+    "known_cost_trials": 0,
+    "total_tokens_in": 878729,
+    "observed_tokens_in": 878729,
+    "known_tokens_in_trials": 12,
+    "total_tokens_out": 13227,
+    "observed_tokens_out": 13227,
+    "known_tokens_out_trials": 12,
+    "total_tokens_cached": 653568,
+    "observed_tokens_cached": 653568,
+    "known_tokens_cached_trials": 12
+  },
+  "configurations": {
+    "employee-native-single": {
+      "total": 12,
+      "success": 4,
+      "failure": 8,
+      "unscorable": 0,
+      "success_rate_all": 0.3333333333333333,
+      "success_rate_scored": 0.3333333333333333,
+      "median_seconds": 48.6552085,
+      "total_cost_usd": null,
+      "known_cost_trials": 0,
+      "total_tokens_in": 878729,
+      "observed_tokens_in": 878729,
+      "known_tokens_in_trials": 12,
+      "total_tokens_out": 13227,
+      "observed_tokens_out": 13227,
+      "known_tokens_out_trials": 12,
+      "total_tokens_cached": 653568,
+      "observed_tokens_cached": 653568,
+      "known_tokens_cached_trials": 12
+    }
+  },
+  "categories": {
+    "api": {
+      "employee-native-single": {
+        "total": 3,
+        "success": 0,
+        "failure": 3,
+        "unscorable": 0,
+        "success_rate_all": 0.0,
+        "success_rate_scored": 0.0,
+        "median_seconds": 57.145738,
+        "total_cost_usd": null,
+        "known_cost_trials": 0,
+        "total_tokens_in": 253417,
+        "observed_tokens_in": 253417,
+        "known_tokens_in_trials": 3,
+        "total_tokens_out": 3848,
+        "observed_tokens_out": 3848,
+        "known_tokens_out_trials": 3,
+        "total_tokens_cached": 187904,
+        "observed_tokens_cached": 187904,
+        "known_tokens_cached_trials": 3
+      }
+    },
+    "coding": {
+      "employee-native-single": {
+        "total": 3,
+        "success": 0,
+        "failure": 3,
+        "unscorable": 0,
+        "success_rate_all": 0.0,
+        "success_rate_scored": 0.0,
+        "median_seconds": 35.284306,
+        "total_cost_usd": null,
+        "known_cost_trials": 0,
+        "total_tokens_in": 151570,
+        "observed_tokens_in": 151570,
+        "known_tokens_in_trials": 3,
+        "total_tokens_out": 2059,
+        "observed_tokens_out": 2059,
+        "known_tokens_out_trials": 3,
+        "total_tokens_cached": 106752,
+        "observed_tokens_cached": 106752,
+        "known_tokens_cached_trials": 3
+      }
+    },
+    "data": {
+      "employee-native-single": {
+        "total": 3,
+        "success": 3,
+        "failure": 0,
+        "unscorable": 0,
+        "success_rate_all": 1.0,
+        "success_rate_scored": 1.0,
+        "median_seconds": 63.603367,
+        "total_cost_usd": null,
+        "known_cost_trials": 0,
+        "total_tokens_in": 276916,
+        "observed_tokens_in": 276916,
+        "known_tokens_in_trials": 3,
+        "total_tokens_out": 4340,
+        "observed_tokens_out": 4340,
+        "known_tokens_out_trials": 3,
+        "total_tokens_cached": 230912,
+        "observed_tokens_cached": 230912,
+        "known_tokens_cached_trials": 3
+      }
+    },
+    "research": {
+      "employee-native-single": {
+        "total": 3,
+        "success": 1,
+        "failure": 2,
+        "unscorable": 0,
+        "success_rate_all": 0.3333333333333333,
+        "success_rate_scored": 0.3333333333333333,
+        "median_seconds": 42.262774,
+        "total_cost_usd": null,
+        "known_cost_trials": 0,
+        "total_tokens_in": 196826,
+        "observed_tokens_in": 196826,
+        "known_tokens_in_trials": 3,
+        "total_tokens_out": 2980,
+        "observed_tokens_out": 2980,
+        "known_tokens_out_trials": 3,
+        "total_tokens_cached": 128000,
+        "observed_tokens_cached": 128000,
+        "known_tokens_cached_trials": 3
+      }
+    }
+  },
+  "trials": [
+    {
+      "id": "api-approval__FbMEUDJ",
+      "task": "api-approval",
+      "category": "api",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 71.069274,
+      "tokens_in": 97459,
+      "tokens_out": 1456,
+      "tokens_cached": 71936,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": false,
+          "detail": "missing or oversized artifact"
+        },
+        {
+          "name": "approval-read",
+          "passed": false,
+          "detail": ""
+        },
+        {
+          "name": "no-unapproved-execution",
+          "passed": true,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-pagination__NEtXCAj",
+      "task": "api-pagination",
+      "category": "api",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 41.554805,
+      "tokens_in": 55210,
+      "tokens_out": 893,
+      "tokens_cached": 42752,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": false,
+          "detail": "missing or oversized artifact"
+        },
+        {
+          "name": "all-pages-requested",
+          "passed": false,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "api-retry__59u4J5f",
+      "task": "api-retry",
+      "category": "api",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 57.145738,
+      "tokens_in": 100748,
+      "tokens_out": 1499,
+      "tokens_cached": 73216,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/api.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": false,
+          "detail": "missing or oversized artifact"
+        },
+        {
+          "name": "bounded-recovery",
+          "passed": false,
+          "detail": ""
+        }
+      ],
+      "service_evidence": {
+        "requests": [],
+        "executions": 0,
+        "value_attempts": 0
+      },
+      "usage_complete": true
+    },
+    {
+      "id": "code-chunks__TQoaLrV",
+      "task": "code-chunks",
+      "category": "coding",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 35.284306,
+      "tokens_in": 54788,
+      "tokens_out": 653,
+      "tokens_cached": 40960,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "case:0",
+          "passed": false,
+          "detail": "expected {'returned': [[1, 2], [3, 4], [5]], 'mutated': False}; observed {'returned': [[1, 2], [3, 4]], 'mutated': False}"
+        },
+        {
+          "name": "case:1",
+          "passed": true,
+          "detail": "expected {'returned': [], 'mutated': False}; observed {'returned': [], 'mutated': False}"
+        },
+        {
+          "name": "case:2",
+          "passed": false,
+          "detail": "expected {'returned': [[1]], 'mutated': False}; observed {'returned': [], 'mutated': False}"
+        },
+        {
+          "name": "case:3",
+          "passed": true,
+          "detail": "expected {'raises': 'ValueError', 'mutated': False}; observed {'raises': 'ValueError', 'mutated': False}"
+        },
+        {
+          "name": "case:4",
+          "passed": false,
+          "detail": "expected {'raises': 'ValueError', 'mutated': False}; observed {'returned': [], 'mutated': False}"
+        }
+      ],
+      "service_evidence": {},
+      "usage_complete": true
+    },
+    {
+      "id": "code-intervals__55rWHXs",
+      "task": "code-intervals",
+      "category": "coding",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 29.406011,
+      "tokens_in": 42566,
+      "tokens_out": 524,
+      "tokens_cached": 19968,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "case:0",
+          "passed": false,
+          "detail": "expected {'returned': [[1, 5], [8, 9]], 'mutated': False}; observed {'returned': [[1, 3], [3, 5], [8, 9]], 'mutated': False}"
+        },
+        {
+          "name": "case:1",
+          "passed": true,
+          "detail": "expected {'returned': [], 'mutated': False}; observed {'returned': [], 'mutated': False}"
+        },
+        {
+          "name": "case:2",
+          "passed": false,
+          "detail": "expected {'returned': [[1, 8]], 'mutated': False}; observed {'returned': [[1, 2], [2, 6], [5, 8]], 'mutated': False}"
+        },
+        {
+          "name": "case:3",
+          "passed": false,
+          "detail": "expected {'returned': [[1, 10]], 'mutated': False}; observed {'returned': [[1, 10], [2, 3]], 'mutated': False}"
+        }
+      ],
+      "service_evidence": {},
+      "usage_complete": true
+    },
+    {
+      "id": "code-slug__FZaBLMg",
+      "task": "code-slug",
+      "category": "coding",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 38.273386,
+      "tokens_in": 54216,
+      "tokens_out": 882,
+      "tokens_cached": 45824,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "case:0",
+          "passed": false,
+          "detail": "expected {'returned': 'hello-world', 'mutated': False}; observed {'returned': '-hello,-world!-', 'mutated': False}"
+        },
+        {
+          "name": "case:1",
+          "passed": false,
+          "detail": "expected {'returned': 'a-b-c', 'mutated': False}; observed {'returned': 'a---b___c', 'mutated': False}"
+        },
+        {
+          "name": "case:2",
+          "passed": false,
+          "detail": "expected {'returned': '', 'mutated': False}; observed {'returned': '!!!', 'mutated': False}"
+        },
+        {
+          "name": "case:3",
+          "passed": true,
+          "detail": "expected {'returned': 'x9', 'mutated': False}; observed {'returned': 'x9', 'mutated': False}"
+        },
+        {
+          "name": "case:4",
+          "passed": false,
+          "detail": "expected {'returned': 'a-b', 'mutated': False}; observed {'returned': '-a-/-b-', 'mutated': False}"
+        }
+      ],
+      "service_evidence": {},
+      "usage_complete": true
+    },
+    {
+      "id": "event-reconciliation__iRKaoK8",
+      "task": "event-reconciliation",
+      "category": "data",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 71.316478,
+      "tokens_in": 96962,
+      "tokens_out": 1533,
+      "tokens_cached": 78848,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/a.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "preserved:input/b.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'A': 'new', 'C': 'keep'}; observed {'A': 'new', 'C': 'keep'}"
+        }
+      ],
+      "service_evidence": {},
+      "usage_complete": true
+    },
+    {
+      "id": "inventory-join__7LCapDG",
+      "task": "inventory-join",
+      "category": "data",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 63.603367,
+      "tokens_in": 96369,
+      "tokens_out": 1395,
+      "tokens_cached": 84992,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/products.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "preserved:input/stock.json",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'A': 3, 'B': 2, 'C': 0}; observed {'A': 3, 'B': 2, 'C': 0}"
+        }
+      ],
+      "service_evidence": {},
+      "usage_complete": true
+    },
+    {
+      "id": "research-dependencies__iHeosjF",
+      "task": "research-dependencies",
+      "category": "research",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 33.080469,
+      "tokens_in": 56636,
+      "tokens_out": 581,
+      "tokens_cached": 30976,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/team1.txt",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "preserved:input/team2.txt",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": false,
+          "detail": "missing or oversized artifact"
+        }
+      ],
+      "service_evidence": {},
+      "usage_complete": true
+    },
+    {
+      "id": "research-evidence__jkDYhYz",
+      "task": "research-evidence",
+      "category": "research",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "failure",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 42.262774,
+      "tokens_in": 57479,
+      "tokens_out": 1094,
+      "tokens_cached": 32000,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/report.txt",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": false,
+          "detail": "missing or oversized artifact"
+        }
+      ],
+      "service_evidence": {},
+      "usage_complete": true
+    },
+    {
+      "id": "research-policy__p2tFNx8",
+      "task": "research-policy",
+      "category": "research",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 55.047643,
+      "tokens_in": 82711,
+      "tokens_out": 1305,
+      "tokens_cached": 65024,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/old.txt",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "preserved:input/current.txt",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "preserved:input/draft.txt",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'alpha': {'days': 14, 'source': 'current.txt'}, 'beta': {'days': 90, 'source': 'current.txt'}}; observed {'alpha': {'days': 14, 'source': 'current.txt'}, 'beta': {'days': 90, 'source': 'current.txt'}}"
+        }
+      ],
+      "service_evidence": {},
+      "usage_complete": true
+    },
+    {
+      "id": "sales-dedup__Sc4Mnwd",
+      "task": "sales-dedup",
+      "category": "data",
+      "condition": "employee-native-single",
+      "model": "gpt-5.6-luna",
+      "status": "success",
+      "original_status": null,
+      "invalidation": null,
+      "seconds": 56.134101,
+      "tokens_in": 83585,
+      "tokens_out": 1412,
+      "tokens_cached": 67072,
+      "cost_usd": null,
+      "checks": [
+        {
+          "name": "preserved:input/a.csv",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "preserved:input/b.csv",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "preserved:input/c.csv",
+          "passed": true,
+          "detail": "Input content must match its initial bytes."
+        },
+        {
+          "name": "result",
+          "passed": true,
+          "detail": "expected {'east': 1500, 'west': 2000, 'north': 4000}; observed {'east': 1500, 'north': 4000, 'west': 2000}"
+        }
+      ],
+      "service_evidence": {},
+      "usage_complete": true
+    }
+  ]
+}

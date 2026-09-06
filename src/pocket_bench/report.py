@@ -55,6 +55,11 @@ def normalize(job_path):
         )
         agent_name = r.get("agent_info", {}).get("name", fallback)
         mode = metadata.get("mode", kwargs.get("mode", "single"))
+        profile_name = kwargs.get("profile_name")
+        identity = plan.get("profile_metadata", {}).get(profile_name, {})
+        if profile_name:
+            agent_name = identity.get("agent", metadata.get("agent", profile_name))
+            mode = identity.get("mode", metadata.get("mode", "single"))
         status = "unscorable"
         if isinstance(rewards, dict) and "reward" in rewards:
             status = "success" if rewards["reward"] == 1 else "failure"
@@ -86,7 +91,14 @@ def normalize(job_path):
             status = "failure"
         outputs = {}
         for p in sorted((trial / "agent").glob("*")) if (trial / "agent").exists() else []:
-            if p.is_file() and p.suffix in (".txt", ".json", ".stderr", ".patch", ".jsonl"):
+            if p.is_file() and p.suffix in (
+                ".txt",
+                ".json",
+                ".stdout",
+                ".stderr",
+                ".patch",
+                ".jsonl",
+            ):
                 outputs[p.name] = p.read_text(errors="replace")[:100_000]
         artifacts = {}
         for p in sorted((trial / "artifacts/app").rglob("*")):
@@ -105,7 +117,8 @@ def normalize(job_path):
                 "agent": agent_name,
                 "mode": mode,
                 "model": (r.get("agent_info", {}).get("model_info") or {}).get("name"),
-                "condition": agent_name + "/" + mode,
+                "condition": profile_name or agent_name + "/" + mode,
+                "profile_name": profile_name,
                 "task_checksum": r.get("task_checksum"),
                 "evaluation_kind": "regrade"
                 if r.get("source_trial", {}).get("action") == "regrade"
@@ -136,9 +149,17 @@ def normalize(job_path):
             else ("pocket-codex" if profile.startswith("codex") else profile)
         )
         mode = "team" if profile.endswith("team") else "single"
+        identity = plan.get("profile_metadata", {}).get(profile)
+        if identity:
+            agent_name, mode = identity["agent"], identity["mode"]
         for spec in plan.get("tasks", []):
             present = sum(
-                r["task"] == spec["id"] and r["agent"] == agent_name and r["mode"] == mode
+                r["task"] == spec["id"]
+                and (
+                    r.get("profile_name") == profile
+                    if identity
+                    else r["agent"] == agent_name and r["mode"] == mode
+                )
                 for r in rows
             )
             for i in range(present, plan["attempts"]):
@@ -152,7 +173,8 @@ def normalize(job_path):
                         "status": "unscorable",
                         "agent": agent_name,
                         "mode": mode,
-                        "condition": agent_name + "/" + mode,
+                        "condition": profile if identity else agent_name + "/" + mode,
+                        "profile_name": profile if identity else None,
                         "model": None,
                         "task_checksum": None,
                         "seconds": None,
@@ -176,11 +198,16 @@ def normalize(job_path):
                 )
     invalid = read(job_path / "pocket-invalidation.json")
     for r in rows:
+        r["instruction"] = plan.get("public_instructions", {}).get(r["task"], r["instruction"])
         r["provenance"] = {
             k: plan.get(k) for k in ("version", "adapter_sha256", "runtime", "suite")
         }
     if invalid:
         for r in rows:
+            if invalid.get("conditions") and r["condition"] not in invalid["conditions"]:
+                continue
+            if invalid.get("tasks") and r["task"] not in invalid["tasks"]:
+                continue
             r["original_status"] = r["status"]
             r["status"] = "unscorable"
             r["invalidation"] = invalid

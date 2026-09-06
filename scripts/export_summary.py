@@ -18,6 +18,8 @@ keys = (
     "condition",
     "model",
     "status",
+    "original_status",
+    "invalidation",
     "seconds",
     "tokens_in",
     "tokens_out",

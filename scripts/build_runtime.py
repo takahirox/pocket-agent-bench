@@ -1,4 +1,4 @@
-"""Build a versioned runtime from an explicit Fleet snapshot without copying secrets."""
+"""Build a versioned runtime with an optional explicit agent project snapshot."""
 
 import argparse
 import hashlib
@@ -11,29 +11,29 @@ from pathlib import Path
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--fleet", type=Path, help="Optional My AI Employee source snapshot")
+    p.add_argument("--install-project", type=Path, help="Optional agent Python project snapshot")
     p.add_argument("--tag", default="pocket-agent-bench-runtime:0.1")
     p.add_argument(
         "--manifest", type=Path, help="Optional manifest destination for an alternate build"
     )
     args = p.parse_args()
     root = Path(__file__).resolve().parents[1]
-    fleet = args.fleet.resolve() if args.fleet else None
+    project = args.install_project.resolve() if args.install_project else None
     with tempfile.TemporaryDirectory(prefix="pocket-build-") as d:
         context = Path(d)
         shutil.copy(root / "docker/Dockerfile", context / "Dockerfile")
-        (context / "fleet").mkdir()
-        if fleet:
+        (context / "project").mkdir()
+        if project:
             for name in ("pyproject.toml", "README.md", "LICENSE"):
-                if (fleet / name).is_file():
-                    shutil.copy(fleet / name, context / "fleet" / name)
+                if (project / name).is_file():
+                    shutil.copy(project / name, context / "project" / name)
             shutil.copytree(
-                fleet / "src",
-                context / "fleet/src",
+                project / "src",
+                context / "project/src",
                 ignore=shutil.ignore_patterns("__pycache__", "*.egg-info"),
             )
         digest = hashlib.sha256()
-        for file in sorted((context / "fleet").rglob("*")):
+        for file in sorted((context / "project").rglob("*")):
             if file.is_file():
                 digest.update(
                     file.relative_to(context).as_posix().encode() + b"\0" + file.read_bytes()
@@ -49,11 +49,11 @@ def main():
                 {
                     "image": args.tag,
                     "image_id": image,
-                    "fleet_snapshot_sha256": digest.hexdigest() if fleet else None,
-                    "fleet_head": subprocess.check_output(
-                        ["git", "-C", str(fleet), "rev-parse", "HEAD"], text=True
+                    "project_snapshot_sha256": digest.hexdigest() if project else None,
+                    "project_head": subprocess.check_output(
+                        ["git", "-C", str(project), "rev-parse", "HEAD"], text=True
                     ).strip()
-                    if fleet
+                    if project
                     else None,
                 },
                 indent=2,

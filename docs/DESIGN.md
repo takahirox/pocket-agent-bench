@@ -25,9 +25,12 @@ its default seccomp filter, drops all capabilities, and has a read-only root fil
 Before real-agent execution, a probe checks the unprivileged UID, hidden verifier,
 root-owned mock state, blocked direct egress and explicit denial of a non-model host.
 An additional model-free probe starts an ephemeral loopback service and connects to
-it through the actual native Codex command sandbox. The workspace sandbox explicitly
-enables network access; the Docker boundary, not an unrestricted network, remains
-the egress authority. Read-only team analysts do not operate APIs.
+it through the actual native Codex command sandbox, using the same shared policy
+builder as the corresponding worker. It checks both loopback access and filesystem
+write permission (denied for Fleet; allowed for native workspace workers). Fleet's
+read-only filesystem uses a named network-enabled permission profile, not the
+ineffective workspace-write network flag. The Docker boundary remains the egress
+authority. Read-only team analysts do not operate APIs.
 Subscription auth is injected using Harbor file upload, mode 0600, and is not included
 in logs, artifacts, build context or version control. It is removed when the trial
 container is destroyed. Default tool filesystem visibility is still the disposable
@@ -61,6 +64,18 @@ orderings, and independently verify coding case properties. These are independen
 implementations of checks, not independent human authorship or certification.
 
 ## What is measured
+
+API tasks offer a public opt-in execution manifest to every configuration:
+`output/execute.json` containing exactly `{"script":"src/any_name.py"}`. It runs
+the explicitly declared agent-authored program once, as uid 1000 in the disposable
+task, after the final candidate is available and within remaining aggregate time.
+Missing manifests never cause guessed script execution. Invalid/missing/out-of-src
+or symlinked targets are rejected. Smoke checks parse all Python sources and validate
+the declaration but never run it. Execution exit status/stdout/stderr are retained;
+the private grader checks the resulting artifact and root-owned service history.
+This is an adapter capability, not a claim that Fleet's native proposal schema can
+execute arbitrary process requests. Native agents can alternatively use direct
+tools without a manifest. No hidden answer or agent-specific reference code is used.
 
 The system includes prompts, orchestration, model, tools and agent policies. The
 single/team comparison keeps the model/effort and task constant. Team invocation
@@ -107,7 +122,7 @@ license review are per dataset, not assumed for the whole registry.
 
 `uv.lock` pins Python dependencies. Runtime builds pin Codex CLI; built image and Fleet
 source digests are recorded. Task checksums are stored by Harbor; the suite manifest
-identifies the catalog and grader. Base tags and apt/runtime dependencies can change
+identifies the catalog, grader and public execution transport. Base tags and apt/runtime dependencies can change
 on rebuild; the recorded immutable image ID identifies the image actually used.
 Model IDs can be server-side aliases, so an identical ID cannot guarantee
 identical future provider behavior. Every run records requested conditions and evidence.

@@ -271,6 +271,7 @@ class ConnectedAgent(BaseAgent):
         for marker in self.profile.get("usage_limit_markers", []):
             if marker.lower() in logs.lower():
                 outcome = "usage_limit"
+        usage_complete = result.return_code == 0
         for line in logs.splitlines():
             try:
                 event = json.loads(line)
@@ -280,6 +281,9 @@ class ConnectedAgent(BaseAgent):
                 "event_value"
             ):
                 continue
+            # Controllers can return normally to permit grading after an internal
+            # interruption. A partial usage event must remain partial thereafter.
+            usage_complete = usage_complete and event.get("complete", True) is True
             for normalized, dotted in mapping.get("fields", {}).items():
                 value = event
                 for key in dotted.split("."):
@@ -290,7 +294,7 @@ class ConnectedAgent(BaseAgent):
             "protocol": PROTOCOL,
             "outcome": outcome,
             "usage": usage,
-            "usage_complete": result.return_code == 0,
+            "usage_complete": usage_complete,
             "details": {
                 "cli_exit_code": result.return_code,
                 "termination": "deadline" if result.return_code in (124, 137) else "returned",

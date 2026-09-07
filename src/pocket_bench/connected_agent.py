@@ -253,6 +253,10 @@ class ConnectedAgent(BaseAgent):
         command = shlex.join(["timeout", "--kill-after=2", str(remaining), *argv])
         if self.profile.get("input", "argument") == "stdin":
             command += " < /home/agent/pocket/instruction.txt"
+        else:
+            # Docker exec may leave stdin open. Argument/request clients must see
+            # EOF rather than wait indefinitely for an additional piped prompt.
+            command += " < /dev/null"
         result = await environment.exec(
             command=command + " > /logs/agent/native.jsonl 2> /logs/agent/native.stderr",
             cwd="/app",

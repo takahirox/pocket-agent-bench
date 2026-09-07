@@ -151,7 +151,7 @@ def test_unrelated_clis_need_configuration_only(tmp_path, argv, mode):
     assert command["user"] == "agent" and command["cwd"] == "/app"
     assert command["command"].startswith("timeout --kill-after=2 ")
     assert argv[0] in command["command"]
-    assert (" < " in command["command"]) == (mode == "stdin")
+    assert (" < /home/agent/pocket/instruction.txt" in command["command"]) == (mode == "stdin")
     assert context.n_input_tokens is None and context.cost_usd is None
 
 

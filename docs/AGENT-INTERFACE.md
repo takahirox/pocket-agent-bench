@@ -31,7 +31,9 @@ Run `pocket-bench run --profile-file local/connections.json --profiles my-cli-si
 
 The process runs as the task's unprivileged `agent` user in `/app`. It writes `src/`
 and `output/`. Input modes are `argument`, `stdin` (instruction on stdin), or
-`request` (JSON request at the `{request}` argv element). Placeholders are substituted
+`request` (JSON request at the `{request}` argv element). Argument and request modes
+receive EOF on stdin so clients cannot wait for an additional piped prompt.
+Placeholders are substituted
 only when they occupy a whole argv element; shell text is not evaluated. Other
 available placeholders are `{workspace}`, `{model}`, and `{effort}`. `setup_argv`
 is an optional array of argv arrays, also executed unprivileged.

@@ -47,6 +47,7 @@ def test_expired_setup_never_starts_cli(tmp_path, monkeypatch):
 def test_container_launcher_clamps_stale_request_after_upload(tmp_path):
     request = tmp_path / "request.json"
     request.write_text(json.dumps({"seconds": 172.0, "instruction": "literal $(never)"}))
+    request.chmod(0o444)
     process = subprocess.run(
         [
             sys.executable,

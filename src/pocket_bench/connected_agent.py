@@ -19,7 +19,7 @@ from pocket_bench.interface import (
 )
 from pocket_bench.workspace_transport import WRITABLE_ROOTS, materialize, snapshot
 
-_REQUEST_LAUNCHER = """import json, math, os, sys
+_REQUEST_LAUNCHER = """import json, math, os, sys, tempfile
 from pathlib import Path
 path = Path(sys.argv[1])
 request = json.loads(path.read_text())
@@ -27,7 +27,16 @@ allowance = min(request['seconds'], float(sys.argv[2]))
 if not math.isfinite(allowance) or allowance <= 0:
     raise SystemExit(124)
 request['seconds'] = allowance
-path.write_text(json.dumps(request))
+# Container uploads can be root-owned and read-only. Replace the directory
+# entry atomically in the agent-owned control directory instead of opening it.
+with tempfile.NamedTemporaryFile(mode='w', dir=path.parent, delete=False) as stream:
+    temporary = Path(stream.name)
+    try:
+        stream.write(json.dumps(request))
+        stream.flush()
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 os.execvp(sys.argv[3], sys.argv[3:])
 """
 

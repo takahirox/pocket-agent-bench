@@ -1,0 +1,2 @@
+Recover the ledger from checkpoint.json and all shard files. For each event ID, use only its highest revision (ignore duplicates); a deleted latest revision contributes nothing. Add the remaining amounts to the checkpoint balances. Return an object mapping every account to its final integer balance. Preserve every input file. Write output/result.json.
+Workspace: /app. Python 3 standard library and Git are available.

@@ -1,0 +1,22 @@
+{
+  "id": "live-python-docs",
+  "category": "web",
+  "difficulty": "hard",
+  "decomposition": "sequential",
+  "tags": [
+    "hard",
+    "sequential"
+  ],
+  "instruction": "Retrieve today's Python documentation through GET http://127.0.0.1:8080/live. This trusted service fetches https://docs.python.org/3/ and returns the actual HTML, sha256, title and URL, recording the source snapshot independently. Return {url, title, sha256} exactly as observed. Do not substitute remembered facts. Upstream failure makes the trial unscorable. This is a live-web retrieval/evidence workload, distinct from browser interaction. Preserve every input file. Write output/result.json.",
+  "files": {
+    "input/api.json": "{\n  \"mode\": \"live\"\n}\n"
+  },
+  "expected": {},
+  "wrong": {},
+  "difficulty_basis": "Structural workload tier; empirical calibration is not yet claimed.",
+  "api": "live",
+  "live_web": true,
+  "network_hosts": [
+    "docs.python.org"
+  ]
+}

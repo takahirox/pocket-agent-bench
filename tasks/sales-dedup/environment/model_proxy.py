@@ -1,10 +1,13 @@
 """CONNECT-only model gateway on a Docker internal network; no credentials logged."""
 
+import os
 import select
 import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ALLOWED = {"chatgpt.com", "auth.openai.com", "api.openai.com"}
+# Set only by the operator-owned task Compose definition, not by an agent request.
+ALLOWED |= {h for h in os.environ.get("POCKET_WEB_HOSTS", "").split(",") if h == "docs.python.org"}
 
 
 class Proxy(BaseHTTPRequestHandler):

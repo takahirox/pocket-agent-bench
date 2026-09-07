@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "kind": "verifier-controls-not-agent-capability-scores",
+  "model_calls": 0,
+  "total_trials": 56,
+  "runs": [
+    {
+      "run": "issue2-regression-controls",
+      "suite": "regression",
+      "suite_version": "1.1",
+      "selection_sha256": "b8463e226f3099410bd784a176483fee2b978ce9c1e5d4616d8cb9fdabb4d4dd",
+      "partial": false,
+      "trials": 24,
+      "oracle_successes": 12,
+      "nop_failures": 12,
+      "unscorable": 0,
+      "environment_evidence": []
+    },
+    {
+      "run": "issue2-capability-controls",
+      "suite": "capability",
+      "suite_version": "1.0",
+      "selection_sha256": "c48003570bc6cf36a05486e4f435ed9850bf53801fd185e061f965d9fe0b5730",
+      "partial": false,
+      "trials": 10,
+      "oracle_successes": 5,
+      "nop_failures": 5,
+      "unscorable": 0,
+      "environment_evidence": []
+    },
+    {
+      "run": "issue2-long-controls",
+      "suite": "long-horizon",
+      "suite_version": "1.0",
+      "selection_sha256": "73499245021613dd292a63fc18e5004fd98616cdd8e779120dc7b5a27c4c665c",
+      "partial": false,
+      "trials": 10,
+      "oracle_successes": 5,
+      "nop_failures": 5,
+      "unscorable": 0,
+      "environment_evidence": []
+    },
+    {
+      "run": "issue2-web-controls",
+      "suite": "web",
+      "suite_version": "1.0",
+      "selection_sha256": "40b303a490a88dace9071b6967cae3155233c81a3b57596a78b0ab0c2e1b0b19",
+      "partial": false,
+      "trials": 4,
+      "oracle_successes": 2,
+      "nop_failures": 2,
+      "unscorable": 0,
+      "environment_evidence": []
+    },
+    {
+      "run": "issue2-repository-final",
+      "suite": "capability",
+      "suite_version": "1.0",
+      "selection_sha256": "167439b695b7b601d211e251d934e3a899fcd47d630eeacff2d0d9fb25a60da0",
+      "partial": true,
+      "trials": 2,
+      "oracle_successes": 1,
+      "nop_failures": 1,
+      "unscorable": 0,
+      "environment_evidence": []
+    },
+    {
+      "run": "issue2-large-repository-final",
+      "suite": "long-horizon",
+      "suite_version": "1.0",
+      "selection_sha256": "a9f04c60ffe0f09b1fbb5819bd85820637a214e9e6e388ff8dcd8356012dd583",
+      "partial": true,
+      "trials": 2,
+      "oracle_successes": 1,
+      "nop_failures": 1,
+      "unscorable": 0,
+      "environment_evidence": []
+    },
+    {
+      "run": "issue2-web-environment-final",
+      "suite": "web",
+      "suite_version": "1.0",
+      "selection_sha256": "3d3fb4f6605a1aaef716e423475acbfc8846d3ed9bbbde6b3afaab1a97c80f9e",
+      "partial": false,
+      "trials": 4,
+      "oracle_successes": 2,
+      "nop_failures": 2,
+      "unscorable": 0,
+      "environment_evidence": [
+        {
+          "python": "3.12.14 (main, Aug 31 2026, 23:48:05) [GCC 12.2.0]",
+          "browser_version": "Chromium 152.0.7977.82 built on Debian GNU/Linux 12 (bookworm)"
+        },
+        {
+          "python": "3.12.14 (main, Aug 31 2026, 23:48:05) [GCC 12.2.0]",
+          "browser_version": "Chromium 152.0.7977.82 built on Debian GNU/Linux 12 (bookworm)"
+        },
+        {
+          "python": "3.12.14 (main, Aug 31 2026, 23:48:05) [GCC 12.2.0]",
+          "browser_version": null
+        },
+        {
+          "python": "3.12.14 (main, Aug 31 2026, 23:48:05) [GCC 12.2.0]",
+          "browser_version": null
+        }
+      ]
+    }
+  ]
+}

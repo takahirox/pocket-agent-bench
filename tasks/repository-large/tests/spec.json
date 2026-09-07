@@ -1,0 +1,2588 @@
+{
+  "id": "repository-large",
+  "category": "coding",
+  "difficulty": "extended",
+  "decomposition": "mixed",
+  "tags": [
+    "extended",
+    "mixed"
+  ],
+  "instruction": "Repair this multi-module repository to satisfy input/contract.md. The public entry point is src/solution.py:reconcile(records). Repair revisions.latest, totals.totals, pipeline.aggregate and solution.reconcile. latest returns deduplicated records sorted by id; totals aggregates non-canceled records by region; aggregate and reconcile compose both operations. Do not mutate arguments. Do not modify files under src/components. The verifier imports the entry point with src on its module search path. Preserve every input file. Deliver repaired sources.",
+  "files": {
+    "input/contract.md": "Each record has region, cents, status and version. Deduplicate by id using highest version; exclude canceled latest records; aggregate cents by region. Never mutate arguments. Return sorted region keys with integer totals.\n",
+    "src/solution.py": "from pipeline import aggregate\n\ndef reconcile(records):\n    return aggregate(records)\n",
+    "src/pipeline.py": "from revisions import latest\nfrom totals import totals\n\ndef aggregate(records):\n    return totals(latest(records))\n",
+    "src/revisions.py": "def latest(records):\n    return records\n",
+    "src/totals.py": "def totals(records):\n    return {}\n",
+    "src/components/component_000.py": "\"\"\"Unrelated historical component 0; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 1\n",
+    "src/components/component_001.py": "\"\"\"Unrelated historical component 1; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 2\n",
+    "src/components/component_002.py": "\"\"\"Unrelated historical component 2; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 3\n",
+    "src/components/component_003.py": "\"\"\"Unrelated historical component 3; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 4\n",
+    "src/components/component_004.py": "\"\"\"Unrelated historical component 4; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 5\n",
+    "src/components/component_005.py": "\"\"\"Unrelated historical component 5; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 6\n",
+    "src/components/component_006.py": "\"\"\"Unrelated historical component 6; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 7\n",
+    "src/components/component_007.py": "\"\"\"Unrelated historical component 7; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 8\n",
+    "src/components/component_008.py": "\"\"\"Unrelated historical component 8; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 9\n",
+    "src/components/component_009.py": "\"\"\"Unrelated historical component 9; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 10\n",
+    "src/components/component_010.py": "\"\"\"Unrelated historical component 10; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 11\n",
+    "src/components/component_011.py": "\"\"\"Unrelated historical component 11; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 12\n",
+    "src/components/component_012.py": "\"\"\"Unrelated historical component 12; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 13\n",
+    "src/components/component_013.py": "\"\"\"Unrelated historical component 13; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 14\n",
+    "src/components/component_014.py": "\"\"\"Unrelated historical component 14; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 15\n",
+    "src/components/component_015.py": "\"\"\"Unrelated historical component 15; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 16\n",
+    "src/components/component_016.py": "\"\"\"Unrelated historical component 16; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 17\n",
+    "src/components/component_017.py": "\"\"\"Unrelated historical component 17; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 18\n",
+    "src/components/component_018.py": "\"\"\"Unrelated historical component 18; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 19\n",
+    "src/components/component_019.py": "\"\"\"Unrelated historical component 19; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 20\n",
+    "src/components/component_020.py": "\"\"\"Unrelated historical component 20; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 21\n",
+    "src/components/component_021.py": "\"\"\"Unrelated historical component 21; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 22\n",
+    "src/components/component_022.py": "\"\"\"Unrelated historical component 22; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 23\n",
+    "src/components/component_023.py": "\"\"\"Unrelated historical component 23; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 24\n",
+    "src/components/component_024.py": "\"\"\"Unrelated historical component 24; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 25\n",
+    "src/components/component_025.py": "\"\"\"Unrelated historical component 25; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 26\n",
+    "src/components/component_026.py": "\"\"\"Unrelated historical component 26; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 27\n",
+    "src/components/component_027.py": "\"\"\"Unrelated historical component 27; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 28\n",
+    "src/components/component_028.py": "\"\"\"Unrelated historical component 28; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 29\n",
+    "src/components/component_029.py": "\"\"\"Unrelated historical component 29; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 30\n",
+    "src/components/component_030.py": "\"\"\"Unrelated historical component 30; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 31\n",
+    "src/components/component_031.py": "\"\"\"Unrelated historical component 31; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 32\n",
+    "src/components/component_032.py": "\"\"\"Unrelated historical component 32; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 33\n",
+    "src/components/component_033.py": "\"\"\"Unrelated historical component 33; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 34\n",
+    "src/components/component_034.py": "\"\"\"Unrelated historical component 34; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 35\n",
+    "src/components/component_035.py": "\"\"\"Unrelated historical component 35; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 36\n",
+    "src/components/component_036.py": "\"\"\"Unrelated historical component 36; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 37\n",
+    "src/components/component_037.py": "\"\"\"Unrelated historical component 37; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 38\n",
+    "src/components/component_038.py": "\"\"\"Unrelated historical component 38; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 39\n",
+    "src/components/component_039.py": "\"\"\"Unrelated historical component 39; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 40\n",
+    "src/components/component_040.py": "\"\"\"Unrelated historical component 40; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 41\n",
+    "src/components/component_041.py": "\"\"\"Unrelated historical component 41; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 42\n",
+    "src/components/component_042.py": "\"\"\"Unrelated historical component 42; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 43\n",
+    "src/components/component_043.py": "\"\"\"Unrelated historical component 43; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 44\n",
+    "src/components/component_044.py": "\"\"\"Unrelated historical component 44; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 45\n",
+    "src/components/component_045.py": "\"\"\"Unrelated historical component 45; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 46\n",
+    "src/components/component_046.py": "\"\"\"Unrelated historical component 46; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 47\n",
+    "src/components/component_047.py": "\"\"\"Unrelated historical component 47; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 48\n",
+    "src/components/component_048.py": "\"\"\"Unrelated historical component 48; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 49\n",
+    "src/components/component_049.py": "\"\"\"Unrelated historical component 49; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 50\n",
+    "src/components/component_050.py": "\"\"\"Unrelated historical component 50; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 51\n",
+    "src/components/component_051.py": "\"\"\"Unrelated historical component 51; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 52\n",
+    "src/components/component_052.py": "\"\"\"Unrelated historical component 52; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 53\n",
+    "src/components/component_053.py": "\"\"\"Unrelated historical component 53; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 54\n",
+    "src/components/component_054.py": "\"\"\"Unrelated historical component 54; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 55\n",
+    "src/components/component_055.py": "\"\"\"Unrelated historical component 55; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 56\n",
+    "src/components/component_056.py": "\"\"\"Unrelated historical component 56; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 57\n",
+    "src/components/component_057.py": "\"\"\"Unrelated historical component 57; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 58\n",
+    "src/components/component_058.py": "\"\"\"Unrelated historical component 58; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 59\n",
+    "src/components/component_059.py": "\"\"\"Unrelated historical component 59; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 60\n",
+    "src/components/component_060.py": "\"\"\"Unrelated historical component 60; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 61\n",
+    "src/components/component_061.py": "\"\"\"Unrelated historical component 61; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 62\n",
+    "src/components/component_062.py": "\"\"\"Unrelated historical component 62; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 63\n",
+    "src/components/component_063.py": "\"\"\"Unrelated historical component 63; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 64\n",
+    "src/components/component_064.py": "\"\"\"Unrelated historical component 64; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 65\n",
+    "src/components/component_065.py": "\"\"\"Unrelated historical component 65; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 66\n",
+    "src/components/component_066.py": "\"\"\"Unrelated historical component 66; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 67\n",
+    "src/components/component_067.py": "\"\"\"Unrelated historical component 67; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 68\n",
+    "src/components/component_068.py": "\"\"\"Unrelated historical component 68; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 69\n",
+    "src/components/component_069.py": "\"\"\"Unrelated historical component 69; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 70\n",
+    "src/components/component_070.py": "\"\"\"Unrelated historical component 70; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 71\n",
+    "src/components/component_071.py": "\"\"\"Unrelated historical component 71; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 72\n",
+    "src/components/component_072.py": "\"\"\"Unrelated historical component 72; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 73\n",
+    "src/components/component_073.py": "\"\"\"Unrelated historical component 73; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 74\n",
+    "src/components/component_074.py": "\"\"\"Unrelated historical component 74; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 75\n",
+    "src/components/component_075.py": "\"\"\"Unrelated historical component 75; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 76\n",
+    "src/components/component_076.py": "\"\"\"Unrelated historical component 76; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 77\n",
+    "src/components/component_077.py": "\"\"\"Unrelated historical component 77; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 78\n",
+    "src/components/component_078.py": "\"\"\"Unrelated historical component 78; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 79\n",
+    "src/components/component_079.py": "\"\"\"Unrelated historical component 79; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 80\n",
+    "src/components/component_080.py": "\"\"\"Unrelated historical component 80; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 81\n",
+    "src/components/component_081.py": "\"\"\"Unrelated historical component 81; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 82\n",
+    "src/components/component_082.py": "\"\"\"Unrelated historical component 82; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 83\n",
+    "src/components/component_083.py": "\"\"\"Unrelated historical component 83; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 84\n",
+    "src/components/component_084.py": "\"\"\"Unrelated historical component 84; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 85\n",
+    "src/components/component_085.py": "\"\"\"Unrelated historical component 85; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 86\n",
+    "src/components/component_086.py": "\"\"\"Unrelated historical component 86; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 87\n",
+    "src/components/component_087.py": "\"\"\"Unrelated historical component 87; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 88\n",
+    "src/components/component_088.py": "\"\"\"Unrelated historical component 88; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 89\n",
+    "src/components/component_089.py": "\"\"\"Unrelated historical component 89; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 90\n",
+    "src/components/component_090.py": "\"\"\"Unrelated historical component 90; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 91\n",
+    "src/components/component_091.py": "\"\"\"Unrelated historical component 91; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 92\n",
+    "src/components/component_092.py": "\"\"\"Unrelated historical component 92; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 93\n",
+    "src/components/component_093.py": "\"\"\"Unrelated historical component 93; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 94\n",
+    "src/components/component_094.py": "\"\"\"Unrelated historical component 94; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 95\n",
+    "src/components/component_095.py": "\"\"\"Unrelated historical component 95; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 96\n",
+    "src/components/component_096.py": "\"\"\"Unrelated historical component 96; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 97\n",
+    "src/components/component_097.py": "\"\"\"Unrelated historical component 97; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 98\n",
+    "src/components/component_098.py": "\"\"\"Unrelated historical component 98; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 99\n",
+    "src/components/component_099.py": "\"\"\"Unrelated historical component 99; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 100\n",
+    "src/components/component_100.py": "\"\"\"Unrelated historical component 100; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 101\n",
+    "src/components/component_101.py": "\"\"\"Unrelated historical component 101; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 102\n",
+    "src/components/component_102.py": "\"\"\"Unrelated historical component 102; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 103\n",
+    "src/components/component_103.py": "\"\"\"Unrelated historical component 103; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 104\n",
+    "src/components/component_104.py": "\"\"\"Unrelated historical component 104; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 105\n",
+    "src/components/component_105.py": "\"\"\"Unrelated historical component 105; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 106\n",
+    "src/components/component_106.py": "\"\"\"Unrelated historical component 106; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 107\n",
+    "src/components/component_107.py": "\"\"\"Unrelated historical component 107; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 108\n",
+    "src/components/component_108.py": "\"\"\"Unrelated historical component 108; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 109\n",
+    "src/components/component_109.py": "\"\"\"Unrelated historical component 109; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 110\n",
+    "src/components/component_110.py": "\"\"\"Unrelated historical component 110; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 111\n",
+    "src/components/component_111.py": "\"\"\"Unrelated historical component 111; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 112\n",
+    "src/components/component_112.py": "\"\"\"Unrelated historical component 112; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 113\n",
+    "src/components/component_113.py": "\"\"\"Unrelated historical component 113; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 114\n",
+    "src/components/component_114.py": "\"\"\"Unrelated historical component 114; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 115\n",
+    "src/components/component_115.py": "\"\"\"Unrelated historical component 115; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 116\n",
+    "src/components/component_116.py": "\"\"\"Unrelated historical component 116; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 117\n",
+    "src/components/component_117.py": "\"\"\"Unrelated historical component 117; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 118\n",
+    "src/components/component_118.py": "\"\"\"Unrelated historical component 118; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 119\n",
+    "src/components/component_119.py": "\"\"\"Unrelated historical component 119; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 120\n"
+  },
+  "expected": {},
+  "difficulty_basis": "Structural workload tier; empirical calibration is not yet claimed.",
+  "function": "reconcile",
+  "cases": [
+    [
+      [],
+      {}
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 0,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 0
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 13,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 13
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 26,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 26
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 39,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 39
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 52,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 52
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 65,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 65
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 78,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 78
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 91,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 91
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 104,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 104
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 117,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 117
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 130,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 130
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 143,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 143
+      }
+    ]
+  ],
+  "solution": "def reconcile(records):\n    latest = {}\n    for record in records:\n        if record['id'] not in latest or record['version'] > latest[record['id']]['version']:\n            latest[record['id']] = record\n    result = {}\n    for record in latest.values():\n        if record['status'] != 'canceled':\n            result[record['region']] = result.get(record['region'], 0) + record['cents']\n    return dict(sorted(result.items()))\n",
+  "alternate": "def reconcile(records):\n    latest = {}\n    for record in records:\n        if record['id'] not in latest or record['version'] > latest[record['id']]['version']:\n            latest[record['id']] = record\n    result = {}\n    for record in latest.values():\n        if record['status'] != 'canceled':\n            result[record['region']] = result.get(record['region'], 0) + record['cents']\n    return dict(sorted(result.items()))\n",
+  "module_imports": true,
+  "preserve_sources": [
+    "src/components/component_000.py",
+    "src/components/component_001.py",
+    "src/components/component_002.py",
+    "src/components/component_003.py",
+    "src/components/component_004.py",
+    "src/components/component_005.py",
+    "src/components/component_006.py",
+    "src/components/component_007.py",
+    "src/components/component_008.py",
+    "src/components/component_009.py",
+    "src/components/component_010.py",
+    "src/components/component_011.py",
+    "src/components/component_012.py",
+    "src/components/component_013.py",
+    "src/components/component_014.py",
+    "src/components/component_015.py",
+    "src/components/component_016.py",
+    "src/components/component_017.py",
+    "src/components/component_018.py",
+    "src/components/component_019.py",
+    "src/components/component_020.py",
+    "src/components/component_021.py",
+    "src/components/component_022.py",
+    "src/components/component_023.py",
+    "src/components/component_024.py",
+    "src/components/component_025.py",
+    "src/components/component_026.py",
+    "src/components/component_027.py",
+    "src/components/component_028.py",
+    "src/components/component_029.py",
+    "src/components/component_030.py",
+    "src/components/component_031.py",
+    "src/components/component_032.py",
+    "src/components/component_033.py",
+    "src/components/component_034.py",
+    "src/components/component_035.py",
+    "src/components/component_036.py",
+    "src/components/component_037.py",
+    "src/components/component_038.py",
+    "src/components/component_039.py",
+    "src/components/component_040.py",
+    "src/components/component_041.py",
+    "src/components/component_042.py",
+    "src/components/component_043.py",
+    "src/components/component_044.py",
+    "src/components/component_045.py",
+    "src/components/component_046.py",
+    "src/components/component_047.py",
+    "src/components/component_048.py",
+    "src/components/component_049.py",
+    "src/components/component_050.py",
+    "src/components/component_051.py",
+    "src/components/component_052.py",
+    "src/components/component_053.py",
+    "src/components/component_054.py",
+    "src/components/component_055.py",
+    "src/components/component_056.py",
+    "src/components/component_057.py",
+    "src/components/component_058.py",
+    "src/components/component_059.py",
+    "src/components/component_060.py",
+    "src/components/component_061.py",
+    "src/components/component_062.py",
+    "src/components/component_063.py",
+    "src/components/component_064.py",
+    "src/components/component_065.py",
+    "src/components/component_066.py",
+    "src/components/component_067.py",
+    "src/components/component_068.py",
+    "src/components/component_069.py",
+    "src/components/component_070.py",
+    "src/components/component_071.py",
+    "src/components/component_072.py",
+    "src/components/component_073.py",
+    "src/components/component_074.py",
+    "src/components/component_075.py",
+    "src/components/component_076.py",
+    "src/components/component_077.py",
+    "src/components/component_078.py",
+    "src/components/component_079.py",
+    "src/components/component_080.py",
+    "src/components/component_081.py",
+    "src/components/component_082.py",
+    "src/components/component_083.py",
+    "src/components/component_084.py",
+    "src/components/component_085.py",
+    "src/components/component_086.py",
+    "src/components/component_087.py",
+    "src/components/component_088.py",
+    "src/components/component_089.py",
+    "src/components/component_090.py",
+    "src/components/component_091.py",
+    "src/components/component_092.py",
+    "src/components/component_093.py",
+    "src/components/component_094.py",
+    "src/components/component_095.py",
+    "src/components/component_096.py",
+    "src/components/component_097.py",
+    "src/components/component_098.py",
+    "src/components/component_099.py",
+    "src/components/component_100.py",
+    "src/components/component_101.py",
+    "src/components/component_102.py",
+    "src/components/component_103.py",
+    "src/components/component_104.py",
+    "src/components/component_105.py",
+    "src/components/component_106.py",
+    "src/components/component_107.py",
+    "src/components/component_108.py",
+    "src/components/component_109.py",
+    "src/components/component_110.py",
+    "src/components/component_111.py",
+    "src/components/component_112.py",
+    "src/components/component_113.py",
+    "src/components/component_114.py",
+    "src/components/component_115.py",
+    "src/components/component_116.py",
+    "src/components/component_117.py",
+    "src/components/component_118.py",
+    "src/components/component_119.py"
+  ],
+  "entry_points": [
+    {
+      "candidate": "src/solution.py",
+      "function": "reconcile",
+      "cases": [
+        [
+          [],
+          {}
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 0
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 13
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 26
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 39
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 52
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 65
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 78
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 91
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 104
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 117
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 130
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 143
+          }
+        ]
+      ]
+    },
+    {
+      "candidate": "src/pipeline.py",
+      "function": "aggregate",
+      "cases": [
+        [
+          [],
+          {}
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 0
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 13
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 26
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 39
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 52
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 65
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 78
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 91
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 104
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 117
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 130
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 143
+          }
+        ]
+      ]
+    },
+    {
+      "candidate": "src/revisions.py",
+      "function": "latest",
+      "cases": [
+        [
+          [],
+          []
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ]
+      ]
+    },
+    {
+      "candidate": "src/totals.py",
+      "function": "totals",
+      "cases": [
+        [
+          [],
+          {}
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 200,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 213,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 226,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 239,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 252,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 265,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 278,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 291,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 304,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 317,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 330,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 343,
+            "west": 999
+          }
+        ]
+      ]
+    }
+  ],
+  "solution_files": {
+    "src/solution.py": "from pipeline import aggregate\n\ndef reconcile(records):\n    return aggregate(records)\n",
+    "src/pipeline.py": "from revisions import latest\nfrom totals import totals\n\ndef aggregate(records):\n    return totals(latest(records))\n",
+    "src/revisions.py": "def latest(records):\n    chosen = {}\n    for r in records:\n        if r['id'] not in chosen or r['version'] > chosen[r['id']]['version']:\n            chosen[r['id']] = dict(r)\n    return [chosen[k] for k in sorted(chosen)]\n",
+    "src/totals.py": "def totals(records):\n    result = {}\n    for r in records:\n        if r['status'] != 'canceled':\n            result[r['region']] = result.get(r['region'], 0) + r['cents']\n    return dict(sorted(result.items()))\n"
+  }
+}

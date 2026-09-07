@@ -4,7 +4,10 @@ A small, local benchmark for **complete agent systems**: single agents, teams, a
 different agent implementations. Harbor runs the containers and trials; Pocket supplies
 reviewable tasks, adapters and a self-contained comparison report.
 
-This is an initial regression/diagnostic suite, **not a general intelligence leaderboard**.
+The default is a regression/diagnostic suite, **not a general intelligence leaderboard**.
+Named capability, long-horizon and web suites add broader workloads; see
+[workloads and the evaluation protocol](docs/SUITES.md) for selection, budgets,
+comparison rules and statistical interpretation.
 Twelve intentionally small original tasks cover data processing, coding, local-document
 research and mock API workflows. Tasks and graders are automatically tested, not
 human-certified. See [the goal](docs/GOAL.md) and [evaluation design](docs/DESIGN.md).

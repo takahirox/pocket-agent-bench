@@ -1,0 +1,32 @@
+schema_version = "1.4"
+[task]
+name = "pocket/research-large"
+version = "1.1.0"
+[metadata]
+category = "research"
+tags = ["extended", "parallel"]
+source = "pocket-original"
+human_reviewed = false
+capabilities = ["filesystem", "python"]
+network_enforcement = "compose-internal-model-proxy-v1"
+execution_transport = "none"
+difficulty = "extended"
+decomposition = "parallel"
+difficulty_basis = "Structural workload tier; empirical calibration is not yet claimed."
+[agent]
+user = "agent"
+timeout_sec = 240.0
+[verifier]
+user = "root"
+timeout_sec = 45.0
+environment_mode = "separate"
+[verifier.environment]
+network_mode = "public"
+cpus = 2
+memory_mb = 2048
+[environment]
+# Egress is enforced by the internal Compose network and model-only proxy.
+network_mode = "public"
+cpus = 2
+memory_mb = 2048
+build_timeout_sec = 600.0

@@ -1,0 +1,23 @@
+{
+  "id": "browser-release",
+  "category": "web",
+  "difficulty": "hard",
+  "decomposition": "mixed",
+  "tags": [
+    "hard",
+    "mixed"
+  ],
+  "instruction": "Inspect http://127.0.0.1:8080/release in a JavaScript-capable browser. The page renders the approved release record by fetching /release-data. Chromium is installed: chromium --headless --no-sandbox --disable-gpu --virtual-time-budget=3000 --dump-dom URL. Return {version, owner, source}, where source is '/release-data'. Ignore the outdated HTML fallback. Preserve every input file. Write output/result.json.",
+  "files": {
+    "input/api.json": "{\n  \"mode\": \"browser\"\n}\n"
+  },
+  "expected": {
+    "version": "2.7",
+    "owner": "release-team",
+    "source": "/release-data"
+  },
+  "wrong": {},
+  "difficulty_basis": "Structural workload tier; empirical calibration is not yet claimed.",
+  "api": "browser",
+  "browser": true
+}

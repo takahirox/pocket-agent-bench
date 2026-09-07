@@ -1,0 +1,59 @@
+{
+  "id": "workflow-long",
+  "category": "api",
+  "difficulty": "extended",
+  "decomposition": "sequential",
+  "tags": [
+    "extended",
+    "sequential"
+  ],
+  "instruction": "Use the loopback workflow service at http://127.0.0.1:8080. GET /workflow returns ordered jobs and approved amounts. Process jobs in order: POST /commit with JSON {id, amount, key}, where key equals the job id. Use at most three POST attempts per approved job. Every first commit is applied but returns 503 (ambiguous response); retry with the SAME key. GET /workflow reports committed jobs for recovery. Never submit denied jobs. Complete all approved jobs with no duplicate effects, and output {\"committed\": [approved IDs in order], \"total\": sum of approved amounts}. GET /workflow must be read before the first commit. Preserve every input file. Write output/result.json.",
+  "files": {
+    "input/api.json": "{\n  \"mode\": \"workflow-48\"\n}\n"
+  },
+  "expected": {
+    "committed": [
+      "job-000",
+      "job-001",
+      "job-002",
+      "job-004",
+      "job-005",
+      "job-006",
+      "job-008",
+      "job-009",
+      "job-010",
+      "job-012",
+      "job-013",
+      "job-014",
+      "job-016",
+      "job-017",
+      "job-018",
+      "job-020",
+      "job-021",
+      "job-022",
+      "job-024",
+      "job-025",
+      "job-026",
+      "job-028",
+      "job-029",
+      "job-030",
+      "job-032",
+      "job-033",
+      "job-034",
+      "job-036",
+      "job-037",
+      "job-038",
+      "job-040",
+      "job-041",
+      "job-042",
+      "job-044",
+      "job-045",
+      "job-046"
+    ],
+    "total": 8640
+  },
+  "wrong": {},
+  "difficulty_basis": "Structural workload tier; empirical calibration is not yet claimed.",
+  "api": "workflow",
+  "workflow_count": 48
+}

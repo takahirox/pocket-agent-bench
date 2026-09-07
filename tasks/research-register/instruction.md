@@ -1,0 +1,2 @@
+Prepare an evidence-backed policy register for every service in scope.json. Select the highest approved revision, excluding drafts and unverified discussion. Return each service's owner, retention_days, launch_date (null if unconfirmed), and source (the selected JSON basename). Do not infer missing launch dates. Preserve every input file. Write output/result.json.
+Workspace: /app. Python 3 standard library and Git are available.

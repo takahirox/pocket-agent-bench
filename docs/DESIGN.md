@@ -133,3 +133,10 @@ so an older cached task image does not silently retain a superseded runtime.
 Reports embed all data and need no server or external assets. Raw trial artifacts are
 kept for regrading. Invalidations preserve the original result and attach an explicit
 reason instead of silently rewriting history.
+
+## Expanded evaluation
+
+The initial-suite limitations above describe historical measurements. Named workload
+selection, extended tasks, optional browser/live-source workflows, conservative comparison
+gating and explicit uncertainty/efficiency calculations are documented in
+[SUITES.md](SUITES.md). Expanded workload support is not an empirical capability ranking.

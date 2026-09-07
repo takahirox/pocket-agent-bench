@@ -1,0 +1,1 @@
+Each record has region, cents, status and version. Deduplicate by id using highest version; exclude canceled latest records; aggregate cents by region. Never mutate arguments. Return sorted region keys with integer totals.

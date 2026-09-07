@@ -7,7 +7,7 @@
     "extended",
     "parallel"
   ],
-  "instruction": "Prepare an evidence-backed policy register for every service in scope.json. Select the highest approved revision, excluding drafts and unverified discussion. Return each service's owner, retention_days, launch_date (null if unconfirmed), and source (the selected JSON basename). Do not infer missing launch dates. Preserve every input file. Write output/result.json.",
+  "instruction": "Prepare an evidence-backed policy register for every service in scope.json. Select the highest approved revision, excluding drafts and unverified discussion. Return a JSON object keyed by service ID. Each value must be an object with owner, retention_days, launch_date (null if unconfirmed), and source (the selected JSON basename). Do not infer missing launch dates. Preserve every input file. Write output/result.json.",
   "files": {
     "input/service-00-r1.json": "{\n  \"service\": \"service-00\",\n  \"revision\": 1,\n  \"status\": \"approved\",\n  \"owner\": \"team-1\",\n  \"retention_days\": 10,\n  \"launch_date\": null\n}\n",
     "input/service-00-r2.json": "{\n  \"service\": \"service-00\",\n  \"revision\": 2,\n  \"status\": \"approved\",\n  \"owner\": \"team-2\",\n  \"retention_days\": 20,\n  \"launch_date\": null\n}\n",

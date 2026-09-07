@@ -100,8 +100,9 @@ def research(name, services, noise):
         "parallel",
         "Prepare an evidence-backed policy register for every service in scope.json. "
         "Select the highest approved revision, excluding drafts and unverified discussion. "
-        "Return each service's owner, retention_days, launch_date (null if unconfirmed), "
-        "and source (the selected JSON basename). Do not infer missing launch dates.",
+        "Return a JSON object keyed by service ID. Each value must be an object with "
+        "owner, retention_days, launch_date (null if unconfirmed), and source "
+        "(the selected JSON basename). Do not infer missing launch dates.",
         files,
         expected,
     )

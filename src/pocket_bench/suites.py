@@ -6,8 +6,8 @@ from pathlib import Path
 
 SUITES = {
     "regression": {"version": "1.1", "attempts": 2, "seconds": 180},
-    "capability": {"version": "1.0", "attempts": 10, "seconds": 600},
-    "long-horizon": {"version": "1.0", "attempts": 10, "seconds": 1800},
+    "capability": {"version": "1.1", "attempts": 10, "seconds": 600},
+    "long-horizon": {"version": "1.1", "attempts": 10, "seconds": 1800},
     "web": {"version": "1.0", "attempts": 10, "seconds": 600},
 }
 

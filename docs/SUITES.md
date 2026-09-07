@@ -60,6 +60,12 @@ partial/full status, agent configuration, source/runtime provenance, and evaluat
 protocol. The fingerprint includes task content and runtime/grader source dependencies.
 A version names a release; the fingerprint detects changes even before a version bump.
 
+Capability and long-horizon version 1.1 clarify that policy-register output is a JSON
+object keyed by service ID. Version 1.0 omitted this container shape while its verifier
+required it, so a semantically correct array could fail. Research results from the two
+versions must not be pooled. Existing version 1.0 control records remain historical
+evidence; task counts, workload data, budgets and grading requirements are unchanged.
+
 Results JSON schema 2 is generated from both new and historical job artifacts/plans
 through the normalizer. Existing standalone HTML reports remain unchanged. Legacy runs retain their original provenance and have **unknown selection
 identity**; they are not guessed to be complete regression runs. Counts are retained

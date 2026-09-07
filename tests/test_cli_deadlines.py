@@ -6,9 +6,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from test_interface import Environment, configuration
 
 import pocket_bench.connected_agent as connected
-from tests.test_interface import Environment, configuration
 
 
 def test_request_allowance_excludes_setup_and_return_reserve(tmp_path, monkeypatch):

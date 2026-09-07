@@ -100,3 +100,35 @@ def test_timeout_retains_reason_and_marks_observed_usage_partial(tmp_path):
     assert context.metadata["details"]["termination"] == "deadline"
     assert context.metadata["details"]["cli_exit_code"] == 124
     assert context.metadata["usage_complete"] is False
+
+
+@pytest.mark.parametrize("partial", [False, True])
+def test_normally_returned_controller_preserves_partial_usage(tmp_path, partial):
+    class UsageEnvironment(Environment):
+        async def download_dir(self, source, destination):
+            events = [{"type": "fixture.usage", "usage": {"input_tokens": 7}}]
+            if partial:
+                events.append({"type": "fixture.usage", "complete": False, "usage": {}})
+            events.append({"type": "fixture.usage", "complete": True, "usage": {"input_tokens": 3}})
+            (destination / "native.jsonl").write_text(
+                "\n".join(json.dumps(event) for event in events)
+            )
+
+    agent = connected.ConnectedAgent(
+        logs_dir=tmp_path,
+        profile_file=configuration(
+            tmp_path,
+            usage_jsonl={
+                "event_key": "type",
+                "event_value": "fixture.usage",
+                "fields": {"input_tokens": "usage.input_tokens"},
+            },
+        ),
+        profile_name="example",
+    )
+    response = asyncio.run(
+        agent.cli("fixture", UsageEnvironment(), connected.time.monotonic() + 180)
+    )
+    assert response["outcome"] == "completed"
+    assert response["usage"] == {"input_tokens": 10}
+    assert response["usage_complete"] is (not partial)

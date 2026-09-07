@@ -19,6 +19,18 @@ from pocket_bench.interface import (
 )
 from pocket_bench.workspace_transport import WRITABLE_ROOTS, materialize, snapshot
 
+_REQUEST_LAUNCHER = """import json, math, os, sys
+from pathlib import Path
+path = Path(sys.argv[1])
+request = json.loads(path.read_text())
+allowance = min(request['seconds'], float(sys.argv[2]))
+if not math.isfinite(allowance) or allowance <= 0:
+    raise SystemExit(124)
+request['seconds'] = allowance
+path.write_text(json.dumps(request))
+os.execvp(sys.argv[3], sys.argv[3:])
+"""
+
 
 class ConnectedAgent(BaseAgent):
     def __init__(
@@ -188,7 +200,11 @@ class ConnectedAgent(BaseAgent):
                         "protocol": PROTOCOL,
                         "instruction": instruction,
                         "workspace": "/app",
-                        "seconds": self.seconds,
+                        # Leave time for the controller's return and the shared
+                        # optional execution transport inside the outer deadline.
+                        "seconds": max(
+                            0.0, deadline - time.monotonic() - min(5.0, self.seconds / 10)
+                        ),
                         "model": self.model_name,
                         "effort": self.effort,
                     }
@@ -205,7 +221,26 @@ class ConnectedAgent(BaseAgent):
                 "effort": self.effort,
             },
         )
-        remaining = max(0.1, deadline - time.monotonic())
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return {
+                "protocol": PROTOCOL,
+                "outcome": "failed",
+                "usage_complete": False,
+                "details": {"termination": "deadline_before_invocation"},
+            }
+        if self.profile.get("input", "argument") == "request":
+            # Clamp again after request upload: a slow upload must not leave
+            # the child with more time than its enclosing timeout.
+            argv = [
+                "python",
+                "-I",
+                "-c",
+                _REQUEST_LAUNCHER,
+                "/home/agent/pocket/request.json",
+                str(max(0.0, remaining - min(5.0, self.seconds / 10))),
+                *argv,
+            ]
         command = shlex.join(["timeout", "--kill-after=2", str(remaining), *argv])
         if self.profile.get("input", "argument") == "stdin":
             command += " < /home/agent/pocket/instruction.txt"
@@ -242,7 +277,16 @@ class ConnectedAgent(BaseAgent):
                     value = value.get(key) if isinstance(value, dict) else None
                 if type(value) is int and value >= 0:
                     usage[normalized] = usage.get(normalized, 0) + value
-        return {"protocol": PROTOCOL, "outcome": outcome, "usage": usage}
+        return {
+            "protocol": PROTOCOL,
+            "outcome": outcome,
+            "usage": usage,
+            "usage_complete": result.return_code == 0,
+            "details": {
+                "cli_exit_code": result.return_code,
+                "termination": "deadline" if result.return_code in (124, 137) else "returned",
+            },
+        }
 
     async def quiesce(self, environment):
         result = await environment.exec(
@@ -295,7 +339,8 @@ class ConnectedAgent(BaseAgent):
             "execution_exit_code": response.get("execution_exit_code"),
             "agent_seconds_limit": self.seconds,
             "agent_seconds_used": time.monotonic() - started,
-            "usage_complete": all(k in usage for k in ("input_tokens", "output_tokens")),
+            "usage_complete": response.get("usage_complete", True)
+            and all(k in usage for k in ("input_tokens", "output_tokens")),
             "details": response.get("details", {}),
             "effort": self.effort,
         }

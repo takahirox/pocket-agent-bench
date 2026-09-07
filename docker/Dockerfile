@@ -4,7 +4,7 @@ COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
  && apt-get update && apt-get install -y --no-install-recommends git ca-certificates procps \
- && npm install -g @openai/codex@0.144.4 \
+ && npm install -g @openai/codex@0.153.4 \
  && useradd -m -u 1000 agent
 COPY project /opt/agent-project
 RUN if [ -f /opt/agent-project/pyproject.toml ]; then pip install --no-cache-dir /opt/agent-project; fi

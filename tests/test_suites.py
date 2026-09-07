@@ -98,3 +98,23 @@ def test_invalid_budget_rejected_before_build(tmp_path, value):
     with pytest.raises(ValueError, match="positive"):
         asyncio.run(run_job(options))
     assert not (tmp_path / "tasks").exists()
+
+
+def test_selected_runtime_is_used_in_agent_and_verifier_images(tmp_path):
+    from pocket_bench.suite import build
+
+    (tmp_path / "suite").mkdir()
+    shutil.copy(ROOT / "suite/catalog.json", tmp_path / "suite/catalog.json")
+    (tmp_path / "local").mkdir()
+    manifest = tmp_path / "local/runtime.json"
+    manifest.write_text(json.dumps({"image": "pocket-experiment:versioned"}))
+    build(tmp_path)
+    for role in ("environment", "tests"):
+        assert (
+            (tmp_path / "tasks/sales-dedup" / role / "Dockerfile")
+            .read_text()
+            .startswith("FROM pocket-experiment:versioned\n")
+        )
+    manifest.write_text(json.dumps({"image": "image\nRUN unexpected"}))
+    with pytest.raises(ValueError, match="Invalid runtime image"):
+        build(tmp_path)

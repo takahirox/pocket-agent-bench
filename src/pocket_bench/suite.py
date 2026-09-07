@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -18,6 +19,16 @@ def catalog(root, name="regression"):
 
 def build(root):
     root = Path(root)
+    runtime_manifest = root / "local/runtime.json"
+    runtime_image = (
+        json.loads(runtime_manifest.read_text())["image"]
+        if runtime_manifest.exists()
+        else "pocket-agent-bench-runtime:0.1"
+    )
+    if not isinstance(runtime_image, str) or not re.fullmatch(
+        r"[a-zA-Z0-9][a-zA-Z0-9._/:@-]*", runtime_image
+    ):
+        raise ValueError("Invalid runtime image in local/runtime.json")
     tasks = root / "tasks"
     tasks.mkdir(exist_ok=True)
     from pocket_bench.suites import SUITES
@@ -71,7 +82,7 @@ def build(root):
             else ""
         )
         (task / "environment/Dockerfile").write_text(
-            "FROM pocket-agent-bench-runtime:0.1\n"
+            f"FROM {runtime_image}\n"
             + browser_install
             + 'COPY --chown=agent:agent input/ /app/input/\nCOPY --chown=agent:agent src/ /app/src/\nCOPY mock_api.py bootstrap.py smoke.py execution.py /opt/pocket/\nWORKDIR /app\nENTRYPOINT ["python", "/opt/pocket/bootstrap.py"]\n'
         )
@@ -107,7 +118,7 @@ networks:
             "#!/bin/sh\nset -eu\npython -I /tests/grader.py /tests/spec.json /app\n"
         )
         (task / "tests/Dockerfile").write_text(
-            "FROM pocket-agent-bench-runtime:0.1\nCOPY grader.py spec.json test.sh /tests/\nRUN chmod 700 /tests\nWORKDIR /app\n"
+            f"FROM {runtime_image}\nCOPY grader.py spec.json test.sh /tests/\nRUN chmod 700 /tests\nWORKDIR /app\n"
         )
         (task / "tests/docker-compose.yaml").write_text(
             "services:\n  main:\n    network_mode: none\n"

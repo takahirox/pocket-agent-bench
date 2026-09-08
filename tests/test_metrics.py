@@ -97,6 +97,14 @@ def test_live_snapshot_changes_block_comparison():
     assert "live-source-changed" in comparisons([a, b])[0]["blocked_reasons"]
 
 
+def test_unread_live_source_is_missing_evidence_not_observed_change():
+    a, b = row(), row(job="b", status="failure")
+    a["source_snapshot_sha256"] = "observed-page"
+    result = comparisons([a, b])[0]
+    assert result["blocked_reasons"] == ["live-source-evidence-missing"]
+    assert result["success_rate_difference"] is None
+
+
 def test_unequal_repetitions_are_task_balanced():
     samples = [row("a")] * 10 + [row("b", status="failure")]
     assert uncertainty(samples)["task_balanced_success_rate"] == 0.5

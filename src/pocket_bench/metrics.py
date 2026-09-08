@@ -130,8 +130,11 @@ def comparisons(rows):
                 if any(identity != identities[0] for identity in identities[1:]):
                     reasons.append("model-effort-budget-concurrency-or-runtime-different")
                 snapshots = {r.get("source_snapshot_sha256") for r in evidence}
-                if len(snapshots) > 1:
+                known_snapshots = snapshots - {None}
+                if len(known_snapshots) > 1:
                     reasons.append("live-source-changed")
+                if known_snapshots and None in snapshots:
+                    reasons.append("live-source-evidence-missing")
                 result.append(
                     {
                         "left": list(left),

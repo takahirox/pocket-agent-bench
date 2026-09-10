@@ -293,6 +293,9 @@ def live():
 
 
 def catalog(name):
+    if name == "capability-smoke":
+        members = {"ledger-recovery", "dependency-schedule", "repository-repair"}
+        return [task for task in catalog("capability") if task["id"] in members]
     if name == "capability":
         return [
             ledger("ledger-recovery", 320),

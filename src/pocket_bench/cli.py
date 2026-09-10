@@ -166,6 +166,7 @@ async def run_job(args):
                     "network_hosts": sorted({h for s in specs for h in s.get("network_hosts", [])}),
                     "sampling": "public-fixed-original-tasks",
                     "calibration": "structural-not-empirical",
+                    "directional_only": selection["directional_only"],
                     "recommended_attempts": selection["recommended_attempts"],
                     "below_recommended_attempts": args.attempts < selection["recommended_attempts"],
                 },
@@ -267,7 +268,10 @@ def main():
     r.add_argument("--model", default="gpt-5.6-luna")
     r.add_argument("--effort", default="low")
     r.add_argument(
-        "--attempts", type=int, default=None, help="Default: regression 2, other suites 10"
+        "--attempts",
+        type=int,
+        default=None,
+        help="Default: regression 2, capability-smoke 1, other suites 10",
     )
     r.add_argument("--concurrency", type=int, default=1)
     r.add_argument(

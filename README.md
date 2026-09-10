@@ -5,6 +5,8 @@ different agent implementations. Harbor runs the containers and trials; Pocket s
 reviewable tasks, adapters and a self-contained comparison report.
 
 The default is a regression/diagnostic suite, **not a general intelligence leaderboard**.
+Use `pocket-bench run --suite capability-smoke --name dev-check` for three harder
+tasks at one attempt per profile (directional feedback only).
 Named capability, long-horizon and web suites add broader workloads; see
 [workloads and the evaluation protocol](docs/SUITES.md) for selection, budgets,
 comparison rules and statistical interpretation.

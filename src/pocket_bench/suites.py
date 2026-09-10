@@ -6,6 +6,7 @@ from pathlib import Path
 
 SUITES = {
     "regression": {"version": "1.1", "attempts": 2, "seconds": 180},
+    "capability-smoke": {"version": "1.0", "attempts": 1, "seconds": 600},
     "capability": {"version": "1.1", "attempts": 10, "seconds": 600},
     "long-horizon": {"version": "1.1", "attempts": 10, "seconds": 1800},
     "web": {"version": "1.0", "attempts": 10, "seconds": 600},
@@ -58,5 +59,6 @@ def select(root, name="regression", tasks=None):
         "available_tasks": len(members),
         "partial": len(selected) != len(members),
         "human_reviewed": False,
+        "directional_only": name == "capability-smoke",
         "recommended_attempts": SUITES[name]["attempts"],
     }

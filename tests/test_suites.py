@@ -118,3 +118,43 @@ def test_selected_runtime_is_used_in_agent_and_verifier_images(tmp_path):
     manifest.write_text(json.dumps({"image": "image\nRUN unexpected"}))
     with pytest.raises(ValueError, match="Invalid runtime image"):
         build(tmp_path)
+
+
+def test_smoke_reuses_capability_definitions_and_fingerprints():
+    smoke, identity = select(ROOT, "capability-smoke")
+    full, full_identity = select(ROOT, "capability")
+    assert identity["task_ids"] == ["ledger-recovery", "dependency-schedule", "repository-repair"]
+    assert {task["decomposition"] for task in smoke} == {"parallel", "sequential", "mixed"}
+    for task in smoke:
+        assert task == next(member for member in full if member["id"] == task["id"])
+        assert (
+            identity["task_fingerprints"][task["id"]]
+            == full_identity["task_fingerprints"][task["id"]]
+        )
+    assert identity["directional_only"] is True
+    assert full_identity["directional_only"] is False
+    assert identity["sha256"] != full_identity["sha256"]
+
+
+@pytest.mark.parametrize("attempts,expected", [(None, 1), (3, 3), (10, 10)])
+def test_smoke_plan_defaults_overrides_and_directional_label(
+    tmp_path, monkeypatch, attempts, expected
+):
+    import harbor.job
+
+    async def forbidden(*args, **kwargs):
+        pytest.fail("plan-only must not launch a job")
+
+    monkeypatch.setattr(harbor.job.Job, "create", forbidden)
+    (tmp_path / "suite").mkdir()
+    shutil.copy(ROOT / "suite/catalog.json", tmp_path / "suite/catalog.json")
+    options = args(tmp_path)
+    options.suite = "capability-smoke"
+    options.attempts = attempts
+    asyncio.run(run_job(options))
+    plan = json.loads((tmp_path / "results/plans/plan.json").read_text())
+    assert plan["attempts"] == expected
+    assert plan["evaluation_protocol"]["agent_seconds"] == 600
+    assert plan["evaluation_protocol"]["directional_only"] is True
+    assert plan["suite"]["directional_only"] is True
+    assert len(plan["configuration"]["tasks"]) == 3

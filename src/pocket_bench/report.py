@@ -206,6 +206,7 @@ def normalize(job_path):
         r["suite_name"] = selection.get("name", "legacy")
         r["suite_version"] = selection.get("version")
         r["suite_partial"] = selection.get("partial")
+        r["directional_only"] = selection.get("directional_only", False)
         r["difficulty"] = spec.get(
             "difficulty", "short" if r["suite_name"] == "regression" else "unknown"
         )

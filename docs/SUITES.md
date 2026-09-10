@@ -8,6 +8,7 @@ and 180 aggregate agent-seconds. No expanded suite is silently added to that run
 | Suite | Tasks | Structural demand | Default attempts/task/profile | Default aggregate seconds/trial |
 | --- | ---: | --- | ---: | ---: |
 | regression | 12 | Short diagnostic tasks | 2 | 180 |
+| capability-smoke | 3 | Ledger recovery, dependency planning, multi-file repair; directional only | 1 | 600 |
 | capability | 5 | Multi-file repair, evidence synthesis, ledger recovery, dependency planning, stateful API recovery | 10 | 600 |
 | long-horizon | 5 | Larger versions: 5,000 ledger events with revisions, 420 policy/noise documents, 120 dependency nodes, 120 auxiliary source modules, 48 ordered service jobs | 10 | 1,800 |
 | web | 2 | JavaScript rendering and live source retrieval with trusted snapshots | 10 | 600 |
@@ -51,6 +52,37 @@ model-only external egress. The live service records the actual HTML, title, URL
 SHA-256 in root-owned service state before grading. Fetch failures are unscorable;
 there is no fallback to memorized facts or a cached gold answer. Live snapshots are
 part of comparison evidence; different observed sources block matched score deltas.
+
+## Lightweight development loop
+
+Use `capability-smoke` after a regression check to get an inexpensive directional
+signal from three fixed capability tasks: `ledger-recovery` (parallel),
+`dependency-schedule` (sequential), and `repository-repair` (mixed). They retain
+exactly the full capability task inputs, instructions, graders and 600-second budget.
+This subset does not cover research, workflow recovery, browser or live retrieval;
+run those suites/tasks explicitly when relevant. No full-suite coverage is removed.
+
+```sh
+pocket-bench run --suite capability-smoke --name dev-plan --plan-only
+pocket-bench run --suite capability-smoke --name dev-1
+# If the signal is ambiguous or promising, run three attempts per task.
+pocket-bench run --suite capability-smoke --name dev-3 --attempts 3
+# Broader confirmation uses all five capability tasks, ten attempts by default.
+pocket-bench run --suite capability --name confirmation
+```
+
+Counts are per profile: the smoke default schedules three trials per profile,
+versus fifty for capability. Inspect `--plan-only` before execution to see the
+selected profiles and maximum aggregate time; this mode does not impose a token cap.
+Attempts are totals for each new run, not incremental top-ups. Preserve every run,
+including failures, and record that escalation was chosen after seeing preliminary
+results. Run long-horizon/web when relevant or before formal evaluation.
+
+Smoke results are **directional only**, unsuitable for leaderboards or general
+capability claims, even if `--attempts` is increased. Plans and normalized JSON
+retain this designation and HTML labels the smoke cohort accordingly. More repeats
+cannot compensate for the limited task coverage. Full evaluation still requires the
+recorded comparison conditions and statistical caveats below.
 
 ## Identities and compatibility
 
@@ -178,7 +210,7 @@ repository cannot create a genuinely held-out benchmark.
 | Review concern | Delivered behavior | Verification |
 | --- | --- | --- |
 | Mixed test scores | Suite/version/selection groups; no mixed overall rate; gated common-task deltas | metrics/report and browser checks |
-| Unbounded implementation scope | Four explicit suites with concrete tasks and this acceptance map | suite selection plus all-suite controls |
+| Unbounded implementation scope | Four full suites plus a fixed development subset with concrete tasks and this acceptance map | suite selection plus all-suite controls |
 | Existing versus new features | Regression defaults preserved; suites distinct from agent profiles; defined task intersection | CLI planning/selection tests |
 | Fair single/team comparisons | Equal recorded budget/model/effort/runtime conditions; parallel/sequential/mixed strata | comparison gating tests and task metadata |
 | Undefined evaluation | Defined repetition policy, structural difficulty, bootstrap, failure/recovery and all-trial efficiency | metric edge-case tests and independent gold audits |

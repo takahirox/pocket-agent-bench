@@ -142,3 +142,34 @@ def test_browser_version_must_be_known_and_equal():
     assert comparisons([a, b])[0]["blocked_reasons"] == []
     b["environment_evidence"] = {"browser_version": "Chromium changed"}
     assert comparisons([a, b])[0]["blocked_reasons"]
+
+
+def test_safety_policy_and_limit_gate_matched_comparisons():
+    a, b = row(), row(job="b", status="failure")
+    for sample in (a, b):
+        sample["agent_config"]["kwargs"] = {"effort": "low", "hard_timeout_seconds": 3600}
+        sample["protocol"] = {"budget_basis": "wall-clock-safety-v1", "trial_concurrency": 1}
+    assert comparisons([a, b])[0]["blocked_reasons"] == []
+    b["agent_config"]["kwargs"]["hard_timeout_seconds"] = 7200
+    assert comparisons([a, b])[0]["blocked_reasons"]
+    assert comparisons([a, row(job="legacy")])[0]["blocked_reasons"]
+
+
+def test_ungraded_timeout_keeps_denominator_and_usage_but_blocks_grade_comparison():
+    a, b = row(), row(status="timed_out")
+    b["termination_reason"] = "hard_timeout"
+    result = summarize([a, b])
+    assert result["success_rate_all"] == 0.5
+    assert result["success_rate_scored"] == 1
+    assert result["timeout_rate_all"] == 0.5
+    assert result["seconds_per_success"] == 20
+    assert result["agent_seconds_per_success"] == 30
+    b["job"] = "b"
+    assert comparisons([a, b])[0]["success_rate_difference"] is None
+    samples = [
+        row(str(task), "success" if attempt % 2 else "failure")
+        for task in range(5)
+        for attempt in range(10)
+    ]
+    samples[0]["status"] = "timed_out"
+    assert uncertainty(samples)["success_rate_ci95"] is None

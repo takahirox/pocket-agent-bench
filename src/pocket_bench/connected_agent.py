@@ -17,6 +17,7 @@ from pocket_bench.interface import (
     public_profile,
     render_argv,
 )
+from pocket_bench.timing import hard_timeout_seconds as resolve_timeout
 from pocket_bench.workspace_transport import WRITABLE_ROOTS, materialize, snapshot
 
 _REQUEST_LAUNCHER = """import json, math, os, sys, tempfile
@@ -48,7 +49,8 @@ class ConnectedAgent(BaseAgent):
         profile_file,
         profile_name,
         allow_host_controller=False,
-        agent_seconds=180,
+        hard_timeout_seconds=None,
+        agent_seconds=None,
         effort="low",
         stop_file=None,
         profile_sha256=None,
@@ -57,7 +59,8 @@ class ConnectedAgent(BaseAgent):
         super().__init__(*args, **kwargs)
         self.profile = load_profiles(profile_file, allow_host_controller)[profile_name]
         self.profile = {"agent": profile_name, **self.profile}
-        self.seconds, self.effort = float(agent_seconds), effort
+        self.seconds = resolve_timeout(hard_timeout_seconds, agent_seconds)
+        self.effort = effort
         self.stop_file = Path(stop_file) if stop_file else None
         self.identity = public_profile(self.profile)
         self.identity["profile_name"] = profile_name
@@ -326,6 +329,12 @@ class ConnectedAgent(BaseAgent):
                     self.stop_file.write_text("usage_limit\n")
                 raise RuntimeError("Usage limit reached; no reset, retry or provider switch")
             if response["outcome"] != "completed":
+                if response.get("details", {}).get("termination") in (
+                    "deadline",
+                    "deadline_before_invocation",
+                    "hard_timeout",
+                ):
+                    raise TimeoutError("Hard safety timeout exhausted")
                 raise RuntimeError("Agent connection returned failure")
             remaining = max(0, deadline - time.monotonic())
             result = await environment.exec(
@@ -335,6 +344,12 @@ class ConnectedAgent(BaseAgent):
                 timeout_sec=max(1, remaining) + 1,
             )
             response["execution_exit_code"] = result.return_code
+            if result.return_code == 124:
+                response.setdefault("details", {})["termination"] = "hard_timeout"
+        except TimeoutError:
+            response["usage_complete"] = False
+            response.setdefault("details", {}).setdefault("termination", "hard_timeout")
+            raise
         finally:
             try:
                 await self.quiesce(environment)
@@ -354,8 +369,18 @@ class ConnectedAgent(BaseAgent):
             **self.identity,
             "connection_outcome": response["outcome"],
             "execution_exit_code": response.get("execution_exit_code"),
-            "agent_seconds_limit": self.seconds,
-            "agent_seconds_used": time.monotonic() - started,
+            "timing_policy": "wall-clock-safety-v1",
+            "hard_timeout_seconds": self.seconds,
+            "wall_seconds": time.monotonic() - started,
+            # A controller/CLI wall duration is not the sum of its parallel workers.
+            "aggregate_agent_seconds": (response.get("timings") or {}).get(
+                "aggregate_agent_seconds"
+            ),
+            "events": (response.get("timings") or {}).get("events", []),
+            "termination_reason": "hard_timeout"
+            if response.get("details", {}).get("termination")
+            in ("deadline", "deadline_before_invocation", "hard_timeout")
+            else None,
             "usage_complete": response.get("usage_complete", True)
             and all(k in usage for k in ("input_tokens", "output_tokens")),
             "details": response.get("details", {}),

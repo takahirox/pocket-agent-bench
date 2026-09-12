@@ -5,11 +5,11 @@ import json
 from pathlib import Path
 
 SUITES = {
-    "regression": {"version": "1.1", "attempts": 2, "seconds": 180},
-    "capability-smoke": {"version": "1.0", "attempts": 1, "seconds": 600},
-    "capability": {"version": "1.1", "attempts": 10, "seconds": 600},
-    "long-horizon": {"version": "1.1", "attempts": 10, "seconds": 1800},
-    "web": {"version": "1.0", "attempts": 10, "seconds": 600},
+    "regression": {"version": "1.1", "attempts": 2},
+    "capability-smoke": {"version": "1.0", "attempts": 1},
+    "capability": {"version": "1.1", "attempts": 10},
+    "long-horizon": {"version": "1.1", "attempts": 10},
+    "web": {"version": "1.0", "attempts": 10},
 }
 
 

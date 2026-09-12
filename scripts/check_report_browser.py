@@ -16,6 +16,15 @@ try {
   assert(all.length>0,'missing trials');
   const initial=document.querySelectorAll('#trials tr').length;
   assert(initial===all.length,'initial trial count');
+  assert(!document.getElementById('trials').textContent.includes('undefined'),'known status labels');
+  for(const id of ['groups','trials']) {
+    const table=document.getElementById(id).closest('table');
+    const columns=table.querySelectorAll('thead th').length;
+    assert([...table.querySelectorAll('tbody tr')].every(r=>r.children.length===columns),'column alignment: '+id);
+  }
+  if(all.some(r=>r.status==='timed_out')) {
+    assert(document.getElementById('trials').textContent.includes('時間切れ（採点なし）'),'timeout label');
+  }
   const cohorts=[...new Set(all.map(r=>r.cohort))];
   document.getElementById('cohort').value=cohorts[0];render();
   assert(document.querySelectorAll('#trials tr').length===all.filter(r=>r.cohort===cohorts[0]).length,'suite filter');

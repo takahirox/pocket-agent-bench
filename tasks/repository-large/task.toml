@@ -15,7 +15,7 @@ decomposition = "mixed"
 difficulty_basis = "Structural workload tier; empirical calibration is not yet claimed."
 [agent]
 user = "agent"
-timeout_sec = 240.0
+timeout_sec = 3690.0
 [verifier]
 user = "root"
 timeout_sec = 45.0

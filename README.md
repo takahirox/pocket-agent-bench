@@ -65,13 +65,13 @@ Run one small real-agent comparison (uses the logged-in account's model allowanc
 
 ```sh
 uv run pocket-bench run --name smoke --tasks sales-dedup \
-  --profiles codex-single,codex-team --attempts 1 --agent-seconds 180
+  --profiles codex-single,codex-team --attempts 1 --hard-timeout-seconds 3600
 ```
 
 Run the full repeated comparison:
 
 ```sh
-uv run pocket-bench run --name baseline --attempts 2 --concurrency 1 --agent-seconds 180
+uv run pocket-bench run --name baseline --attempts 2 --concurrency 1 --hard-timeout-seconds 3600
 ```
 
 To run an explicitly trusted external controller, create its ignored local profile
@@ -80,15 +80,38 @@ following [the interface contract](docs/AGENT-INTERFACE.md), then run:
 ```sh
 uv run pocket-bench run --name connected-agent \
   --profile-file local/connections.json --allow-host-controller \
-  --profiles my-agent-single --attempts 1 --concurrency 1 --agent-seconds 180
+  --profiles my-agent-single --attempts 1 --concurrency 1 --hard-timeout-seconds 3600
 ```
 
 Default model: `gpt-5.6-luna`, effort `low`; override with `--model` and `--effort`.
 The default profiles are Codex single/team; other systems are explicit connections.
-Keep these equal when comparing orchestration. `--agent-seconds` is an aggregate
-upper bound on agent invocation time, **not a token or dollar cap**. The single agent
-receives the whole allocation; each of two concurrent analysts receives 1/6, and the
-coordinator receives 2/3. Concurrency between trials can add resource contention;
+Keep these equal when comparing orchestration. `--hard-timeout-seconds` defaults to
+3600 seconds and is an emergency wall-clock limit for active trial work, including
+agent tools and optional declared execution. It is **not a grading deadline, token
+cap, or dollar cap**. There are no short per-role allocations: concurrent analysts
+and the coordinator share the remaining wall-clock allowance. Setup, verification,
+and bounded cleanup retain separate infrastructure limits. Adjust the safety limit
+for the workload and host; 3600 seconds is a configurable starting point, not a
+claim that every normal task finishes within an hour.
+
+Elapsed time is measured, not compared with a short pass/fail target. The independent
+grader determines correctness. A timeout without a grade is `timed_out`; a grade
+that is available is preserved, with the termination reason recorded separately.
+Reports include all trials in the overall success and timeout rates, and retain
+observed time and partial/unknown token usage. Aggregate agent invocation time
+excludes declared execution and is the sum of worker durations, not parallel wall
+time. Connected systems without worker timing evidence report it as unknown.
+Harness retries remain disabled; inner retry/recovery evidence stays in agent logs.
+Tasks that require a real deadline must state and grade it explicitly; the safety
+limit does not add such a requirement to ordinary tasks.
+
+`--agent-seconds` is a deprecated alias for the safety limit, with a warning; its
+old aggregate-budget semantics and role fractions no longer apply. Old experiment
+configurations remain recorded in their plans. Compare runs with matching timing
+policies and safety limits; historical commands in `docs/VALIDATION.md` describe
+the old implementation.
+
+Concurrency between trials can add resource contention;
 use `--concurrency 1` for careful latency comparisons. A two-attempt result is only
 an initial observation, not a statistically reliable ranking.
 
@@ -141,7 +164,7 @@ their own model tools and are explicitly trusted host code, not a sandboxed plug
 API tasks expose the same optional `pocket-python-v1` execution transport to all
 configurations: the agent explicitly authors `output/execute.json` with
 `{"script":"src/any_name.py"}`. After its final response, the adapter runs that
-program once as the task's unprivileged user, within the remaining aggregate time.
+program once as the task's unprivileged user, within the remaining wall-clock safety allowance.
 No source filename is guessed, no answer is supplied, and internal structural
 checks never execute API operations. Alternatively, an agent can call the service
 directly and omit the manifest. The final private grader and trusted service audit

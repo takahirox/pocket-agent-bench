@@ -2,7 +2,6 @@ import argparse
 import asyncio
 import hashlib
 import json
-import math
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -12,6 +11,7 @@ from pocket_bench import __version__
 from pocket_bench.report import generate
 from pocket_bench.suite import build
 from pocket_bench.suites import SUITES, select
+from pocket_bench.timing import hard_timeout_seconds
 
 
 async def run_job(args):
@@ -22,16 +22,11 @@ async def run_job(args):
     suite_name = getattr(args, "suite", "regression")
     specs, selection = select(root, suite_name, args.tasks)
     args.attempts = args.attempts if args.attempts is not None else SUITES[suite_name]["attempts"]
-    args.agent_seconds = (
-        args.agent_seconds if args.agent_seconds is not None else SUITES[suite_name]["seconds"]
+    args.hard_timeout_seconds = hard_timeout_seconds(
+        getattr(args, "hard_timeout_seconds", None), getattr(args, "agent_seconds", None)
     )
-    if (
-        args.attempts < 1
-        or args.concurrency < 1
-        or not math.isfinite(args.agent_seconds)
-        or args.agent_seconds <= 0
-    ):
-        raise ValueError("Attempts, concurrency and finite agent-seconds must be positive")
+    if args.attempts < 1 or args.concurrency < 1:
+        raise ValueError("Attempts and concurrency must be positive")
     if any(s.get("live_web") for s in specs) and not getattr(args, "allow_live_web", False):
         raise ValueError("Live-web tasks require --allow-live-web; or select browser-release only")
     build(root)
@@ -55,7 +50,7 @@ async def run_job(args):
     agents = []
     for name in profiles:
         if name in ("oracle", "nop"):
-            agents.append({"name": name})
+            agents.append({"name": name, "override_timeout_sec": args.hard_timeout_seconds})
         elif name in connections:
             agents.append(
                 {
@@ -65,11 +60,11 @@ async def run_job(args):
                         "profile_file": str(Path(args.profile_file).resolve()),
                         "profile_name": name,
                         "allow_host_controller": args.allow_host_controller,
-                        "agent_seconds": args.agent_seconds,
+                        "hard_timeout_seconds": args.hard_timeout_seconds,
                         "effort": connections[name].get("effort", args.effort),
                         "profile_sha256": profile_metadata[name]["sha256"],
                     },
-                    "override_timeout_sec": args.agent_seconds + 90,
+                    "override_timeout_sec": args.hard_timeout_seconds + 90,
                 }
             )
         elif name in ("codex-single", "codex-team"):
@@ -80,9 +75,9 @@ async def run_job(args):
                     "kwargs": {
                         "mode": "team" if name.endswith("team") else "single",
                         "effort": args.effort,
-                        "agent_seconds": args.agent_seconds,
+                        "hard_timeout_seconds": args.hard_timeout_seconds,
                     },
-                    "override_timeout_sec": args.agent_seconds + 30,
+                    "override_timeout_sec": args.hard_timeout_seconds + 30,
                 }
             )
         else:
@@ -132,6 +127,7 @@ async def run_job(args):
                         Path(__file__).with_name(n).read_bytes()
                         for n in (
                             "agents.py",
+                            "timing.py",
                             "boundary_probe.py",
                             "sandbox_probe.py",
                             "codex_policy.py",
@@ -147,6 +143,11 @@ async def run_job(args):
                 "profiles": profiles,
                 "profile_metadata": profile_metadata,
                 "attempts": args.attempts,
+                "timing_policy": {
+                    "kind": "wall-clock-safety-v1",
+                    "hard_timeout_seconds": args.hard_timeout_seconds,
+                    "max_retries": 0,
+                },
                 "tasks": specs,
                 "public_instructions": {
                     s["id"]: (root / "tasks" / s["id"] / "instruction.md").read_text()
@@ -155,9 +156,9 @@ async def run_job(args):
                 "configuration": config.model_dump(mode="json"),
                 "suite": selection,
                 "evaluation_protocol": {
-                    "version": "1.0",
-                    "budget_basis": "aggregate-agent-seconds",
-                    "agent_seconds": args.agent_seconds,
+                    "version": "1.1",
+                    "budget_basis": "wall-clock-safety-v1",
+                    "hard_timeout_seconds": args.hard_timeout_seconds,
                     "attempts": args.attempts,
                     "trial_concurrency": args.concurrency,
                     "token_cap": None,
@@ -185,10 +186,10 @@ async def run_job(args):
                 {
                     "suite": selection,
                     "trials": len(specs) * len(profiles) * args.attempts,
-                    "maximum_agent_seconds": len(specs)
+                    "maximum_active_trial_wall_seconds": len(specs)
                     * len(profiles)
                     * args.attempts
-                    * args.agent_seconds,
+                    * args.hard_timeout_seconds,
                 }
             )
         )
@@ -274,11 +275,16 @@ def main():
         help="Default: regression 2, capability-smoke 1, other suites 10",
     )
     r.add_argument("--concurrency", type=int, default=1)
-    r.add_argument(
+    limits = r.add_mutually_exclusive_group()
+    limits.add_argument(
+        "--hard-timeout-seconds",
+        type=float,
+        help="Emergency wall-clock limit per trial (default: 3600); not a grading deadline",
+    )
+    limits.add_argument(
         "--agent-seconds",
         type=float,
-        default=None,
-        help="Aggregate time budget; suite default if omitted",
+        help="Deprecated alias for --hard-timeout-seconds; no aggregate role allocation",
     )
     report = sub.add_parser("report")
     report.add_argument("jobs", nargs="+", type=Path)
@@ -324,15 +330,13 @@ def main():
     elif a.command == "report":
         print(generate(a.jobs, a.output))
     else:
-        if (
-            (a.attempts is not None and a.attempts < 1)
-            or a.concurrency < 1
-            or (
-                a.agent_seconds is not None
-                and (not math.isfinite(a.agent_seconds) or a.agent_seconds <= 0)
-            )
-        ):
-            p.error("attempts, concurrency and agent-seconds must be positive")
+        if (a.attempts is not None and a.attempts < 1) or a.concurrency < 1:
+            p.error("attempts and concurrency must be positive")
+        try:
+            a.hard_timeout_seconds = hard_timeout_seconds(a.hard_timeout_seconds, a.agent_seconds)
+            a.agent_seconds = None  # Alias resolved once, before run_job validates direct callers.
+        except ValueError as exc:
+            p.error(str(exc))
         asyncio.run(run_job(a))
     return 0
 

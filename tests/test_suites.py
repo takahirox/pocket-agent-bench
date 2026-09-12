@@ -52,7 +52,7 @@ def args(root, **kw):
         suite="capability",
         tasks=None,
         attempts=None,
-        agent_seconds=None,
+        hard_timeout_seconds=None,
         profiles="oracle,nop",
         concurrency=1,
         model="fixture-model",
@@ -77,7 +77,7 @@ def test_plan_only_no_docker_or_model_and_suite_defaults(tmp_path, monkeypatch):
     asyncio.run(run_job(args(tmp_path)))
     plan = json.loads((tmp_path / "results/plans/plan.json").read_text())
     assert plan["attempts"] == 10
-    assert plan["evaluation_protocol"]["agent_seconds"] == 600
+    assert plan["evaluation_protocol"]["hard_timeout_seconds"] == 3600
     assert plan["suite"]["tasks"] == 5
     assert len(plan["configuration"]["tasks"]) == 5
     assert not (tmp_path / "results/jobs/plan").exists()
@@ -94,7 +94,7 @@ def test_live_gate_precedes_build(tmp_path):
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), 0, -1])
 def test_invalid_budget_rejected_before_build(tmp_path, value):
     options = args(tmp_path)
-    options.agent_seconds = value
+    options.hard_timeout_seconds = value
     with pytest.raises(ValueError, match="positive"):
         asyncio.run(run_job(options))
     assert not (tmp_path / "tasks").exists()
@@ -154,7 +154,24 @@ def test_smoke_plan_defaults_overrides_and_directional_label(
     asyncio.run(run_job(options))
     plan = json.loads((tmp_path / "results/plans/plan.json").read_text())
     assert plan["attempts"] == expected
-    assert plan["evaluation_protocol"]["agent_seconds"] == 600
+    assert plan["evaluation_protocol"]["hard_timeout_seconds"] == 3600
     assert plan["evaluation_protocol"]["directional_only"] is True
     assert plan["suite"]["directional_only"] is True
     assert len(plan["configuration"]["tasks"]) == 3
+
+
+def test_all_suites_share_main_safety_default_and_keep_repetition_defaults(tmp_path):
+    root = tmp_path
+    (root / "suite").mkdir()
+    shutil.copy(ROOT / "suite/catalog.json", root / "suite/catalog.json")
+    for name, spec in SUITES.items():
+        options = args(root)
+        options.name = "safety-" + name
+        options.suite = name
+        options.allow_live_web = True
+        asyncio.run(run_job(options))
+        plan = json.loads((root / "results/plans" / (options.name + ".json")).read_text())
+        assert plan["timing_policy"]["hard_timeout_seconds"] == 3600
+        assert plan["evaluation_protocol"]["budget_basis"] == "wall-clock-safety-v1"
+        assert plan["attempts"] == spec["attempts"]
+        assert "agent_seconds" not in plan["evaluation_protocol"]

@@ -15,19 +15,28 @@ from pathlib import Path
 from harbor.agents.base import BaseAgent
 
 from pocket_bench.codex_policy import permission_args
+from pocket_bench.timing import hard_timeout_seconds as resolve_timeout
 
 
 class CodexAgent(BaseAgent):
     command_policy = "workspace-write"
 
-    def __init__(self, *args, mode="single", effort="low", agent_seconds=180, **kwargs):
+    def __init__(
+        self,
+        *args,
+        mode="single",
+        effort="low",
+        hard_timeout_seconds=None,
+        agent_seconds=None,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         if mode not in ("single", "team"):
             raise ValueError("mode must be single or team")
-        self.mode, self.effort, self.agent_seconds = mode, effort, float(agent_seconds)
-        if self.agent_seconds <= 0:
-            raise ValueError("agent_seconds must be positive")
+        self.mode, self.effort = mode, effort
+        self.hard_timeout_seconds = resolve_timeout(hard_timeout_seconds, agent_seconds)
         self.events = []
+        self.termination_reason = None
 
     @staticmethod
     def name():
@@ -58,7 +67,7 @@ class CodexAgent(BaseAgent):
             raise RuntimeError(
                 "Isolation preflight failed: " + (probe.stderr or probe.stdout or "unknown")
             )
-        for name in ("sandbox_probe.py", "codex_policy.py", "execution.py"):
+        for name in ("sandbox_probe.py", "codex_policy.py", "execution.py", "quiesce.py"):
             await environment.upload_file(Path(__file__).with_name(name), f"/opt/pocket/{name}")
         probe = await environment.exec(
             command=f"python -I /opt/pocket/sandbox_probe.py {self.command_policy}",
@@ -104,20 +113,21 @@ class CodexAgent(BaseAgent):
             prompt,
         ]
         started = time.time()
+        clock_started = time.monotonic()
         command = shlex.join(argv) + f" > /logs/agent/{role}.jsonl 2> /logs/agent/{role}.stderr"
         try:
             r = await environment.exec(
                 command=command, cwd="/app", user="agent", timeout_sec=seconds
             )
             code = r.return_code
-        except Exception as e:
+        except BaseException as e:
             code = None
             self.events.append(
                 {
                     "role": role,
                     "error": type(e).__name__,
                     "started_at": started,
-                    "duration_seconds": time.time() - started,
+                    "duration_seconds": time.monotonic() - clock_started,
                 }
             )
             raise
@@ -126,65 +136,92 @@ class CodexAgent(BaseAgent):
                 "role": role,
                 "exit_code": code,
                 "started_at": started,
-                "duration_seconds": time.time() - started,
+                "duration_seconds": time.monotonic() - clock_started,
             }
         )
+        if code == 124:
+            self.termination_reason = "hard_timeout"
+            raise TimeoutError("Agent invocation reached the hard safety timeout")
         r = await environment.exec(command=f"cat /logs/agent/{role}.txt", user="agent")
         return r.stdout or "No final message produced."
 
     async def run(self, instruction, environment, context):
+        self.started = time.monotonic()
+        self.deadline = self.started + self.hard_timeout_seconds
         try:
-            if self.mode == "team":
-                analyst_limit = self.agent_seconds / 6
-                reports = await asyncio.gather(
-                    *[
-                        self.invoke(
-                            environment,
-                            instruction
-                            + "\nYou are a read-only analyst. Inspect inputs and propose a concrete solution. Do not edit files or call APIs; only the coordinator operates services. "
-                            + focus,
-                            role,
-                            analyst_limit,
-                            True,
-                        )
-                        for role, focus in (
-                            ("analyst-data", "Focus on data and implementation."),
-                            ("analyst-check", "Focus on constraints, edge cases and verification."),
-                        )
-                    ],
-                    return_exceptions=True,
-                )
-                handoff = "\n\n".join(f"Analyst {i + 1}: {r}" for i, r in enumerate(reports))
-                await self.invoke(
-                    environment,
-                    instruction
-                    + "\n\nRead-only analyst reports (verify them yourself):\n"
-                    + handoff,
-                    "coordinator",
-                    self.agent_seconds * 2 / 3,
-                )
-            else:
-                await self.invoke(environment, instruction, "single", self.agent_seconds)
-            await self.execute_declared(environment)
+            async with asyncio.timeout(self.hard_timeout_seconds):
+                await self.run_work(instruction, environment)
+        except TimeoutError:
+            self.termination_reason = "hard_timeout"
+            raise
         finally:
-            await self.collect(environment, context)
+            self.wall_seconds = time.monotonic() - self.started
+            try:
+                result = await environment.exec(
+                    command="python -I /opt/pocket/quiesce.py", user="root", timeout_sec=5
+                )
+                if result.return_code:
+                    raise RuntimeError("Task-user process cleanup not confirmed")
+            finally:
+                await self.collect(environment, context)
+
+    def remaining(self):
+        seconds = self.deadline - time.monotonic()
+        if seconds <= 0:
+            raise TimeoutError("Hard safety timeout exhausted")
+        return seconds
+
+    async def run_work(self, instruction, environment):
+        if self.mode == "team":
+            analyst_limit = self.remaining()
+            reports = await asyncio.gather(
+                *[
+                    self.invoke(
+                        environment,
+                        instruction
+                        + "\nYou are a read-only analyst. Inspect inputs and propose a concrete solution. Do not edit files or call APIs; only the coordinator operates services. "
+                        + focus,
+                        role,
+                        analyst_limit,
+                        True,
+                    )
+                    for role, focus in (
+                        ("analyst-data", "Focus on data and implementation."),
+                        ("analyst-check", "Focus on constraints, edge cases and verification."),
+                    )
+                ],
+                return_exceptions=True,
+            )
+            handoff = "\n\n".join(f"Analyst {i + 1}: {r}" for i, r in enumerate(reports))
+            await self.invoke(
+                environment,
+                instruction + "\n\nRead-only analyst reports (verify them yourself):\n" + handoff,
+                "coordinator",
+                self.remaining(),
+            )
+        else:
+            await self.invoke(environment, instruction, "single", self.remaining())
+        await self.execute_declared(environment)
 
     async def execute_declared(self, environment):
-        remaining = max(0, self.agent_seconds - sum(e["duration_seconds"] for e in self.events))
+        remaining = self.remaining()
         started = time.time()
+        clock_started = time.monotonic()
         r = await environment.exec(
             command=f"python -I /opt/pocket/execution.py {remaining}",
             cwd="/app",
             user="agent",
             timeout_sec=max(1, remaining) + 1,
         )
+        if r.return_code == 124:
+            self.termination_reason = "hard_timeout"
         self.events.append(
             {
                 "role": "declared-execution",
                 "kind": "transport",
                 "exit_code": r.return_code,
                 "started_at": started,
-                "duration_seconds": time.time() - started,
+                "duration_seconds": time.monotonic() - clock_started,
                 "remaining_seconds": remaining,
             }
         )
@@ -209,13 +246,24 @@ class CodexAgent(BaseAgent):
         context.metadata = {
             "mode": self.mode,
             "events": self.events,
-            "agent_seconds_limit": self.agent_seconds,
-            "agent_seconds_used": sum(e["duration_seconds"] for e in self.events),
+            "timing_policy": "wall-clock-safety-v1",
+            "hard_timeout_seconds": self.hard_timeout_seconds,
+            "termination_reason": self.termination_reason,
+            "wall_seconds": getattr(self, "wall_seconds", None),
+            "aggregate_agent_seconds": sum(
+                e["duration_seconds"] for e in self.events if e.get("kind") != "transport"
+            )
+            if self.events
+            else None,
             "usage_complete": bool(usage)
             and len(usage) >= sum(e.get("kind") != "transport" for e in self.events)
-            and not any(e.get("error") for e in self.events),
+            and not any(
+                e.get("error") or e.get("exit_code", 0) != 0
+                for e in self.events
+                if e.get("kind") != "transport"
+            ),
             "cost_basis": "unknown-subscription",
-            "budget_enforcement": "per-role timeout; aggregate agent-seconds upper bound",
+            "budget_enforcement": "shared wall-clock safety timeout; no role allocation",
             "effort": self.effort,
         }
         (self.logs_dir / "events.json").write_text(json.dumps(context.metadata, indent=2))

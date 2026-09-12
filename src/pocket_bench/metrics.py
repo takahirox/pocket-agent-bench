@@ -33,7 +33,10 @@ def uncertainty(rows, *, draws=1000):
     }
     if len({(r.get("job"), r.get("condition")) for r in rows}) > 1:
         result["interval_reason"] = "mixed-experiment-conditions"
-    elif any(r["status"] == "unscorable" or r.get("evaluation_kind") == "regrade" for r in rows):
+    elif any(
+        r["status"] in ("unscorable", "timed_out") or r.get("evaluation_kind") == "regrade"
+        for r in rows
+    ):
         result["interval_reason"] = "unscorable-or-regraded-evidence"
     elif len(tasks) < 5 or result["minimum_attempts"] < 5:
         result["interval_reason"] = "requires-at-least-5-tasks-and-5-attempts-per-task"
@@ -92,7 +95,11 @@ def condition_identity(row):
     return {
         "model": row.get("model") or config.get("model_name"),
         "effort": kwargs.get("effort", row.get("metadata", {}).get("effort")),
-        "agent_seconds": kwargs.get("agent_seconds", row.get("protocol", {}).get("agent_seconds")),
+        "time_limit_seconds": (
+            kwargs.get("hard_timeout_seconds", row.get("protocol", {}).get("hard_timeout_seconds"))
+            if row.get("protocol", {}).get("budget_basis") == "wall-clock-safety-v1"
+            else kwargs.get("agent_seconds", row.get("protocol", {}).get("agent_seconds"))
+        ),
         "budget_basis": row.get("protocol", {}).get("budget_basis"),
         "concurrency": row.get("protocol", {}).get("trial_concurrency"),
         "runtime": (row.get("provenance", {}).get("runtime") or {}).get("image_id"),
@@ -121,7 +128,10 @@ def comparisons(rows):
                 reasons = []
                 if len(hashes) != 1 or None in hashes:
                     reasons.append("task-definition-different-or-unknown")
-                if any(r["status"] == "unscorable" or r.get("invalidation") for r in evidence):
+                if any(
+                    r["status"] in ("unscorable", "timed_out") or r.get("invalidation")
+                    for r in evidence
+                ):
                     reasons.append("unscorable-or-invalidated")
                 if any(r.get("evaluation_kind") == "regrade" for r in evidence):
                     reasons.append("regrade-is-not-an-independent-run")

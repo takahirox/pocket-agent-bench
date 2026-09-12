@@ -89,8 +89,23 @@ def normalize(job_path):
                 "exception_type": "MissingTrialResult",
                 "exception_message": "Trial did not produce a result; see job log.",
             }
-        if stage == "agent_timeout" and status == "unscorable":
-            status = "failure"
+        grade_status = status
+        termination = metadata.get("termination_reason")
+        if stage == "agent_timeout" and not termination:
+            termination = (
+                "hard_timeout"
+                if metadata.get("timing_policy") == "wall-clock-safety-v1"
+                or kwargs.get("hard_timeout_seconds") is not None
+                or plan.get("timing_policy", {}).get("kind") == "wall-clock-safety-v1"
+                else "legacy_timeout"
+            )
+        if not termination and metadata.get("details", {}).get("termination") in (
+            "deadline",
+            "deadline_before_invocation",
+        ):
+            termination = "legacy_timeout"
+        if termination in ("hard_timeout", "legacy_timeout") and status == "unscorable":
+            status = "timed_out"
         outputs = {}
         for p in sorted((trial / "agent").glob("*")) if (trial / "agent").exists() else []:
             if p.is_file() and p.suffix in (
@@ -116,6 +131,9 @@ def normalize(job_path):
                 "category": spec.get("category", "unknown"),
                 "tags": spec.get("tags", []),
                 "status": status,
+                "grade_status": grade_status,
+                "termination_reason": termination,
+                "aggregate_agent_seconds": metadata.get("aggregate_agent_seconds"),
                 "agent": agent_name,
                 "mode": mode,
                 "model": (r.get("agent_info", {}).get("model_info") or {}).get("name"),
@@ -174,6 +192,9 @@ def normalize(job_path):
                         "category": spec["category"],
                         "tags": spec["tags"],
                         "status": "unscorable",
+                        "grade_status": "unscorable",
+                        "termination_reason": None,
+                        "aggregate_agent_seconds": None,
                         "agent": agent_name,
                         "mode": mode,
                         "condition": profile if identity else agent_name + "/" + mode,
@@ -214,7 +235,11 @@ def normalize(job_path):
         r["browser_required"] = bool(spec.get("browser"))
         r["task_fingerprint"] = selection.get("task_fingerprints", {}).get(r["task"])
         r["protocol"] = plan.get("evaluation_protocol", {})
-        r["agent_seconds"] = r.get("metadata", {}).get("agent_seconds_used")
+        r["agent_seconds"] = (
+            r.get("aggregate_agent_seconds")
+            if r.get("metadata", {}).get("timing_policy") == "wall-clock-safety-v1"
+            else r.get("metadata", {}).get("agent_seconds_used")
+        )
         evidence = r.get("service_evidence") or {}
         r["source_snapshot_sha256"] = (evidence.get("live_snapshot") or {}).get("sha256")
         if "attempts" in evidence:
@@ -231,13 +256,16 @@ def normalize(job_path):
             if r["status"] == "success"
             else "infrastructure-or-grader"
             if r["status"] == "unscorable"
+            else "safety-timeout"
+            if r.get("termination_reason") == "hard_timeout"
             else "budget-exhausted"
-            if stage == "agent_timeout"
+            if stage == "agent_timeout" or r.get("termination_reason") == "legacy_timeout"
             else "correctness-or-delivery"
         )
         r["instruction"] = plan.get("public_instructions", {}).get(r["task"], r["instruction"])
         r["provenance"] = {
-            k: plan.get(k) for k in ("version", "adapter_sha256", "runtime", "suite")
+            k: plan.get(k)
+            for k in ("version", "adapter_sha256", "runtime", "suite", "timing_policy")
         }
         r["cohort"] = cohort(r)
     if invalid:
@@ -248,6 +276,8 @@ def normalize(job_path):
                 continue
             r["original_status"] = r["status"]
             r["status"] = "unscorable"
+            r["original_grade_status"] = r["grade_status"]
+            r["grade_status"] = "unscorable"
             r["invalidation"] = invalid
             r["failure_category"] = "invalidated"
             r["exception"] = {"type": "InvalidatedEvaluation", "message": invalid["reason"]}
@@ -269,7 +299,22 @@ def summarize(rows):
         usage[f"known_{key}_trials"] = len(known)
     result = {
         "total": n,
-        **{k: counts[k] for k in ("success", "failure", "unscorable")},
+        **{k: counts[k] for k in ("success", "failure", "unscorable", "timed_out")},
+        "timeout_trials": sum(
+            r.get("termination_reason") in ("hard_timeout", "legacy_timeout")
+            or r["status"] == "timed_out"
+            for r in rows
+        ),
+        "timeout_rate_all": sum(
+            r.get("termination_reason") in ("hard_timeout", "legacy_timeout")
+            or r["status"] == "timed_out"
+            for r in rows
+        )
+        / n
+        if n
+        else None,
+        "total_observed_seconds": sum(times) if times else None,
+        "known_time_trials": len(times),
         "success_rate_all": counts["success"] / n if n else None,
         "success_rate_scored": counts["success"] / scored if scored else None,
         "median_seconds": statistics.median(times) if times else None,

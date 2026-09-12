@@ -68,7 +68,7 @@ implementations of checks, not independent human authorship or certification.
 API tasks offer a public opt-in execution manifest to every configuration:
 `output/execute.json` containing exactly `{"script":"src/any_name.py"}`. It runs
 the explicitly declared agent-authored program once, as uid 1000 in the disposable
-task, after the final candidate is available and within remaining aggregate time.
+task, after the final candidate is available and within the remaining wall-clock safety allowance.
 Missing manifests never cause guessed script execution. Invalid/missing/out-of-src
 or symlinked targets are rejected. Smoke checks parse all Python sources and validate
 the declaration but never run it. Execution exit status/stdout/stderr are retained;

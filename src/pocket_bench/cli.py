@@ -10,6 +10,7 @@ from pathlib import Path
 from pocket_bench import __version__
 from pocket_bench.report import generate
 from pocket_bench.suite import build, catalog
+from pocket_bench.timing import hard_timeout_seconds
 
 
 async def run_job(args):
@@ -45,7 +46,7 @@ async def run_job(args):
     agents = []
     for name in profiles:
         if name in ("oracle", "nop"):
-            agents.append({"name": name})
+            agents.append({"name": name, "override_timeout_sec": args.hard_timeout_seconds})
         elif name in connections:
             agents.append(
                 {
@@ -55,11 +56,11 @@ async def run_job(args):
                         "profile_file": str(Path(args.profile_file).resolve()),
                         "profile_name": name,
                         "allow_host_controller": args.allow_host_controller,
-                        "agent_seconds": args.agent_seconds,
+                        "hard_timeout_seconds": args.hard_timeout_seconds,
                         "effort": args.effort,
                         "profile_sha256": profile_metadata[name]["sha256"],
                     },
-                    "override_timeout_sec": args.agent_seconds + 90,
+                    "override_timeout_sec": args.hard_timeout_seconds + 90,
                 }
             )
         elif name in ("codex-single", "codex-team"):
@@ -70,9 +71,9 @@ async def run_job(args):
                     "kwargs": {
                         "mode": "team" if name.endswith("team") else "single",
                         "effort": args.effort,
-                        "agent_seconds": args.agent_seconds,
+                        "hard_timeout_seconds": args.hard_timeout_seconds,
                     },
-                    "override_timeout_sec": args.agent_seconds + 30,
+                    "override_timeout_sec": args.hard_timeout_seconds + 30,
                 }
             )
         else:
@@ -114,6 +115,7 @@ async def run_job(args):
                         Path(__file__).with_name(n).read_bytes()
                         for n in (
                             "agents.py",
+                            "timing.py",
                             "boundary_probe.py",
                             "sandbox_probe.py",
                             "codex_policy.py",
@@ -129,6 +131,11 @@ async def run_job(args):
                 "profiles": profiles,
                 "profile_metadata": profile_metadata,
                 "attempts": args.attempts,
+                "timing_policy": {
+                    "kind": "wall-clock-safety-v1",
+                    "hard_timeout_seconds": args.hard_timeout_seconds,
+                    "max_retries": 0,
+                },
                 "tasks": specs,
                 "public_instructions": {
                     s["id"]: (root / "tasks" / s["id"] / "instruction.md").read_text()
@@ -209,7 +216,17 @@ def main():
     r.add_argument("--effort", default="low")
     r.add_argument("--attempts", type=int, default=2)
     r.add_argument("--concurrency", type=int, default=1)
-    r.add_argument("--agent-seconds", type=float, default=180)
+    limits = r.add_mutually_exclusive_group()
+    limits.add_argument(
+        "--hard-timeout-seconds",
+        type=float,
+        help="Emergency wall-clock limit per trial (default: 3600); not a grading deadline",
+    )
+    limits.add_argument(
+        "--agent-seconds",
+        type=float,
+        help="Deprecated alias for --hard-timeout-seconds; no aggregate role allocation",
+    )
     report = sub.add_parser("report")
     report.add_argument("jobs", nargs="+", type=Path)
     report.add_argument("--output", type=Path, default=Path("results/report"))
@@ -254,8 +271,12 @@ def main():
     elif a.command == "report":
         print(generate(a.jobs, a.output))
     else:
-        if a.attempts < 1 or a.concurrency < 1 or a.agent_seconds <= 0:
-            p.error("attempts, concurrency and agent-seconds must be positive")
+        if a.attempts < 1 or a.concurrency < 1:
+            p.error("attempts and concurrency must be positive")
+        try:
+            a.hard_timeout_seconds = hard_timeout_seconds(a.hard_timeout_seconds, a.agent_seconds)
+        except ValueError as exc:
+            p.error(str(exc))
         asyncio.run(run_job(a))
     return 0
 

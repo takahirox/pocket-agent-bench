@@ -24,7 +24,10 @@ def test_request_allowance_excludes_setup_and_return_reserve(tmp_path, monkeypat
     monkeypatch.setattr(connected.time, "monotonic", lambda: clock[0])
     profile = configuration(tmp_path, input="request", argv=["fixture", "{request}"])
     agent = connected.ConnectedAgent(
-        logs_dir=tmp_path / "logs", profile_file=profile, profile_name="example", agent_seconds=180
+        logs_dir=tmp_path / "logs",
+        profile_file=profile,
+        profile_name="example",
+        hard_timeout_seconds=180,
     )
     agent.logs_dir.mkdir()
     environment = DelayedEnvironment()
@@ -95,7 +98,7 @@ def test_timeout_retains_reason_and_marks_observed_usage_partial(tmp_path):
         logs_dir=tmp_path, profile_file=configuration(tmp_path), profile_name="example"
     )
     context = SimpleNamespace()
-    with pytest.raises(RuntimeError, match="Agent connection"):
+    with pytest.raises(TimeoutError, match="Hard safety timeout"):
         asyncio.run(agent.run("fixture", TimedOut(), context))
     assert context.metadata["details"]["termination"] == "deadline"
     assert context.metadata["details"]["cli_exit_code"] == 124

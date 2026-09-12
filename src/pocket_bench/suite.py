@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 
 from pocket_bench.execution import CONTRACT
+from pocket_bench.timing import DEFAULT_HARD_TIMEOUT_SECONDS
 
 
 def catalog(root):
@@ -48,7 +49,7 @@ def build(root):
                 f"{k} = {json.dumps(v) if not isinstance(v, bool) else str(v).lower()}"
                 for k, v in metadata.items()
             )
-            + '\n[agent]\nuser = "agent"\ntimeout_sec = 240.0\n'
+            + f'\n[agent]\nuser = "agent"\ntimeout_sec = {DEFAULT_HARD_TIMEOUT_SECONDS + 90}\n'
             + '[verifier]\nuser = "root"\ntimeout_sec = 45.0\nenvironment_mode = "separate"\n[verifier.environment]\nnetwork_mode = "public"\ncpus = 2\nmemory_mb = 2048\n'
             + '[environment]\n# Egress is enforced by the internal Compose network and model-only proxy.\nnetwork_mode = "public"\ncpus = 2\nmemory_mb = 2048\nbuild_timeout_sec = 600.0\n'
         )

@@ -5,7 +5,7 @@ Optional execution transport (pocket-python-v1), identical for every configurati
 You may perform the API workflow directly, OR author a Python program under src/
 and output/execute.json containing exactly {"script":"src/your_program.py"}.
 If declared, after your final response the harness runs that program ONCE in /app
-as the unprivileged agent, using the remaining aggregate time budget. It must perform
+as the unprivileged agent, using the remaining wall-clock safety allowance. It must perform
 the requested operations and write output/result.json itself. Python's standard
 library is available. The harness does not infer a program or supply an answer.
 Do not both perform state-changing API calls now and declare a program that repeats

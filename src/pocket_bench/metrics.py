@@ -89,17 +89,12 @@ def efficiency(rows):
     return output
 
 
-def condition_identity(row):
+def condition_identity(row, *, include_safety_limit=False):
     config = row.get("agent_config", {})
     kwargs = config.get("kwargs", {})
-    return {
+    identity = {
         "model": row.get("model") or config.get("model_name"),
         "effort": kwargs.get("effort", row.get("metadata", {}).get("effort")),
-        "time_limit_seconds": (
-            kwargs.get("hard_timeout_seconds", row.get("protocol", {}).get("hard_timeout_seconds"))
-            if row.get("protocol", {}).get("budget_basis") == "wall-clock-safety-v1"
-            else kwargs.get("agent_seconds", row.get("protocol", {}).get("agent_seconds"))
-        ),
         "budget_basis": row.get("protocol", {}).get("budget_basis"),
         "concurrency": row.get("protocol", {}).get("trial_concurrency"),
         "runtime": (row.get("provenance", {}).get("runtime") or {}).get("image_id"),
@@ -107,6 +102,17 @@ def condition_identity(row):
         if row.get("browser_required")
         else "not-required",
     }
+    if identity["budget_basis"] == "wall-clock-safety-v1":
+        # A guard that never fired is provenance, not an equal-compute condition.
+        if include_safety_limit:
+            identity["time_limit_seconds"] = kwargs.get(
+                "hard_timeout_seconds", row.get("protocol", {}).get("hard_timeout_seconds")
+            )
+    else:
+        identity["time_limit_seconds"] = kwargs.get(
+            "agent_seconds", row.get("protocol", {}).get("agent_seconds")
+        )
+    return identity
 
 
 def comparisons(rows):
@@ -123,7 +129,15 @@ def comparisons(rows):
             for task in common:
                 aa, bb = [r for r in a if r["task"] == task], [r for r in b if r["task"] == task]
                 evidence = aa + bb
-                identities = [condition_identity(r) for r in evidence]
+                interrupted = any(
+                    r["status"] == "timed_out"
+                    or r.get("termination_reason") in ("hard_timeout", "legacy_timeout")
+                    or r.get("failure_stage") == "agent_timeout"
+                    for r in evidence
+                )
+                identities = [
+                    condition_identity(r, include_safety_limit=interrupted) for r in evidence
+                ]
                 hashes = {r.get("task_fingerprint") or r.get("task_checksum") for r in evidence}
                 reasons = []
                 if len(hashes) != 1 or None in hashes:

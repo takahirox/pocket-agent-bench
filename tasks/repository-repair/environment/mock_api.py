@@ -14,7 +14,14 @@ def serve(mode, state_path):
 
     if mode.startswith("workflow-"):
         count = int(mode.split("-")[1])
-        state.update(committed=[], attempts={}, violations=0)
+        state.update(
+            committed=[],
+            attempts={},
+            violations=0,
+            confirmed_via_get=[],
+            confirmed_via_retry=[],
+            pending_ambiguous=None,
+        )
         jobs = [
             {"id": f"job-{i:03}", "amount": (i + 1) * 10, "approved": i % 4 != 3}
             for i in range(count)
@@ -32,6 +39,13 @@ def serve(mode, state_path):
             code, body = 200, {}
             if self.path == "/workflow" and mode.startswith("workflow-"):
                 body = {"jobs": jobs, "committed": state["committed"]}
+                # Only a read after this job's ambiguous commit, before the next
+                # POST, confirms its outcome. An initial or final bulk read cannot
+                # retroactively confirm earlier unacknowledged commits.
+                pending = state["pending_ambiguous"]
+                if pending is not None and pending in state["committed"]:
+                    state["confirmed_via_get"].append(pending)
+                    state["pending_ambiguous"] = None
             elif self.path == "/release" and mode == "browser":
                 persist()
                 self.send_response(200)
@@ -95,6 +109,9 @@ def serve(mode, state_path):
 
         def do_POST(self):
             state["requests"].append("POST " + self.path)
+            pending = state.get("pending_ambiguous")
+            if mode.startswith("workflow-"):
+                state["pending_ambiguous"] = None
             if self.path == "/commit" and mode.startswith("workflow-"):
                 code, body = 400, {"error": "invalid commit"}
                 try:
@@ -118,6 +135,10 @@ def serve(mode, state_path):
                     n = state["attempts"].get(job["id"], 0) + 1
                     state["attempts"][job["id"]] = n
                     code = 503 if n == 1 else 200
+                    if n == 1:
+                        state["pending_ambiguous"] = job["id"]
+                    elif pending == job["id"]:
+                        state["confirmed_via_retry"].append(job["id"])
                     body = {"status": "ambiguous" if n == 1 else "committed"}
                 except (ValueError, KeyError, StopIteration, TypeError, IndexError):
                     state["violations"] += 1

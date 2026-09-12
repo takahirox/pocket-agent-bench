@@ -27,6 +27,7 @@ def evidence(spec):
             "committed": list(spec["expected"]["committed"]),
             "violations": 0,
             "attempts": {j: 2 for j in spec["expected"]["committed"]},
+            "confirmed_via_retry": list(spec["expected"]["committed"]),
         }
     if spec.get("api") == "browser":
         return {"requests": ["GET /release", "GET /release-data"]}

@@ -176,7 +176,14 @@ except Exception as e: print(json.dumps({'raises':type(e).__name__,'mutated':a!=
             check("no-denied-or-invalid-actions", api_state.get("violations") == 0)
             check(
                 "recovered-ambiguous-commits",
-                all(2 <= api_state.get("attempts", {}).get(job, 0) <= 3 for job in wanted),
+                all(
+                    1 <= api_state.get("attempts", {}).get(job, 0) <= 3
+                    and (
+                        job in api_state.get("confirmed_via_get", [])
+                        or job in api_state.get("confirmed_via_retry", [])
+                    )
+                    for job in wanted
+                ),
             )
             first_commit = next(
                 (i for i, request in enumerate(requests) if request == "POST /commit"),

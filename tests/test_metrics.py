@@ -144,14 +144,20 @@ def test_browser_version_must_be_known_and_equal():
     assert comparisons([a, b])[0]["blocked_reasons"]
 
 
-def test_safety_policy_and_limit_gate_matched_comparisons():
+def test_unused_safety_limit_does_not_gate_matched_comparisons():
     a, b = row(), row(job="b", status="failure")
     for sample in (a, b):
         sample["agent_config"]["kwargs"] = {"effort": "low", "hard_timeout_seconds": 3600}
         sample["protocol"] = {"budget_basis": "wall-clock-safety-v1", "trial_concurrency": 1}
     assert comparisons([a, b])[0]["blocked_reasons"] == []
     b["agent_config"]["kwargs"]["hard_timeout_seconds"] = 7200
+    b["seconds"] = 500  # Observed runtime is an outcome, never an equality condition.
+    assert comparisons([a, b])[0]["blocked_reasons"] == []
+    assert comparisons([a, b])[0]["success_rate_difference"] == -1
+    b["termination_reason"] = "hard_timeout"
     assert comparisons([a, b])[0]["blocked_reasons"]
+    b["agent_config"]["kwargs"]["hard_timeout_seconds"] = 3600
+    assert comparisons([a, b])[0]["blocked_reasons"] == []
     assert comparisons([a, row(job="legacy")])[0]["blocked_reasons"]
 
 

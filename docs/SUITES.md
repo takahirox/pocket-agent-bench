@@ -103,6 +103,17 @@ evidence; that output-shape correction did not change task counts, workload data
 grading requirements. The later integration of Issue #10 replaces short aggregate
 budgets with an independent wall-clock safety limit for all suites.
 
+Capability and long-horizon version 1.2 accept either same-key POST retry or a
+subsequent GET confirming the ambiguous job before another commit (or completion).
+Both methods must confirm each job before moving on. The fixture records GET and
+retry confirmations in trusted service state; merely writing the
+expected answer or reading once at the beginning/end does not prove per-job recovery.
+The previous retry-only grading could reject valid GET-based solutions. Do not pool
+version 1.2 workflow results with version 1.1 results; old evidence without per-job GET
+or retry confirmation order cannot establish the revised per-job recovery contract.
+Existing archived controls retain
+their original versions and fingerprints.
+
 Results JSON schema 2 is generated from both new and historical job artifacts/plans
 through the normalizer. Existing standalone HTML reports remain unchanged. Legacy runs retain their original provenance and have **unknown selection
 identity**; they are not guessed to be complete regression runs. Counts are retained
@@ -112,8 +123,13 @@ Difficulty and decomposition breakdowns use the same boundary. Partial selection
 clearly labeled rather than presented as a complete-suite score.
 
 Matched task comparisons can cross suite boundaries when task definitions agree.
-They require known and equal model, effort, timing policy and safety limit (or historical aggregate budget), trial concurrency,
+They require known and equal model, effort, timing policy, trial concurrency,
 and immutable base-runtime ID (plus observed Chromium version for browser tasks), plus scorable evidence and unchanged live source snapshots.
+The safety-limit value is retained as provenance, but differing values do not block
+comparisons when neither side timed out. If any included trial timed out, known equal
+safety limits are required; ungraded timeouts still block grade comparisons. Historical
+aggregate-budget runs continue to require equal allocations and cannot be matched
+against the new safety policy. Measured runtime is never an equality condition.
 They never imply that the entire suites measure the same thing. Regraded and invalidated
 trials are not independent runs and do not receive these deltas. Agent implementations,
 prompts, tools and orchestration can differ because the subject is the complete system;
@@ -223,7 +239,7 @@ repository cannot create a genuinely held-out benchmark.
 | Mixed test scores | Suite/version/selection groups; no mixed overall rate; gated common-task deltas | metrics/report and browser checks |
 | Unbounded implementation scope | Four full suites plus a fixed development subset with concrete tasks and this acceptance map | suite selection plus all-suite controls |
 | Existing versus new features | Regression task/repetition defaults preserved; suites distinct from agent profiles; defined task intersection | CLI planning/selection tests |
-| Fair single/team comparisons | Equal recorded timing-policy/limit/model/effort/runtime conditions; parallel/sequential/mixed strata | comparison gating tests and task metadata |
+| Fair single/team comparisons | Equal recorded timing-policy/model/effort/runtime conditions; safety limits gated only on timeout; parallel/sequential/mixed strata | comparison gating tests and task metadata |
 | Undefined evaluation | Defined repetition policy, structural difficulty, bootstrap, failure/recovery and all-trial efficiency | metric edge-case tests and independent gold audits |
 
 The complete implementation is one reviewable PR; no original workload dimension is

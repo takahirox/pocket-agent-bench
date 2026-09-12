@@ -236,8 +236,10 @@ def workflow(name, count):
         "returns ordered jobs and approved amounts. Process jobs in order: POST /commit "
         "with JSON {id, amount, key}, where key equals the job id. Use at most three "
         "POST attempts per approved job. Every first commit "
-        "is applied but returns 503 (ambiguous response); retry with the SAME key. "
-        "GET /workflow reports committed jobs for recovery. Never submit denied jobs. "
+        "is applied but returns 503 (ambiguous response). Before committing another job "
+        "or finishing, confirm that job either by retrying the same POST with the SAME "
+        "key and receiving 200, or by reading GET /workflow and verifying the job is "
+        "listed as committed. Either recovery method is valid. Never submit denied jobs. "
         "Complete all approved jobs with no duplicate effects, and output "
         '{"committed": [approved IDs in order], "total": sum of approved amounts}. '
         "GET /workflow must be read before the first commit.",

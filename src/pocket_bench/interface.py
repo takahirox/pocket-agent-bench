@@ -100,6 +100,25 @@ def read_response(path):
         value = usage.get(name)
         if value is not None and (type(value) is not int or value < 0):
             raise ValueError("invalid usage count")
+    timings = result.get("timings", {})
+    if not isinstance(timings, dict):
+        raise TypeError("invalid timings")
+
+    def nonnegative(value):
+        return type(value) in (int, float) and math.isfinite(value) and value >= 0
+
+    aggregate = timings.get("aggregate_agent_seconds")
+    if aggregate is not None and not nonnegative(aggregate):
+        raise ValueError("invalid aggregate agent time")
+    events = timings.get("events", [])
+    if not isinstance(events, list) or any(
+        not isinstance(event, dict)
+        or not isinstance(event.get("role"), str)
+        or not nonnegative(event.get("started_at"))
+        or not nonnegative(event.get("duration_seconds"))
+        for event in events
+    ):
+        raise ValueError("invalid role timings")
     return result
 
 

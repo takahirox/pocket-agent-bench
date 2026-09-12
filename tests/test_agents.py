@@ -30,12 +30,12 @@ def test_native_network_and_single_session_configuration(tmp_path):
     assert cmd["user"] == "agent" and cmd["timeout_sec"] == 90
 
 
-def test_team_budget_and_handoff(tmp_path):
-    agent = CodexAgent(logs_dir=tmp_path, mode="team", agent_seconds=180)
+def test_team_shared_safety_timeout_and_handoff(tmp_path):
+    agent = CodexAgent(logs_dir=tmp_path, mode="team", hard_timeout_seconds=180)
     env, context = Environment(), SimpleNamespace()
     asyncio.run(agent.run("task", env, context))
     invocations = [c for c in env.commands if c["command"].startswith("codex exec")]
-    assert sorted(c["timeout_sec"] for c in invocations) == [30, 30, 120]
+    assert all(179 < c["timeout_sec"] <= 180 for c in invocations)
     assert sum('sandbox_mode="read-only"' in c["command"] for c in invocations) == 2
     assert "Analyst 1: analyst report" in invocations[-1]["command"]
     assert context.metadata["usage_complete"] is False
@@ -65,4 +65,4 @@ def test_native_usage_not_agent_self_report(tmp_path):
 @pytest.mark.parametrize("seconds", [0, -1])
 def test_invalid_budget(tmp_path, seconds):
     with pytest.raises(ValueError):
-        CodexAgent(logs_dir=tmp_path, agent_seconds=seconds)
+        CodexAgent(logs_dir=tmp_path, hard_timeout_seconds=seconds)

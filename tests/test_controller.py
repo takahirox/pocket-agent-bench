@@ -95,7 +95,7 @@ def test_host_cleanup_even_after_timeout_or_protocol_error(tmp_path, behavior):
         profile_file=profile,
         profile_name="example",
         allow_host_controller=True,
-        agent_seconds=0.2 if behavior == "timeout" else 3,
+        hard_timeout_seconds=0.2 if behavior == "timeout" else 3,
     )
     agent.logs_dir.mkdir()
     with pytest.raises((TimeoutError, ValueError)):

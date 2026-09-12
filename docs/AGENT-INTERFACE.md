@@ -118,3 +118,27 @@ It copies only the selected project metadata and `src`, never credentials/state.
 The user-owned pre-existing benchmark corrections were preserved separately from
 this interface work. Do not compare a newly connected run against an older task or
 runtime revision without checking the recorded provenance.
+
+## Execution timing
+
+Request `seconds` is the remaining wall-clock **safety allowance**, not a desired
+completion time or an aggregate worker budget. The default trial guard is 3600
+seconds (`--hard-timeout-seconds`). Controllers must stop within the allowance;
+mandatory cleanup has its own bounded allowance, including on timeout. Ordinary
+correctness is determined by the independent grader, not by a short runtime target.
+
+Host controllers may return optional measured timings:
+
+```json
+"timings": {
+  "aggregate_agent_seconds": 42.5,
+  "events": [{"role": "worker", "started_at": 1780000000.0, "duration_seconds": 42.5}]
+}
+```
+
+`started_at` is Unix time; durations are finite nonnegative seconds measured with
+a monotonic clock. Aggregate time sums all agent invocations, including retries and
+parallel workers, and excludes harness transport/cleanup. Omit unknown measurements;
+the harness does not infer aggregate worker time from a controller's wall duration.
+CLI connections retain native logs and report aggregate worker time as unknown.
+Token counts and their completeness remain independent of timing measurements.

@@ -1,5 +1,9 @@
 import asyncio
 import json
+import os
+import re
+import shlex
+import signal
 import subprocess
 import sys
 from pathlib import Path
@@ -9,6 +13,58 @@ import pytest
 from test_interface import Environment, configuration
 
 import pocket_bench.connected_agent as connected
+
+
+@pytest.mark.parametrize("input_mode", ["argument", "request", "stdin"])
+def test_cli_input_completes_while_transport_stdin_stays_open(tmp_path, input_mode):
+    control = tmp_path / "control"
+    control.mkdir()
+
+    def run_with_open_stdin(command):
+        read_fd, write_fd = os.pipe()
+        process = subprocess.Popen(command, shell=True, stdin=read_fd, start_new_session=True)
+        try:
+            # Keep write_fd open: inheriting this transport pipe must not prevent
+            # the client from reading its complete designated input.
+            return process.wait(timeout=3)
+        finally:
+            if process.poll() is None:
+                os.killpg(process.pid, signal.SIGKILL)
+                process.wait()
+            os.close(read_fd)
+            os.close(write_fd)
+
+    class PipeEnvironment(Environment):
+        async def upload_file(self, source, destination):
+            (control / Path(destination).name).write_bytes(Path(source).read_bytes())
+
+        async def exec(self, **kwargs):
+            command = kwargs["command"]
+            if not command.startswith("timeout "):
+                return SimpleNamespace(return_code=0)
+            # Exercise the emitted shell redirections locally; only adapt the
+            # container deadline wrapper, interpreter and absolute fixture paths.
+            command = re.sub(r"^timeout --kill-after=2 \S+ ", "", command, count=1)
+            command = command.replace("python -I -c ", shlex.quote(sys.executable) + " -I -c ")
+            command = command.replace("/home/agent/pocket/", str(control) + "/")
+            command = command.replace("/logs/agent/", str(tmp_path) + "/")
+            return SimpleNamespace(return_code=await asyncio.to_thread(run_with_open_stdin, command))
+
+    script = "import json,sys; print(json.dumps(sys.stdin.read()))"
+    agent = connected.ConnectedAgent(
+        logs_dir=tmp_path,
+        profile_file=configuration(
+            tmp_path, input=input_mode, argv=[sys.executable, "-c", script]
+        ),
+        profile_name="example",
+    )
+    response = asyncio.run(
+        agent.cli("literal prompt", PipeEnvironment(), connected.time.monotonic() + 180)
+    )
+    assert response["outcome"] == "completed"
+    assert json.loads((tmp_path / "native.jsonl").read_text()) == (
+        "literal prompt" if input_mode == "stdin" else ""
+    )
 
 
 def test_request_allowance_excludes_setup_and_return_reserve(tmp_path, monkeypatch):

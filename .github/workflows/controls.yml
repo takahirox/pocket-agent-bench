@@ -1,21 +1,43 @@
 name: Docker verifier controls
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      live_web:
+        description: Also run live docs.python.org source controls (requires upstream availability)
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
   controls:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [regression, capability, long-horizon, web]
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --frozen --extra dev
       - run: uv run python scripts/build_runtime.py
-      - run: uv run pocket-bench run --name controls --profiles oracle,nop --attempts 1 --concurrency 2
-      - run: |
-          uv run python -c 'import json; s=json.load(open("results/reports/controls/results.json"))["summary"]; assert (s["success"],s["failure"],s["unscorable"]) == (12,12,0), s'
+      - name: Run references and no-op controls without model credentials
+        env:
+          BENCH_SUITE: ${{ matrix.suite }}
+          BENCH_LIVE_WEB: ${{ inputs.live_web }}
+        run: |
+          extra=()
+          if [ "$BENCH_SUITE" = web ]; then
+            if [ "$BENCH_LIVE_WEB" = true ]; then
+              extra+=(--allow-live-web)
+            else
+              extra+=(--tasks browser-release)
+            fi
+          fi
+          uv run pocket-bench run --suite "$BENCH_SUITE" --name controls --profiles oracle,nop --attempts 1 --concurrency 2 "${extra[@]}"
+      - run: uv run python scripts/check_controls.py results/reports/controls/results.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: verifier-controls
+          name: verifier-controls-${{ matrix.suite }}
           path: results/

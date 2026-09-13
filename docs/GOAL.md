@@ -23,3 +23,7 @@ intelligence, multi-agent superiority or production readiness.
 My AI Employee's internal status is diagnostic, not the benchmark grade. Subscription usage
 has unknown monetary cost unless a documented rate is explicitly supplied. Agent self-report
 is not trusted evidence for final success or protected-state preservation.
+
+Named regression, capability, long-horizon and web workloads and their acceptance criteria
+are specified in [SUITES.md](SUITES.md). The initial acceptance above remains the historical
+release baseline; expanded suites retain independent grading and evidence requirements.

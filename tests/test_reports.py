@@ -140,3 +140,31 @@ def test_report_exports_grouped_summaries_and_provenance(tmp_path):
     report = json.loads(page.with_name("results.json").read_text())
     assert report["groups"]["category"][0]["total"] == 2
     assert "provenance" in report["trials"][0]
+
+
+def test_directional_designation_survives_normalization(tmp_path):
+    root = job(tmp_path)
+    path = root / "pocket-plan.json"
+    plan = json.loads(path.read_text())
+    plan["suite"] = {"name": "capability-smoke", "version": "1.0", "directional_only": True}
+    path.write_text(json.dumps(plan))
+    rows = normalize(root)
+    assert len(rows) == 2
+    assert all(row["directional_only"] is True for row in rows)
+    assert all(row["provenance"]["suite"]["directional_only"] is True for row in rows)
+
+
+def test_safety_timing_feeds_suite_efficiency_without_inventing_worker_time(tmp_path):
+    root = job(tmp_path)
+    path = root / "x__one/result.json"
+    result = json.loads(path.read_text())
+    result["agent_result"]["metadata"] = {
+        "timing_policy": "wall-clock-safety-v1",
+        "aggregate_agent_seconds": 720,
+        "wall_seconds": 480,
+    }
+    path.write_text(json.dumps(result))
+    assert normalize(root)[0]["agent_seconds"] == 720
+    result["agent_result"]["metadata"]["aggregate_agent_seconds"] = None
+    path.write_text(json.dumps(result))
+    assert normalize(root)[0]["agent_seconds"] is None

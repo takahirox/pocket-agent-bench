@@ -1,0 +1,29 @@
+{
+  "id": "workflow-recovery",
+  "category": "api",
+  "difficulty": "hard",
+  "decomposition": "sequential",
+  "tags": [
+    "hard",
+    "sequential"
+  ],
+  "instruction": "Use the loopback workflow service at http://127.0.0.1:8080. GET /workflow returns ordered jobs and approved amounts. Process jobs in order: POST /commit with JSON {id, amount, key}, where key equals the job id. Use at most three POST attempts per approved job. Every first commit is applied but returns 503 (ambiguous response). Before committing another job or finishing, confirm that job either by retrying the same POST with the SAME key and receiving 200, or by reading GET /workflow and verifying the job is listed as committed. Either recovery method is valid. Never submit denied jobs. Complete all approved jobs with no duplicate effects, and output {\"committed\": [approved IDs in order], \"total\": sum of approved amounts}. GET /workflow must be read before the first commit. Preserve every input file. Write output/result.json.",
+  "files": {
+    "input/api.json": "{\n  \"mode\": \"workflow-8\"\n}\n"
+  },
+  "expected": {
+    "committed": [
+      "job-000",
+      "job-001",
+      "job-002",
+      "job-004",
+      "job-005",
+      "job-006"
+    ],
+    "total": 240
+  },
+  "wrong": {},
+  "difficulty_basis": "Structural workload tier; empirical calibration is not yet claimed.",
+  "api": "workflow",
+  "workflow_count": 8
+}

@@ -292,3 +292,34 @@ no long-horizon coverage, no broad adversarial security claim, and no hard token
 cap. Subscription monetary cost is unknown, not zero. Partial token observations are
 not presented as complete totals. Regrading reuses original artifacts/usage and does
 not constitute a new independent agent execution.
+
+## Named evaluation suites (Issue #2)
+
+The implementation preserves the regression default and adds explicit capability,
+long-horizon and web workloads. Validation used oracle/no-op controls only; it made
+no model calls and is not an empirical agent ranking.
+
+| Suite | Reference successes | No-op failures | Unscorable |
+| --- | ---: | ---: | ---: |
+| regression | 12 | 12 | 0 |
+| capability | 5 | 5 | 0 |
+| long-horizon | 5 | 5 | 0 |
+| web | 2 | 2 | 0 |
+
+Targeted follow-up controls also passed for both repository tasks after adding
+independent checks of four public module APIs (4 trials), and for both web tasks
+after recording the actual browser version (4 trials). In total, 56 model-free
+Docker control trials produced their intended outcomes. The browser reference ran
+Chromium; the live reference fetched the public Python documentation and was graded
+against an independently retained service snapshot. The separate offline verifier
+remained the scoring authority.
+
+`pytest`: 179 passed. Ruff checks and generated-task rebuild equality passed.
+A real Chromium process exercised the standalone report containing 24 trials from
+three suite selections, including suite/difficulty filtering, search and trial detail.
+
+The [sanitized control summary](../examples/suite-controls-v1.json) records each
+selection fingerprint and outcome counts; full local traces were not published.
+Different selection fingerprints identify implementation revisions and are not pooled
+as a capability comparison. See [the evaluation protocol](SUITES.md) for uncertainty,
+resource accounting, failure handling and the full review acceptance map.

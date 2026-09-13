@@ -43,7 +43,7 @@ class CodexAgent(BaseAgent):
         return "pocket-codex"
 
     def version(self):
-        return "0.1.0/codex-0.144.4"
+        return "0.1.0/codex-0.153.4"
 
     async def setup(self, environment):
         auth = Path(os.environ.get("POCKET_CODEX_AUTH", str(Path.home() / ".codex/auth.json")))

@@ -6,6 +6,8 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
+from pocket_bench.metrics import cohort, comparisons, efficiency, uncertainty
+
 
 def read(path, default=None):
     try:
@@ -155,6 +157,7 @@ def normalize(job_path):
                 "instruction": spec.get("instruction", ""),
                 "artifacts": artifacts,
                 "service_evidence": read(trial / "artifacts/var/lib/pocket/state.json"),
+                "environment_evidence": read(trial / "artifacts/var/lib/pocket/environment.json"),
                 "logs": outputs,
                 "agent_config": config.get("agent", {}),
                 "human_reviewed": False,
@@ -219,11 +222,52 @@ def normalize(job_path):
                 )
     invalid = read(job_path / "pocket-invalidation.json")
     for r in rows:
+        spec = specs.get(r["task"], {})
+        selection = plan.get("suite") or {}
+        r["suite_name"] = selection.get("name", "legacy")
+        r["suite_version"] = selection.get("version")
+        r["suite_partial"] = selection.get("partial")
+        r["directional_only"] = selection.get("directional_only", False)
+        r["difficulty"] = spec.get(
+            "difficulty", "short" if r["suite_name"] == "regression" else "unknown"
+        )
+        r["decomposition"] = spec.get("decomposition", "unspecified")
+        r["browser_required"] = bool(spec.get("browser"))
+        r["task_fingerprint"] = selection.get("task_fingerprints", {}).get(r["task"])
+        r["protocol"] = plan.get("evaluation_protocol", {})
+        r["agent_seconds"] = (
+            r.get("aggregate_agent_seconds")
+            if r.get("metadata", {}).get("timing_policy") == "wall-clock-safety-v1"
+            else r.get("metadata", {}).get("agent_seconds_used")
+        )
+        evidence = r.get("service_evidence") or {}
+        r["source_snapshot_sha256"] = (evidence.get("live_snapshot") or {}).get("sha256")
+        if "attempts" in evidence:
+            r["recovery_attempts"] = sum(
+                max(0, count - 1) for count in evidence["attempts"].values()
+            )
+        elif "value_attempts" in evidence and spec.get("api") == "retry":
+            r["recovery_attempts"] = max(0, evidence["value_attempts"] - 1)
+        else:
+            r["recovery_attempts"] = None
+        stage = r.get("failure_stage")
+        r["failure_category"] = (
+            "none"
+            if r["status"] == "success"
+            else "infrastructure-or-grader"
+            if r["status"] == "unscorable"
+            else "safety-timeout"
+            if r.get("termination_reason") == "hard_timeout"
+            else "budget-exhausted"
+            if stage == "agent_timeout" or r.get("termination_reason") == "legacy_timeout"
+            else "correctness-or-delivery"
+        )
         r["instruction"] = plan.get("public_instructions", {}).get(r["task"], r["instruction"])
         r["provenance"] = {
             k: plan.get(k)
             for k in ("version", "adapter_sha256", "runtime", "suite", "timing_policy")
         }
+        r["cohort"] = cohort(r)
     if invalid:
         for r in rows:
             if invalid.get("conditions") and r["condition"] not in invalid["conditions"]:
@@ -235,6 +279,7 @@ def normalize(job_path):
             r["original_grade_status"] = r["grade_status"]
             r["grade_status"] = "unscorable"
             r["invalidation"] = invalid
+            r["failure_category"] = "invalidated"
             r["exception"] = {"type": "InvalidatedEvaluation", "message": invalid["reason"]}
     return rows
 
@@ -252,7 +297,7 @@ def summarize(rows):
         usage[f"total_{key}"] = sum(known) if len(known) == n and n and complete else None
         usage[f"observed_{key}"] = sum(known) if known else None
         usage[f"known_{key}_trials"] = len(known)
-    return {
+    result = {
         "total": n,
         **{k: counts[k] for k in ("success", "failure", "unscorable", "timed_out")},
         "timeout_trials": sum(
@@ -273,31 +318,61 @@ def summarize(rows):
         "success_rate_all": counts["success"] / n if n else None,
         "success_rate_scored": counts["success"] / scored if scored else None,
         "median_seconds": statistics.median(times) if times else None,
-        "total_cost_usd": sum(costs) if len(costs) == n and n else None,
+        "total_cost_usd": sum(costs)
+        if len(costs) == n
+        and n
+        and all(r.get("metadata", {}).get("usage_complete") is not False for r in rows)
+        else None,
         "known_cost_trials": len(costs),
         **usage,
     }
+    mixed = len({cohort(r) for r in rows}) > 1
+    result["mixed_suites_or_selections"] = mixed
+    if mixed:
+        for key in ("success_rate_all", "success_rate_scored", "median_seconds"):
+            result[key] = None
+        result["aggregation_note"] = "Counts only; compare each suite/version/selection separately"
+    else:
+        result.update(efficiency(rows))
+        result.update(uncertainty(rows))
+    return result
 
 
 def generate(job_paths, output):
     rows = [row for job in job_paths for row in normalize(job)]
     groups = {}
-    for dimension in ("condition", "category"):
+    for dimension in ("condition", "category", "difficulty", "decomposition"):
+        keys = sorted({(r["job"], r["condition"], r["cohort"], r[dimension]) for r in rows})
         groups[dimension] = [
             {
                 "job": job,
+                "condition": condition,
+                "cohort": identity,
                 dimension: value,
-                **summarize([r for r in rows if r["job"] == job and r[dimension] == value]),
+                **summarize(
+                    [
+                        r
+                        for r in rows
+                        if r["job"] == job
+                        and r["condition"] == condition
+                        and r["cohort"] == identity
+                        and r[dimension] == value
+                    ]
+                ),
             }
-            for job, value in sorted({(r["job"], r[dimension]) for r in rows})
+            for job, condition, identity, value in keys
         ]
     data = {
-        "schema_version": 1,
+        "schema_version": 2,
         "trials": rows,
         "summary": summarize(rows),
         "groups": groups,
+        "comparisons": comparisons(rows),
         "notes": [
-            "Prototype suite; not human-reviewed.",
+            "Public original workloads; structural difficulty tiers, not human-certified or empirically calibrated.",
+            "Suite/version/selection groups are separate; legacy runs have unknown selection identity.",
+            "Bootstrap intervals need >=5 tasks and >=5 attempts each; they do not establish population-wide ability.",
+            "Efficiency includes failed trials; unknown or incomplete usage is not zero.",
             "Tag groups overlap.",
             "Unknown usage and unscorable trials are never treated as zero.",
             "Regrades reuse saved candidate evidence and original agent usage; they are not new independent agent runs.",

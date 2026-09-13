@@ -1,0 +1,2380 @@
+{
+  "id": "repository-repair",
+  "category": "coding",
+  "difficulty": "hard",
+  "decomposition": "mixed",
+  "tags": [
+    "hard",
+    "mixed"
+  ],
+  "instruction": "Repair this multi-module repository to satisfy input/contract.md. The public entry point is src/solution.py:reconcile(records). Repair revisions.latest, totals.totals, pipeline.aggregate and solution.reconcile. latest returns deduplicated records sorted by id; totals aggregates non-canceled records by region; aggregate and reconcile compose both operations. Do not mutate arguments. Do not modify files under src/components. The verifier imports the entry point with src on its module search path. Preserve every input file. Deliver repaired sources.",
+  "files": {
+    "input/contract.md": "Each record has region, cents, status and version. Deduplicate by id using highest version; exclude canceled latest records; aggregate cents by region. Never mutate arguments. Return sorted region keys with integer totals.\n",
+    "src/solution.py": "from pipeline import aggregate\n\ndef reconcile(records):\n    return aggregate(records)\n",
+    "src/pipeline.py": "from revisions import latest\nfrom totals import totals\n\ndef aggregate(records):\n    return totals(latest(records))\n",
+    "src/revisions.py": "def latest(records):\n    return records\n",
+    "src/totals.py": "def totals(records):\n    return {}\n",
+    "src/components/component_000.py": "\"\"\"Unrelated historical component 0; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 1\n",
+    "src/components/component_001.py": "\"\"\"Unrelated historical component 1; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 2\n",
+    "src/components/component_002.py": "\"\"\"Unrelated historical component 2; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 3\n",
+    "src/components/component_003.py": "\"\"\"Unrelated historical component 3; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 4\n",
+    "src/components/component_004.py": "\"\"\"Unrelated historical component 4; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 5\n",
+    "src/components/component_005.py": "\"\"\"Unrelated historical component 5; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 6\n",
+    "src/components/component_006.py": "\"\"\"Unrelated historical component 6; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 7\n",
+    "src/components/component_007.py": "\"\"\"Unrelated historical component 7; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 8\n",
+    "src/components/component_008.py": "\"\"\"Unrelated historical component 8; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 9\n",
+    "src/components/component_009.py": "\"\"\"Unrelated historical component 9; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 10\n",
+    "src/components/component_010.py": "\"\"\"Unrelated historical component 10; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 11\n",
+    "src/components/component_011.py": "\"\"\"Unrelated historical component 11; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 12\n",
+    "src/components/component_012.py": "\"\"\"Unrelated historical component 12; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 13\n",
+    "src/components/component_013.py": "\"\"\"Unrelated historical component 13; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 14\n",
+    "src/components/component_014.py": "\"\"\"Unrelated historical component 14; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 15\n",
+    "src/components/component_015.py": "\"\"\"Unrelated historical component 15; preserve public interfaces.\"\"\"\ndef convert(value):\n    return value * 16\n"
+  },
+  "expected": {},
+  "difficulty_basis": "Structural workload tier; empirical calibration is not yet claimed.",
+  "function": "reconcile",
+  "cases": [
+    [
+      [],
+      {}
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 0,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 0
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 13,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 13
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 26,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 26
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 39,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 39
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 52,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 52
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 65,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 65
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 78,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 78
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 91,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 91
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 104,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 104
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 117,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 117
+      }
+    ],
+    [
+      [
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 130,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        }
+      ],
+      {
+        "east": 130
+      }
+    ],
+    [
+      [
+        {
+          "id": "y",
+          "version": 2,
+          "cents": 200,
+          "region": "east",
+          "status": "canceled"
+        },
+        {
+          "id": "y",
+          "version": 1,
+          "cents": 200,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 2,
+          "cents": 143,
+          "region": "east",
+          "status": "ok"
+        },
+        {
+          "id": "x",
+          "version": 1,
+          "cents": 999,
+          "region": "west",
+          "status": "ok"
+        }
+      ],
+      {
+        "east": 143
+      }
+    ]
+  ],
+  "solution": "def reconcile(records):\n    latest = {}\n    for record in records:\n        if record['id'] not in latest or record['version'] > latest[record['id']]['version']:\n            latest[record['id']] = record\n    result = {}\n    for record in latest.values():\n        if record['status'] != 'canceled':\n            result[record['region']] = result.get(record['region'], 0) + record['cents']\n    return dict(sorted(result.items()))\n",
+  "alternate": "def reconcile(records):\n    latest = {}\n    for record in records:\n        if record['id'] not in latest or record['version'] > latest[record['id']]['version']:\n            latest[record['id']] = record\n    result = {}\n    for record in latest.values():\n        if record['status'] != 'canceled':\n            result[record['region']] = result.get(record['region'], 0) + record['cents']\n    return dict(sorted(result.items()))\n",
+  "module_imports": true,
+  "preserve_sources": [
+    "src/components/component_000.py",
+    "src/components/component_001.py",
+    "src/components/component_002.py",
+    "src/components/component_003.py",
+    "src/components/component_004.py",
+    "src/components/component_005.py",
+    "src/components/component_006.py",
+    "src/components/component_007.py",
+    "src/components/component_008.py",
+    "src/components/component_009.py",
+    "src/components/component_010.py",
+    "src/components/component_011.py",
+    "src/components/component_012.py",
+    "src/components/component_013.py",
+    "src/components/component_014.py",
+    "src/components/component_015.py"
+  ],
+  "entry_points": [
+    {
+      "candidate": "src/solution.py",
+      "function": "reconcile",
+      "cases": [
+        [
+          [],
+          {}
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 0
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 13
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 26
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 39
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 52
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 65
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 78
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 91
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 104
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 117
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 130
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 143
+          }
+        ]
+      ]
+    },
+    {
+      "candidate": "src/pipeline.py",
+      "function": "aggregate",
+      "cases": [
+        [
+          [],
+          {}
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 0
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 13
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 26
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 39
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 52
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 65
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 78
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 91
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 104
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 117
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 130
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 143
+          }
+        ]
+      ]
+    },
+    {
+      "candidate": "src/revisions.py",
+      "function": "latest",
+      "cases": [
+        [
+          [],
+          []
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          [
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ]
+        ]
+      ]
+    },
+    {
+      "candidate": "src/totals.py",
+      "function": "totals",
+      "cases": [
+        [
+          [],
+          {}
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 0,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 200,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 13,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 213,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 26,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 226,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 39,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 239,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 52,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 252,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 65,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 265,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 78,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 278,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 91,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 291,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 104,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 304,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 117,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 317,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 130,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            }
+          ],
+          {
+            "east": 330,
+            "west": 999
+          }
+        ],
+        [
+          [
+            {
+              "id": "y",
+              "version": 2,
+              "cents": 200,
+              "region": "east",
+              "status": "canceled"
+            },
+            {
+              "id": "y",
+              "version": 1,
+              "cents": 200,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 2,
+              "cents": 143,
+              "region": "east",
+              "status": "ok"
+            },
+            {
+              "id": "x",
+              "version": 1,
+              "cents": 999,
+              "region": "west",
+              "status": "ok"
+            }
+          ],
+          {
+            "east": 343,
+            "west": 999
+          }
+        ]
+      ]
+    }
+  ],
+  "solution_files": {
+    "src/solution.py": "from pipeline import aggregate\n\ndef reconcile(records):\n    return aggregate(records)\n",
+    "src/pipeline.py": "from revisions import latest\nfrom totals import totals\n\ndef aggregate(records):\n    return totals(latest(records))\n",
+    "src/revisions.py": "def latest(records):\n    chosen = {}\n    for r in records:\n        if r['id'] not in chosen or r['version'] > chosen[r['id']]['version']:\n            chosen[r['id']] = dict(r)\n    return [chosen[k] for k in sorted(chosen)]\n",
+    "src/totals.py": "def totals(records):\n    result = {}\n    for r in records:\n        if r['status'] != 'canceled':\n            result[r['region']] = result.get(r['region'], 0) + r['cents']\n    return dict(sorted(result.items()))\n"
+  }
+}

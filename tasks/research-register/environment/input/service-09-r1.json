@@ -1,0 +1,8 @@
+{
+  "service": "service-09",
+  "revision": 1,
+  "status": "approved",
+  "owner": "team-3",
+  "retention_days": 19,
+  "launch_date": null
+}

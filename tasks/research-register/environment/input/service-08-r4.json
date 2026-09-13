@@ -1,0 +1,8 @@
+{
+  "service": "service-08",
+  "revision": 4,
+  "status": "draft",
+  "owner": "team-5",
+  "retention_days": 48,
+  "launch_date": "2027-01-15"
+}

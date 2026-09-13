@@ -9,7 +9,8 @@ from pathlib import Path
 
 from pocket_bench import __version__
 from pocket_bench.report import generate
-from pocket_bench.suite import build, catalog
+from pocket_bench.suite import build
+from pocket_bench.suites import SUITES, select
 from pocket_bench.timing import hard_timeout_seconds
 
 
@@ -18,14 +19,17 @@ async def run_job(args):
     from harbor.models.job.config import JobConfig
 
     root = Path(args.root).resolve()
+    suite_name = getattr(args, "suite", "regression")
+    specs, selection = select(root, suite_name, args.tasks)
+    args.attempts = args.attempts if args.attempts is not None else SUITES[suite_name]["attempts"]
+    args.hard_timeout_seconds = hard_timeout_seconds(
+        getattr(args, "hard_timeout_seconds", None), getattr(args, "agent_seconds", None)
+    )
+    if args.attempts < 1 or args.concurrency < 1:
+        raise ValueError("Attempts and concurrency must be positive")
+    if any(s.get("live_web") for s in specs) and not getattr(args, "allow_live_web", False):
+        raise ValueError("Live-web tasks require --allow-live-web; or select browser-release only")
     build(root)
-    specs = catalog(root)
-    if args.tasks:
-        names = set(args.tasks.split(","))
-        missing = names - {s["id"] for s in specs}
-        if missing:
-            raise ValueError(f"Unknown tasks: {sorted(missing)}")
-        specs = [s for s in specs if s["id"] in names]
     profiles = args.profiles.split(",")
     from pocket_bench.interface import load_profiles, public_profile
 
@@ -51,13 +55,13 @@ async def run_job(args):
             agents.append(
                 {
                     "import_path": "pocket_bench.connected_agent:ConnectedAgent",
-                    "model_name": args.model,
+                    "model_name": connections[name].get("model", args.model),
                     "kwargs": {
                         "profile_file": str(Path(args.profile_file).resolve()),
                         "profile_name": name,
                         "allow_host_controller": args.allow_host_controller,
                         "hard_timeout_seconds": args.hard_timeout_seconds,
-                        "effort": args.effort,
+                        "effort": connections[name].get("effort", args.effort),
                         "profile_sha256": profile_metadata[name]["sha256"],
                     },
                     "override_timeout_sec": args.hard_timeout_seconds + 90,
@@ -100,11 +104,19 @@ async def run_job(args):
             "environment": {"force_build": True},
             "agents": agents,
             "tasks": [{"path": str(root / "tasks" / s["id"])} for s in specs],
-            "artifacts": ["/app/output", "/app/src", "/app/input", "/var/lib/pocket/state.json"],
+            "artifacts": [
+                "/app/output",
+                "/app/src",
+                "/app/input",
+                "/var/lib/pocket/state.json",
+                "/var/lib/pocket/environment.json",
+            ],
         }
     )
     # Record the intended matrix before preflight so setup failures cannot disappear.
     metadata = root / "results/plans" / f"{name}.json"
+    if metadata.exists():
+        raise ValueError("Plan already exists; use a new name to preserve evidence")
     metadata.parent.mkdir(parents=True, exist_ok=True)
     metadata.write_text(
         json.dumps(
@@ -142,7 +154,23 @@ async def run_job(args):
                     for s in specs
                 },
                 "configuration": config.model_dump(mode="json"),
-                "suite": json.loads((root / "suite/manifest.json").read_text()),
+                "suite": selection,
+                "evaluation_protocol": {
+                    "version": "1.1",
+                    "timing_policy": "wall-clock-safety-v1",
+                    "hard_timeout_seconds": args.hard_timeout_seconds,
+                    "attempts": args.attempts,
+                    "trial_concurrency": args.concurrency,
+                    "token_cap": None,
+                    "dollar_cap": None,
+                    "live_web": any(s.get("live_web") for s in specs),
+                    "network_hosts": sorted({h for s in specs for h in s.get("network_hosts", [])}),
+                    "sampling": "public-fixed-original-tasks",
+                    "calibration": "structural-not-empirical",
+                    "directional_only": selection["directional_only"],
+                    "recommended_attempts": selection["recommended_attempts"],
+                    "below_recommended_attempts": args.attempts < selection["recommended_attempts"],
+                },
                 "runtime": json.loads((root / "local/runtime.json").read_text())
                 if (root / "local/runtime.json").exists()
                 else None,
@@ -151,6 +179,21 @@ async def run_job(args):
         )
         + "\n"
     )
+    if getattr(args, "plan_only", False):
+        print(f"Plan: {metadata}")
+        print(
+            json.dumps(
+                {
+                    "suite": selection,
+                    "trials": len(specs) * len(profiles) * args.attempts,
+                    "maximum_active_trial_wall_seconds": len(specs)
+                    * len(profiles)
+                    * args.attempts
+                    * args.hard_timeout_seconds,
+                }
+            )
+        )
+        return
     error = None
     try:
         manifest = json.loads(metadata.read_text())["runtime"]
@@ -204,7 +247,18 @@ def main():
     inv.add_argument("--tasks", help="Limit to comma-separated task IDs (AND with conditions)")
     r = sub.add_parser("run", help="Run a versioned experiment; consumes configured model access")
     r.add_argument("--name")
-    r.add_argument("--tasks", help="Comma-separated task IDs; default all")
+    r.add_argument("--suite", choices=tuple(SUITES), default="regression")
+    r.add_argument(
+        "--plan-only",
+        action="store_true",
+        help="Write the experiment plan; no model or Docker execution",
+    )
+    r.add_argument(
+        "--allow-live-web",
+        action="store_true",
+        help="Allow the explicitly selected live-web workload",
+    )
+    r.add_argument("--tasks", help="Comma-separated task IDs within --suite; default all members")
     r.add_argument("--profiles", default="codex-single,codex-team")
     r.add_argument("--profile-file", type=Path, help="Operator-owned pocket-agent-v1 JSON profiles")
     r.add_argument(
@@ -214,7 +268,12 @@ def main():
     )
     r.add_argument("--model", default="gpt-5.6-luna")
     r.add_argument("--effort", default="low")
-    r.add_argument("--attempts", type=int, default=2)
+    r.add_argument(
+        "--attempts",
+        type=int,
+        default=None,
+        help="Default: regression 2, capability-smoke 1, other suites 10",
+    )
     r.add_argument("--concurrency", type=int, default=1)
     limits = r.add_mutually_exclusive_group()
     limits.add_argument(
@@ -271,10 +330,11 @@ def main():
     elif a.command == "report":
         print(generate(a.jobs, a.output))
     else:
-        if a.attempts < 1 or a.concurrency < 1:
+        if (a.attempts is not None and a.attempts < 1) or a.concurrency < 1:
             p.error("attempts and concurrency must be positive")
         try:
             a.hard_timeout_seconds = hard_timeout_seconds(a.hard_timeout_seconds, a.agent_seconds)
+            a.agent_seconds = None  # Alias resolved once, before run_job validates direct callers.
         except ValueError as exc:
             p.error(str(exc))
         asyncio.run(run_job(a))

@@ -148,7 +148,7 @@ def test_unused_safety_limit_does_not_gate_matched_comparisons():
     a, b = row(), row(job="b", status="failure")
     for sample in (a, b):
         sample["agent_config"]["kwargs"] = {"effort": "low", "hard_timeout_seconds": 3600}
-        sample["protocol"] = {"budget_basis": "wall-clock-safety-v1", "trial_concurrency": 1}
+        sample["protocol"] = {"timing_policy": "wall-clock-safety-v1", "trial_concurrency": 1}
     assert comparisons([a, b])[0]["blocked_reasons"] == []
     b["agent_config"]["kwargs"]["hard_timeout_seconds"] = 7200
     b["seconds"] = 500  # Observed runtime is an outcome, never an equality condition.
@@ -179,3 +179,23 @@ def test_ungraded_timeout_keeps_denominator_and_usage_but_blocks_grade_compariso
     ]
     samples[0]["status"] = "timed_out"
     assert uncertainty(samples)["success_rate_ci95"] is None
+
+
+def test_legacy_safety_field_matches_new_timing_policy_field():
+    a, b = row(), row(job="b")
+    for sample in (a, b):
+        sample["agent_config"]["kwargs"] = {"effort": "low", "hard_timeout_seconds": 3600}
+    a["protocol"] = {"budget_basis": "wall-clock-safety-v1", "trial_concurrency": 1}
+    b["protocol"] = {"timing_policy": "wall-clock-safety-v1", "trial_concurrency": 1}
+    assert comparisons([a, b])[0]["blocked_reasons"] == []
+    b["termination_reason"] = "hard_timeout"
+    assert comparisons([a, b])[0]["blocked_reasons"] == []
+    b["agent_config"]["kwargs"]["hard_timeout_seconds"] = 7200
+    assert comparisons([a, b])[0]["blocked_reasons"]
+
+
+def test_explicit_timing_policy_takes_precedence_over_legacy_field():
+    a, b = row(), row(job="b")
+    b["protocol"]["timing_policy"] = "wall-clock-safety-v1"
+    b["agent_config"]["kwargs"]["hard_timeout_seconds"] = 3600
+    assert comparisons([a, b])[0]["blocked_reasons"]

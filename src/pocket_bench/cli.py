@@ -157,7 +157,7 @@ async def run_job(args):
                 "suite": selection,
                 "evaluation_protocol": {
                     "version": "1.1",
-                    "budget_basis": "wall-clock-safety-v1",
+                    "timing_policy": "wall-clock-safety-v1",
                     "hard_timeout_seconds": args.hard_timeout_seconds,
                     "attempts": args.attempts,
                     "trial_concurrency": args.concurrency,

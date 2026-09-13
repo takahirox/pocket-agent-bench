@@ -172,6 +172,7 @@ def test_all_suites_share_main_safety_default_and_keep_repetition_defaults(tmp_p
         asyncio.run(run_job(options))
         plan = json.loads((root / "results/plans" / (options.name + ".json")).read_text())
         assert plan["timing_policy"]["hard_timeout_seconds"] == 3600
-        assert plan["evaluation_protocol"]["budget_basis"] == "wall-clock-safety-v1"
+        assert plan["evaluation_protocol"]["timing_policy"] == "wall-clock-safety-v1"
         assert plan["attempts"] == spec["attempts"]
         assert "agent_seconds" not in plan["evaluation_protocol"]
+        assert "budget_basis" not in plan["evaluation_protocol"]

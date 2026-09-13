@@ -92,17 +92,19 @@ def efficiency(rows):
 def condition_identity(row, *, include_safety_limit=False):
     config = row.get("agent_config", {})
     kwargs = config.get("kwargs", {})
+    protocol = row.get("protocol", {})
     identity = {
         "model": row.get("model") or config.get("model_name"),
         "effort": kwargs.get("effort", row.get("metadata", {}).get("effort")),
-        "budget_basis": row.get("protocol", {}).get("budget_basis"),
+        # Older plans used budget_basis for both aggregate budgets and safety guards.
+        "timing_policy": protocol.get("timing_policy", protocol.get("budget_basis")),
         "concurrency": row.get("protocol", {}).get("trial_concurrency"),
         "runtime": (row.get("provenance", {}).get("runtime") or {}).get("image_id"),
         "browser": (row.get("environment_evidence") or {}).get("browser_version")
         if row.get("browser_required")
         else "not-required",
     }
-    if identity["budget_basis"] == "wall-clock-safety-v1":
+    if identity["timing_policy"] == "wall-clock-safety-v1":
         # A guard that never fired is provenance, not an equal-compute condition.
         if include_safety_limit:
             identity["time_limit_seconds"] = kwargs.get(

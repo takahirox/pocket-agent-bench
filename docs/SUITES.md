@@ -149,6 +149,11 @@ Different worker/tool policies are part of the system under evaluation, not hidd
 changes to the task or grader. Wider teams connect through the existing generic agent
 interface, preserving native per-role events and complete aggregate usage when available.
 
+New plans record `evaluation_protocol.timing_policy: "wall-clock-safety-v1"`.
+Readers also accept historical `budget_basis` fields, including the earlier safety
+policy spelling; this compatibility does not equate old aggregate-budget runs with
+safety-policy runs. An explicit `timing_policy` takes precedence when both exist.
+
 The timing policy is **wall-clock-safety-v1**. Concurrent analysts and the coordinator
 share the remaining trial safety allowance without fixed role fractions. Declared
 execution uses the same remaining allowance; bounded cleanup is separate. Correctness

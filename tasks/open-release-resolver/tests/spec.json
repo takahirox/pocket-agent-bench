@@ -1,0 +1,5392 @@
+{
+  "id": "open-release-resolver",
+  "category": "coding",
+  "difficulty": "open-path",
+  "decomposition": "mixed",
+  "tags": [
+    "open-path",
+    "diagnosis",
+    "integration"
+  ],
+  "difficulty_basis": "Requires empirical calibration; no multi-agent advantage claimed.",
+  "instruction": "Resolve the customer incident in input/incident.md. The checked-in repository and product records describe the supported behavior. Deliver repaired sources implementing src/solution.py:solve(request), with src on the import path. Preserve every input file and do not mutate request arguments. All documented behavior, not just the reported reproduction, must work. Any implementation strategy or source-file organization is acceptable. Python standard library only.",
+  "files": {
+    "input/incident.md": "Deployment INC-412: a valid release is rejected after adding an extension. Other customers report unnecessary upgrades and a hang on mutually dependent packages. Restore the resolver without regressing the published selection policy. Reproduction: repro.json.\n",
+    "input/repro.json": "{\n  \"catalog\": {\n    \"app\": [\n      {\n        \"version\": 1,\n        \"requires\": {\n          \"core\": [\n            1,\n            2\n          ]\n        }\n      },\n      {\n        \"version\": 2,\n        \"requires\": {\n          \"core\": [\n            2,\n            3\n          ]\n        }\n      }\n    ],\n    \"core\": [\n      {\n        \"version\": 1\n      },\n      {\n        \"version\": 2,\n        \"conflicts\": {\n          \"addon\": [\n            1,\n            1\n          ]\n        }\n      },\n      {\n        \"version\": 3,\n        \"requires\": {\n          \"app\": [\n            2,\n            2\n          ]\n        }\n      }\n    ],\n    \"addon\": [\n      {\n        \"version\": 1,\n        \"requires\": {\n          \"core\": [\n            1,\n            2\n          ]\n        }\n      }\n    ]\n  },\n  \"roots\": {\n    \"app\": 1,\n    \"addon\": 1\n  },\n  \"installed\": {\n    \"app\": 2,\n    \"core\": 3\n  }\n}\n",
+    "input/api.md": "solve receives {catalog, roots, installed?, pins?}. Catalog maps package names to release records with unique positive integer version, optional requires and conflicts (dependency name to inclusive [minimum,maximum]), and optional yanked boolean. Roots map names to minimum versions. All dependency names occur in catalog. Return {selected: {name:version}} or {error:\"unsatisfiable\"}. Empty roots are valid.\n",
+    "input/policy.md": "Select exactly the transitive closure of roots under the selected releases. A package has one version. Every requirement must hold, every conflict must be absent, and yanked releases are unavailable even if installed. Cycles are valid when constraints are jointly satisfiable. Pins require the named package to be in the closure at exactly the pinned version; they do not add roots. No valid closure means unsatisfiable.\n",
+    "input/decisions/017.md": "Approved selection policy: first minimize selected packages whose version differs from installed (newly installed packages count as changes; removals do not). Then minimize closure size. Finally maximize the version vector over all catalog names in alphabetical order, assigning zero to absent packages. Input ordering never breaks ties.\n",
+    "input/history.md": "Superseded prototype preferred newest releases greedily. Do not use that policy for production; decision 017 replaced it.\n",
+    "src/solution.py": "from resolver import resolve\ndef solve(request):\n    return resolve(request)\n",
+    "src/resolver.py": "from selection import choose\nfrom validation import acceptable\n\ndef resolve(request):\n    selected = {}\n    pending = list(request['roots'])\n    while pending:\n        name = pending.pop()\n        if name in selected:\n            continue\n        release = choose(request['catalog'][name])\n        selected[name] = release\n        pending.extend(release.get('requires', {}))\n    if not acceptable(selected, request):\n        return {'error': 'unsatisfiable'}\n    return {'selected': {n: r['version'] for n, r in selected.items()}}\n",
+    "src/selection.py": "def choose(releases):\n    return max(releases, key=lambda r: r[\"version\"])\n",
+    "src/validation.py": "def acceptable(selected, request):\n    for r in selected.values():\n        for dep, bounds in r.get('requires', {}).items():\n            if not bounds[0] <= selected[dep]['version'] <= bounds[1]:\n                return False\n    return True\n"
+  },
+  "function": "solve",
+  "module_imports": true,
+  "cases": [
+    [
+      {
+        "catalog": {
+          "app": [
+            {
+              "version": 1,
+              "requires": {
+                "core": [
+                  1,
+                  2
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "requires": {
+                "core": [
+                  2,
+                  3
+                ]
+              }
+            }
+          ],
+          "core": [
+            {
+              "version": 1
+            },
+            {
+              "version": 2,
+              "conflicts": {
+                "addon": [
+                  1,
+                  1
+                ]
+              }
+            },
+            {
+              "version": 3,
+              "requires": {
+                "app": [
+                  2,
+                  2
+                ]
+              }
+            }
+          ],
+          "addon": [
+            {
+              "version": 1,
+              "requires": {
+                "core": [
+                  1,
+                  2
+                ]
+              }
+            }
+          ]
+        },
+        "roots": {
+          "app": 1,
+          "addon": 1
+        },
+        "installed": {
+          "app": 2,
+          "core": 3
+        }
+      },
+      {
+        "selected": {
+          "addon": 1,
+          "app": 1,
+          "core": 1
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {},
+        "roots": {}
+      },
+      {
+        "selected": {}
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "amber": 1
+        },
+        "installed": {},
+        "pins": {
+          "dune": 2
+        }
+      },
+      {
+        "selected": {
+          "amber": 2,
+          "dune": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ],
+          "dune": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            }
+          ]
+        },
+        "roots": {
+          "birch": 2
+        },
+        "installed": {
+          "amber": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 3,
+          "dune": 1
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            },
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "cedar": 1
+        },
+        "installed": {
+          "amber": 1,
+          "birch": 1
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "amber": 1,
+          "cedar": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "dune": 2
+        },
+        "installed": {
+          "amber": 3,
+          "birch": 2,
+          "cedar": 1
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "amber": 2,
+          "dune": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "amber": 1
+        },
+        "installed": {
+          "amber": 1,
+          "birch": 2,
+          "cedar": 2,
+          "dune": 1
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "amber": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "birch": 2
+        },
+        "installed": {},
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "cedar": 1
+        },
+        "installed": {
+          "amber": 3
+        },
+        "pins": {
+          "dune": 2
+        }
+      },
+      {
+        "selected": {
+          "cedar": 2,
+          "dune": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "dune": 2
+        },
+        "installed": {
+          "amber": 1,
+          "birch": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "dune": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "amber": 1
+        },
+        "installed": {
+          "amber": 2,
+          "birch": 2,
+          "cedar": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "amber": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "birch": 2
+        },
+        "installed": {
+          "amber": 2,
+          "birch": 2,
+          "cedar": 2,
+          "dune": 1
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 2,
+          "cedar": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ]
+        },
+        "roots": {
+          "cedar": 1
+        },
+        "installed": {},
+        "pins": {}
+      },
+      {
+        "selected": {
+          "amber": 2,
+          "cedar": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "dune": 2
+        },
+        "installed": {
+          "amber": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "dune": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ],
+          "cedar": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ]
+        },
+        "roots": {
+          "amber": 1
+        },
+        "installed": {
+          "amber": 2,
+          "birch": 2
+        },
+        "pins": {
+          "dune": 2
+        }
+      },
+      {
+        "selected": {
+          "amber": 2,
+          "cedar": 2,
+          "dune": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "birch": 2
+        },
+        "installed": {
+          "amber": 1,
+          "birch": 3,
+          "cedar": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "cedar": 1
+        },
+        "installed": {
+          "amber": 1,
+          "birch": 2,
+          "cedar": 3,
+          "dune": 3
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "cedar": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "dune": 2
+        },
+        "installed": {},
+        "pins": {}
+      },
+      {
+        "selected": {
+          "dune": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "amber": 1
+        },
+        "installed": {
+          "amber": 3
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "amber": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "birch": 2
+        },
+        "installed": {
+          "amber": 3,
+          "birch": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "cedar": 1
+        },
+        "installed": {
+          "amber": 2,
+          "birch": 3,
+          "cedar": 1
+        },
+        "pins": {
+          "dune": 2
+        }
+      },
+      {
+        "selected": {
+          "cedar": 3,
+          "dune": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ]
+        },
+        "roots": {
+          "dune": 2
+        },
+        "installed": {
+          "amber": 2,
+          "birch": 3,
+          "cedar": 3,
+          "dune": 1
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "dune": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "amber": 1
+        },
+        "installed": {},
+        "pins": {}
+      },
+      {
+        "selected": {
+          "amber": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "birch": 2
+        },
+        "installed": {
+          "amber": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 3,
+          "dune": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "cedar": 1
+        },
+        "installed": {
+          "amber": 3,
+          "birch": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "cedar": 1
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": true
+            }
+          ]
+        },
+        "roots": {
+          "dune": 2
+        },
+        "installed": {
+          "amber": 1,
+          "birch": 3,
+          "cedar": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "dune": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "amber": 1
+        },
+        "installed": {
+          "amber": 2,
+          "birch": 1,
+          "cedar": 3,
+          "dune": 2
+        },
+        "pins": {
+          "dune": 2
+        }
+      },
+      {
+        "error": "unsatisfiable"
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "birch": 2
+        },
+        "installed": {},
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": true
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "cedar": 1
+        },
+        "installed": {
+          "amber": 3
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 2,
+          "cedar": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": true
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "dune": 2
+        },
+        "installed": {
+          "amber": 3,
+          "birch": 3
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "dune": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "amber": 1
+        },
+        "installed": {
+          "amber": 2,
+          "birch": 1,
+          "cedar": 3
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "amber": 3
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "birch": 2
+        },
+        "installed": {
+          "amber": 1,
+          "birch": 2,
+          "cedar": 2,
+          "dune": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "amber": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "cedar": 1
+        },
+        "installed": {},
+        "pins": {
+          "dune": 2
+        }
+      },
+      {
+        "selected": {
+          "birch": 3,
+          "cedar": 3,
+          "dune": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "birch": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "dune": 2
+        },
+        "installed": {
+          "amber": 1
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "dune": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            }
+          ],
+          "dune": [
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": true
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "dune": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "amber": 1
+        },
+        "installed": {
+          "amber": 2,
+          "birch": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "amber": 2
+        }
+      }
+    ],
+    [
+      {
+        "catalog": {
+          "amber": [
+            {
+              "version": 1,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "birch": [
+            {
+              "version": 1,
+              "requires": {
+                "cedar": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "cedar": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "cedar": [
+            {
+              "version": 3,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 1,
+              "requires": {
+                "amber": [
+                  1,
+                  3
+                ]
+              },
+              "conflicts": {
+                "cedar": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {},
+              "conflicts": {},
+              "yanked": false
+            }
+          ],
+          "dune": [
+            {
+              "version": 1,
+              "requires": {
+                "birch": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            },
+            {
+              "version": 3,
+              "requires": {
+                "amber": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {
+                "dune": [
+                  2,
+                  2
+                ]
+              },
+              "yanked": false
+            },
+            {
+              "version": 2,
+              "requires": {
+                "dune": [
+                  2,
+                  3
+                ]
+              },
+              "conflicts": {},
+              "yanked": false
+            }
+          ]
+        },
+        "roots": {
+          "birch": 2
+        },
+        "installed": {
+          "amber": 3,
+          "birch": 1,
+          "cedar": 2
+        },
+        "pins": {}
+      },
+      {
+        "selected": {
+          "birch": 3,
+          "cedar": 2
+        }
+      }
+    ]
+  ],
+  "solution": "import itertools\n\ndef solve(request):\n    names = sorted(request['catalog'])\n    options = [[None] + list(request['catalog'][n]) for n in names]\n    valid = []\n    for values in itertools.product(*options):\n        chosen = dict(zip(names, values))\n        if any(chosen.get(n) is None or chosen[n]['version'] < minimum for n, minimum in request['roots'].items()):\n            continue\n        if any(chosen.get(n) is None or chosen[n]['version'] != v for n, v in request.get('pins', {}).items()):\n            continue\n        if any(r is not None and r.get('yanked', False) for r in values):\n            continue\n        reachable = set(request['roots'])\n        pending = list(reachable)\n        good = True\n        while pending:\n            n = pending.pop()\n            r = chosen.get(n)\n            if r is None:\n                good = False; break\n            for dep, interval in r.get('requires', {}).items():\n                other = chosen.get(dep)\n                if other is None or not interval[0] <= other['version'] <= interval[1]:\n                    good = False; break\n                if dep not in reachable:\n                    reachable.add(dep); pending.append(dep)\n            if not good: break\n        if not good or reachable != {n for n, r in chosen.items() if r is not None}:\n            continue\n        if any(chosen.get(other) is not None and lo <= chosen[other]['version'] <= hi\n               for r in values if r is not None for other, (lo, hi) in r.get('conflicts', {}).items()):\n            continue\n        versions = {n: chosen[n]['version'] for n in sorted(reachable)}\n        changed = sum(request.get('installed', {}).get(n) != v for n, v in versions.items())\n        score = (changed, len(versions), tuple(-versions.get(n, 0) for n in names))\n        valid.append((score, versions))\n    if not valid: return {'error': 'unsatisfiable'}\n    return {'selected': min(valid, key=lambda pair: pair[0])[1]}\n",
+  "expected": {}
+}

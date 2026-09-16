@@ -1,0 +1,1 @@
+Approved: unit*quantity*active/period uses exact rational cents. Round the SUM of invoice line amounts half up. Allocate its cents to lines: floor each exact amount, distribute remaining cents by descending fractional remainder, ties by line id ascending. Do not round each line independently.

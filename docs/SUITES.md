@@ -12,6 +12,7 @@ no expanded suite is silently added to the default run.
 | capability-smoke | 3 | Ledger recovery, dependency planning, multi-file repair; directional only | 1 | 3600 |
 | capability | 5 | Multi-file repair, evidence synthesis, ledger recovery, dependency planning, stateful API recovery | 10 | 3600 |
 | long-horizon | 5 | Larger versions: 5,000 ledger events with revisions, 420 policy/noise documents, 120 dependency nodes, 120 auxiliary source modules, 48 ordered service jobs | 10 | 3600 |
+| open-path | 2 | Unknown resolver repair and billing specification reconstruction; see OPEN-PATH.md | 10 | 3600 |
 | web | 2 | JavaScript rendering and live source retrieval with trusted snapshots | 10 | 3600 |
 
 These are original public workloads, with independent deterministic grading, not

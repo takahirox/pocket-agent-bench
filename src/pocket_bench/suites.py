@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 SUITES = {
-    "open-path": {"version": "1.0", "attempts": 10},
+    "open-path": {"version": "1.1", "attempts": 10},
     "regression": {"version": "1.1", "attempts": 2},
     "capability-smoke": {"version": "1.0", "attempts": 1},
     "capability": {"version": "1.2", "attempts": 10},

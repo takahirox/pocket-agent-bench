@@ -55,6 +55,8 @@ def test_reference_agrees_with_independent_oracle_and_is_pure(spec):
         ("min(e.get('discount', 0), sum(floors))", "0"),
         ("tax = (net * line['tax_bps'] * 2 + 10000) // 20000", "tax = 0"),
         ("invoice['refunded'].add(line)", "pass"),
+        ("e['at'], e['tenant'], e['id']", "e['at'], e['tenant']"),
+        ("min(e.get('discount', 0), sum(floors))", "e.get('discount', 0)"),
     ],
 )
 def test_plausible_billing_partial_fixes_fail(tmp_path, old, new):
@@ -102,3 +104,31 @@ def test_build_keeps_private_cases_and_oracles_out_of_agent_snapshot(tmp_path):
                 if p.is_file()
             }
             assert actual == {n: t for n, t in spec["files"].items() if n.startswith(folder + "/")}
+
+
+def test_billing_allocation_uses_ids_not_original_order(tmp_path):
+    spec = SPECS[1]
+    w = workspace(tmp_path, spec)
+    # Sorting the input first is optional if the actual allocation uses ID ties.
+    alternative = spec["solution"].replace("key=lambda l: l['id']", "key=lambda l: ''")
+    (w / "src/solution.py").write_text(alternative)
+    assert grade(spec, w)["status"] == "success"
+    (w / "src/solution.py").write_text(alternative.replace("lines[i]['id']", "i"))
+    assert grade(spec, w)["status"] == "failure"
+
+
+def test_candidate_cannot_damage_inputs_during_verification(tmp_path):
+    spec = dict(SPECS[0], cases=SPECS[0]["cases"][:1])
+    w = workspace(tmp_path, spec)
+    malicious = (
+        spec["solution"]
+        + "\noriginal_solve = solve\ndef solve(request):\n    from pathlib import Path\n    Path('input/incident.md').write_text('damaged')\n    return original_solve(request)\n"
+    )
+    (w / "src/solution.py").write_text(malicious)
+    result = grade(spec, w)
+    assert result["status"] == "failure"
+    assert any(c["name"] == "case:0" and c["passed"] for c in result["checks"])
+    assert any(
+        c["name"] == "preserved-final:input/incident.md" and not c["passed"]
+        for c in result["checks"]
+    )

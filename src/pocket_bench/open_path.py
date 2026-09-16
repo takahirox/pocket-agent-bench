@@ -381,6 +381,42 @@ def billing():
             },
         ]
     )
+    # Hand-designed boundaries supplement generated combinations. The original
+    # reproduction is unchanged; these cases enforce already-public semantics.
+    for unit, discount, tax in [(1, 0, 0), (1, 1, 5000), (0, 99, 825), (10**18 + 1, 3, 825)]:
+        invoice = {
+            "tenant": "edge",
+            "id": "a-invoice",
+            "revision": 1,
+            "at": 5,
+            "kind": "invoice",
+            "discount": discount,
+            "lines": [
+                {"id": name, "unit": unit, "quantity": 1, "active": 1, "period": 2, "tax_bps": tax}
+                for name in ["z", "a"]
+            ],
+        }
+        refund = {
+            "tenant": "edge",
+            "id": "z-refund",
+            "revision": 1,
+            "at": 5,
+            "kind": "refund",
+            "invoice": "a-invoice",
+            "line_ids": ["a"],
+        }
+        requests.append({"events": [refund, invoice], "as_of": 5})
+        requests.append({"events": [invoice, refund], "as_of": 5})
+    before = {
+        "tenant": "edge",
+        "id": "0-refund",
+        "revision": 1,
+        "at": 0,
+        "kind": "refund",
+        "invoice": "absent",
+        "line_ids": ["a"],
+    }
+    requests.append({"events": [before], "as_of": 0})
     files = {
         "input/incident.md": "FIN-209: after replaying corrected invoices, balances differ across tenants "
         "and partial refunds sometimes over-credit. Repair the billing projection against the "

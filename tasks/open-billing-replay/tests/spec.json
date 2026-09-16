@@ -34145,6 +34145,403 @@
       {
         "n": 0
       }
+    ],
+    [
+      {
+        "events": [
+          {
+            "tenant": "edge",
+            "id": "z-refund",
+            "revision": 1,
+            "at": 5,
+            "kind": "refund",
+            "invoice": "a-invoice",
+            "line_ids": [
+              "a"
+            ]
+          },
+          {
+            "tenant": "edge",
+            "id": "a-invoice",
+            "revision": 1,
+            "at": 5,
+            "kind": "invoice",
+            "discount": 0,
+            "lines": [
+              {
+                "id": "z",
+                "unit": 1,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 0
+              },
+              {
+                "id": "a",
+                "unit": 1,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 0
+              }
+            ]
+          }
+        ],
+        "as_of": 5
+      },
+      {
+        "edge": 0
+      }
+    ],
+    [
+      {
+        "events": [
+          {
+            "tenant": "edge",
+            "id": "a-invoice",
+            "revision": 1,
+            "at": 5,
+            "kind": "invoice",
+            "discount": 0,
+            "lines": [
+              {
+                "id": "z",
+                "unit": 1,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 0
+              },
+              {
+                "id": "a",
+                "unit": 1,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 0
+              }
+            ]
+          },
+          {
+            "tenant": "edge",
+            "id": "z-refund",
+            "revision": 1,
+            "at": 5,
+            "kind": "refund",
+            "invoice": "a-invoice",
+            "line_ids": [
+              "a"
+            ]
+          }
+        ],
+        "as_of": 5
+      },
+      {
+        "edge": 0
+      }
+    ],
+    [
+      {
+        "events": [
+          {
+            "tenant": "edge",
+            "id": "z-refund",
+            "revision": 1,
+            "at": 5,
+            "kind": "refund",
+            "invoice": "a-invoice",
+            "line_ids": [
+              "a"
+            ]
+          },
+          {
+            "tenant": "edge",
+            "id": "a-invoice",
+            "revision": 1,
+            "at": 5,
+            "kind": "invoice",
+            "discount": 1,
+            "lines": [
+              {
+                "id": "z",
+                "unit": 1,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 5000
+              },
+              {
+                "id": "a",
+                "unit": 1,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 5000
+              }
+            ]
+          }
+        ],
+        "as_of": 5
+      },
+      {
+        "edge": 0
+      }
+    ],
+    [
+      {
+        "events": [
+          {
+            "tenant": "edge",
+            "id": "a-invoice",
+            "revision": 1,
+            "at": 5,
+            "kind": "invoice",
+            "discount": 1,
+            "lines": [
+              {
+                "id": "z",
+                "unit": 1,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 5000
+              },
+              {
+                "id": "a",
+                "unit": 1,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 5000
+              }
+            ]
+          },
+          {
+            "tenant": "edge",
+            "id": "z-refund",
+            "revision": 1,
+            "at": 5,
+            "kind": "refund",
+            "invoice": "a-invoice",
+            "line_ids": [
+              "a"
+            ]
+          }
+        ],
+        "as_of": 5
+      },
+      {
+        "edge": 0
+      }
+    ],
+    [
+      {
+        "events": [
+          {
+            "tenant": "edge",
+            "id": "z-refund",
+            "revision": 1,
+            "at": 5,
+            "kind": "refund",
+            "invoice": "a-invoice",
+            "line_ids": [
+              "a"
+            ]
+          },
+          {
+            "tenant": "edge",
+            "id": "a-invoice",
+            "revision": 1,
+            "at": 5,
+            "kind": "invoice",
+            "discount": 99,
+            "lines": [
+              {
+                "id": "z",
+                "unit": 0,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 825
+              },
+              {
+                "id": "a",
+                "unit": 0,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 825
+              }
+            ]
+          }
+        ],
+        "as_of": 5
+      },
+      {
+        "edge": 0
+      }
+    ],
+    [
+      {
+        "events": [
+          {
+            "tenant": "edge",
+            "id": "a-invoice",
+            "revision": 1,
+            "at": 5,
+            "kind": "invoice",
+            "discount": 99,
+            "lines": [
+              {
+                "id": "z",
+                "unit": 0,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 825
+              },
+              {
+                "id": "a",
+                "unit": 0,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 825
+              }
+            ]
+          },
+          {
+            "tenant": "edge",
+            "id": "z-refund",
+            "revision": 1,
+            "at": 5,
+            "kind": "refund",
+            "invoice": "a-invoice",
+            "line_ids": [
+              "a"
+            ]
+          }
+        ],
+        "as_of": 5
+      },
+      {
+        "edge": 0
+      }
+    ],
+    [
+      {
+        "events": [
+          {
+            "tenant": "edge",
+            "id": "z-refund",
+            "revision": 1,
+            "at": 5,
+            "kind": "refund",
+            "invoice": "a-invoice",
+            "line_ids": [
+              "a"
+            ]
+          },
+          {
+            "tenant": "edge",
+            "id": "a-invoice",
+            "revision": 1,
+            "at": 5,
+            "kind": "invoice",
+            "discount": 3,
+            "lines": [
+              {
+                "id": "z",
+                "unit": 1000000000000000001,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 825
+              },
+              {
+                "id": "a",
+                "unit": 1000000000000000001,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 825
+              }
+            ]
+          }
+        ],
+        "as_of": 5
+      },
+      {
+        "edge": 541249999999999999
+      }
+    ],
+    [
+      {
+        "events": [
+          {
+            "tenant": "edge",
+            "id": "a-invoice",
+            "revision": 1,
+            "at": 5,
+            "kind": "invoice",
+            "discount": 3,
+            "lines": [
+              {
+                "id": "z",
+                "unit": 1000000000000000001,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 825
+              },
+              {
+                "id": "a",
+                "unit": 1000000000000000001,
+                "quantity": 1,
+                "active": 1,
+                "period": 2,
+                "tax_bps": 825
+              }
+            ]
+          },
+          {
+            "tenant": "edge",
+            "id": "z-refund",
+            "revision": 1,
+            "at": 5,
+            "kind": "refund",
+            "invoice": "a-invoice",
+            "line_ids": [
+              "a"
+            ]
+          }
+        ],
+        "as_of": 5
+      },
+      {
+        "edge": 541249999999999999
+      }
+    ],
+    [
+      {
+        "events": [
+          {
+            "tenant": "edge",
+            "id": "0-refund",
+            "revision": 1,
+            "at": 0,
+            "kind": "refund",
+            "invoice": "absent",
+            "line_ids": [
+              "a"
+            ]
+          }
+        ],
+        "as_of": 0
+      },
+      {
+        "edge": 0
+      }
     ]
   ],
   "solution": "from fractions import Fraction\n\ndef solve(request):\n    seen = {}\n    for e in request['events']:\n        key = (e['tenant'], e['id'])\n        if key not in seen or e['revision'] > seen[key]['revision']:\n            seen[key] = e\n    amounts = {}\n    invoices = {}\n    for e in sorted(seen.values(), key=lambda e: (e['at'], e['tenant'], e['id'])):\n        if e.get('deleted', False) or e['at'] > request['as_of']:\n            continue\n        tenant = e['tenant']\n        amounts.setdefault(tenant, 0)\n        if e['kind'] == 'invoice':\n            lines = sorted(e['lines'], key=lambda l: l['id'])\n            raw = [Fraction(l['unit'] * l['quantity'] * l['active'], l['period']) for l in lines]\n            floors = [int(x) for x in raw]\n            total = sum(raw)\n            target = (2 * total.numerator + total.denominator) // (2 * total.denominator)\n            order = sorted(range(len(lines)), key=lambda i: (-(raw[i]-floors[i]), lines[i]['id']))\n            for i in order[:target-sum(floors)]: floors[i] += 1\n            discount = min(e.get('discount', 0), sum(floors))\n            cuts = [0] * len(lines)\n            if sum(floors):\n                shares = [Fraction(discount * x, sum(floors)) for x in floors]\n                cuts = [int(x) for x in shares]\n                order = sorted(range(len(lines)), key=lambda i: (-(shares[i]-cuts[i]), lines[i]['id']))\n                for i in order[:discount-sum(cuts)]: cuts[i] += 1\n            charged = {}\n            for i, line in enumerate(lines):\n                net = floors[i] - cuts[i]\n                tax = (net * line['tax_bps'] * 2 + 10000) // 20000\n                charged[line['id']] = net + tax\n            invoices[(tenant, e['id'])] = {'charged': charged, 'refunded': set()}\n            amounts[tenant] += sum(charged.values())\n        else:\n            invoice = invoices.get((tenant, e['invoice']))\n            if invoice:\n                for line in set(e['line_ids']):\n                    if line in invoice['charged'] and line not in invoice['refunded']:\n                        amounts[tenant] -= invoice['charged'][line]\n                        invoice['refunded'].add(line)\n    return dict(sorted(amounts.items()))\n",

@@ -45,7 +45,8 @@ this is not an agent planning deadline. Existing timing and scoring semantics ar
 
 These cases are hidden from the executing agent, **not held out from the public repository**.
 Task definitions (including all cases, references, and public files) contribute to per-task
-and suite fingerprints. `open-path` starts at version 1.0; semantic changes require a
+and suite fingerprints. The review pilot used version 1.0. Version 1.1 adds explicit billing boundary checks
+without changing public instructions; semantic changes require a
 suite version bump and new calibration records. Do not edit generated tasks directly.
 
 ## Acceptance and interpretation
@@ -66,3 +67,8 @@ not a stable success-rate estimate. Record every failure and unscorable trial, m
 effort, timing, and usage. A successful fast run is evidence that the task may need more
 work, not a reason to shorten its time limit. Multi-agent advantage requires a subsequent
 matched comparison and is not implied by task structure alone.
+
+Verifier version 2 checks protected files after candidate execution as well as before.
+This closes a review-discovered gap where code could alter an input during grading.
+The shared verifier source change updates existing task fingerprints too; old and new
+verifier results must remain distinct. Agent deadlines and outcome requirements are unchanged.

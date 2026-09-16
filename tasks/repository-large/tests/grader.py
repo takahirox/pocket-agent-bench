@@ -141,6 +141,7 @@ except Exception as e: print(json.dumps({'raises':type(e).__name__,'mutated':a!=
                     )
                 except subprocess.TimeoutExpired:
                     check(f"case:{i}", False, "Candidate exceeded 3-second case limit.")
+                    break
                 except (ValueError, OSError) as e:
                     check(f"case:{i}", False, str(e))
     else:

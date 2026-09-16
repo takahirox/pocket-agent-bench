@@ -41,7 +41,10 @@ The existing separate verifier receives fixed cases and executes candidate code 
 unprivileged child without expected outputs. `/tests` and `/solution` are absent from
 the agent workspace. The grader checks all hidden cases, including cases beyond the
 public reproduction. A short per-case execution guard bounds malformed candidate code;
-this is not an agent planning deadline. Existing timing and scoring semantics are unchanged.
+this is not an agent planning deadline. New task verifier deadlines allow three seconds
+per case plus 15 seconds of overhead, including offline regrading. A case timeout ends
+further probing and records failure, followed by final preservation checks. Agent
+safety deadlines remain unchanged.
 
 These cases are hidden from the executing agent, **not held out from the public repository**.
 Task definitions (including all cases, references, and public files) contribute to per-task

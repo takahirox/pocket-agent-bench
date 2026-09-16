@@ -26,6 +26,7 @@ def task(name, files, cases, solution):
         "function": "solve",
         "module_imports": True,
         "cases": cases,
+        "verifier_timeout_seconds": 3 * len(cases) + 15,
         "solution": solution,
         "expected": {},
     }

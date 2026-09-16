@@ -18,7 +18,7 @@ user = "agent"
 timeout_sec = 3690.0
 [verifier]
 user = "root"
-timeout_sec = 45.0
+timeout_sec = 156.0
 environment_mode = "separate"
 [verifier.environment]
 network_mode = "public"

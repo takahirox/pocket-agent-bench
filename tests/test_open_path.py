@@ -132,3 +132,36 @@ def test_candidate_cannot_damage_inputs_during_verification(tmp_path):
         c["name"] == "preserved-final:input/incident.md" and not c["passed"]
         for c in result["checks"]
     )
+
+
+def test_case_timeout_is_a_bounded_failure(tmp_path, monkeypatch):
+    import subprocess
+
+    import pocket_bench.grader as verifier
+
+    spec = SPECS[1]
+    w = workspace(tmp_path, spec)
+    calls = []
+
+    def timeout(*args, **kwargs):
+        calls.append(kwargs["timeout"])
+        raise subprocess.TimeoutExpired(args[0], kwargs["timeout"])
+
+    monkeypatch.setattr(verifier.subprocess, "run", timeout)
+    result = grade(spec, w)
+    assert result["status"] == "failure"
+    assert calls == [3]
+    assert any(c["name"] == "case:0" and not c["passed"] for c in result["checks"])
+
+
+def test_verifier_allows_every_case_its_execution_guard(tmp_path):
+    import tomllib
+
+    root = Path(__file__).resolve().parents[1]
+    (tmp_path / "suite").mkdir()
+    (tmp_path / "suite/catalog.json").write_bytes((root / "suite/catalog.json").read_bytes())
+    build(tmp_path)
+    for spec in SPECS:
+        config = tomllib.loads((tmp_path / "tasks" / spec["id"] / "task.toml").read_text())
+        assert config["verifier"]["timeout_sec"] >= len(spec["cases"]) * 3 + 15
+        assert config["agent"]["timeout_sec"] == 3690

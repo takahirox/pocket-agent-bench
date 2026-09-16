@@ -75,3 +75,45 @@ Verifier version 2 checks protected files after candidate execution as well as b
 This closes a review-discovered gap where code could alter an input during grading.
 The shared verifier source change updates existing task fingerprints too; old and new
 verifier results must remain distinct. Agent deadlines and outcome requirements are unchanged.
+
+## Calibration and review record — 2026-09-16
+
+Each model/effort ran each task once, sequentially, as a single agent with no trial
+retry and the same 3600-second safety limit. The pilot used v1.0. All ten saved
+submissions (six model runs plus four controls) were then regraded offline with
+final v1.1; all grades agreed. Public instructions and input/source snapshots were
+byte-identical between versions. Agent times below belong to the pilot executions;
+regrading did not run the models again. Final verifier hashes and usage are in
+[evidence/issue12-calibration.json](evidence/issue12-calibration.json).
+
+| System | Release resolver | Billing replay |
+| --- | --- | --- |
+| Codex Sol / high | FAIL, 377.9s | PASS, 243.1s |
+| Codex Luna / max | PASS, 757.8s | PASS, 383.2s |
+| Codex Astra / medium | PASS, 207.3s | PASS, 105.2s |
+| Reference control | PASS | PASS |
+| Unmodified repository control | FAIL | FAIL |
+
+Sol's resolver omitted required pinned packages from the reachable closure in six
+of 36 cases. This is an explicit public requirement, not a hidden extra constraint.
+There were no safety timeouts or infrastructure errors. This pilot demonstrates an
+observed outcome difference and longer execution/validation than the previous short
+tasks, but does not establish a stable ranking, general difficulty, or multi-agent
+benefit. All six model trials are retained, including the failure; no task
+was removed based on results. Billing passed all three systems and should not be
+presented as a demonstrated success-rate discriminator on this evidence alone.
+
+The experiment used the existing generic runtime image with Codex CLI 0.154.0;
+only adapter version metadata was aligned to that installed CLI. It did not change
+public tasks or model instructions. The release's default runtime is unchanged.
+Twenty experiment Compose projects were checked after completion; no containers or
+networks remained. Regrade containers were removed by the offline runner.
+
+Independent Sol/high review covered both functionality and Issue #12 scope, then
+rechecked fixes. It found (1) missing final input-preservation checks and (2) an outer
+verifier deadline too short for the new case counts. Both were fixed and tested.
+Review also prompted explicit timestamp/rounding boundary coverage and suite version
+bumps. The final independent review found no remaining correctness or scope blockers.
+Validation: 266 tests, lint, generated build reproducibility, Docker controls, and
+final offline grading. This initial release covers two representative types allowed
+by the issue; it makes no claim to deliver every proposed task category.

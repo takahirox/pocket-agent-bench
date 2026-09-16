@@ -90,6 +90,13 @@ recorded comparison conditions and statistical caveats below.
 
 ## Identities and compatibility
 
+Verifier version 2 also checks protected files after candidate execution and stops
+after a timed-out case. The affected suites advance to regression 1.2,
+capability-smoke 1.1, capability 1.3, and long-horizon 1.3; open-path is 1.1.
+Their task definitions and agent safety limits are otherwise unchanged. Preserve
+older results under their original versions; do not pool them with these grades.
+
+
 A run plan and every normalized trial retain suite name/version, complete suite
 fingerprint, selected task IDs, selection fingerprint, per-task definition fingerprints,
 partial/full status, agent configuration, source/runtime provenance, and evaluation

@@ -90,7 +90,9 @@ def regrade(source, destination, suite_root):
                     ["docker", "start", "-a", cid],
                     capture_output=True,
                     text=True,
-                    timeout=60,
+                    timeout=max(
+                        60, read(tests / "spec.json", {}).get("verifier_timeout_seconds", 45)
+                    ),
                     check=False,
                 )
                 (logs / "regrade-stderr.txt").write_text(p.stderr)

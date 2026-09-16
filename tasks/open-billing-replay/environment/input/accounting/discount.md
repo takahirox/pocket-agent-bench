@@ -1,0 +1,1 @@
+Cap invoice discount at the allocated invoice gross. Allocate discount proportionally to the integer gross line amounts, using floors then largest fractional remainders (line id ascending ties). Zero gross receives zero discount.

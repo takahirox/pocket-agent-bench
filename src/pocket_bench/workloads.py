@@ -295,6 +295,9 @@ def live():
 
 
 def catalog(name):
+    if name == "open-path":
+        from pocket_bench.open_path import catalog as open_catalog
+        return open_catalog()
     if name == "capability-smoke":
         members = {"ledger-recovery", "dependency-schedule", "repository-repair"}
         return [task for task in catalog("capability") if task["id"] in members]

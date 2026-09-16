@@ -1,0 +1,1 @@
+A refund reverses the original charged cents including tax for each named line at most once across all refunds of an invoice. Unknown invoice/line has no effect. Only an invoice already replayed for the SAME tenant is eligible. Refunds before an invoice are not deferred. Do not recalculate tax or redistribute discounts when refunding.

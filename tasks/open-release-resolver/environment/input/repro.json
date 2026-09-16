@@ -1,0 +1,66 @@
+{
+  "catalog": {
+    "app": [
+      {
+        "version": 1,
+        "requires": {
+          "core": [
+            1,
+            2
+          ]
+        }
+      },
+      {
+        "version": 2,
+        "requires": {
+          "core": [
+            2,
+            3
+          ]
+        }
+      }
+    ],
+    "core": [
+      {
+        "version": 1
+      },
+      {
+        "version": 2,
+        "conflicts": {
+          "addon": [
+            1,
+            1
+          ]
+        }
+      },
+      {
+        "version": 3,
+        "requires": {
+          "app": [
+            2,
+            2
+          ]
+        }
+      }
+    ],
+    "addon": [
+      {
+        "version": 1,
+        "requires": {
+          "core": [
+            1,
+            2
+          ]
+        }
+      }
+    ]
+  },
+  "roots": {
+    "app": 1,
+    "addon": 1
+  },
+  "installed": {
+    "app": 2,
+    "core": 3
+  }
+}

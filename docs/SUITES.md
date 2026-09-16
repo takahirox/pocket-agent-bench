@@ -12,6 +12,7 @@ no expanded suite is silently added to the default run.
 | capability-smoke | 3 | Ledger recovery, dependency planning, multi-file repair; directional only | 1 | 3600 |
 | capability | 5 | Multi-file repair, evidence synthesis, ledger recovery, dependency planning, stateful API recovery | 10 | 3600 |
 | long-horizon | 5 | Larger versions: 5,000 ledger events with revisions, 420 policy/noise documents, 120 dependency nodes, 120 auxiliary source modules, 48 ordered service jobs | 10 | 3600 |
+| open-path | 2 | Unknown resolver repair and billing specification reconstruction; see OPEN-PATH.md | 10 | 3600 |
 | web | 2 | JavaScript rendering and live source retrieval with trusted snapshots | 10 | 3600 |
 
 These are original public workloads, with independent deterministic grading, not
@@ -88,6 +89,13 @@ cannot compensate for the limited task coverage. Full evaluation still requires 
 recorded comparison conditions and statistical caveats below.
 
 ## Identities and compatibility
+
+Verifier version 2 also checks protected files after candidate execution and stops
+after a timed-out case. The affected suites advance to regression 1.2,
+capability-smoke 1.1, capability 1.3, and long-horizon 1.3; open-path is 1.1.
+Their task definitions and agent safety limits are otherwise unchanged. Preserve
+older results under their original versions; do not pool them with these grades.
+
 
 A run plan and every normalized trial retain suite name/version, complete suite
 fingerprint, selected task IDs, selection fingerprint, per-task definition fingerprints,

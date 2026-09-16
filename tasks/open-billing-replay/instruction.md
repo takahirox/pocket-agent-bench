@@ -1,0 +1,2 @@
+Resolve the customer incident in input/incident.md. The checked-in repository and product records describe the supported behavior. Deliver repaired sources implementing src/solution.py:solve(request), with src on the import path. Preserve every input file and do not mutate request arguments. All documented behavior, not just the reported reproduction, must work. Any implementation strategy or source-file organization is acceptable. Python standard library only.
+Workspace: /app. Python 3 standard library and Git are available.

@@ -1,1 +1,0 @@
-Deployment INC-412: a valid release is rejected after adding an extension. Other customers report unnecessary upgrades and a hang on mutually dependent packages. Restore the resolver without regressing the published selection policy. Reproduction: repro.json.

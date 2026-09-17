@@ -1,1 +1,0 @@
-FIN-209: after replaying corrected invoices, balances differ across tenants and partial refunds sometimes over-credit. Repair the billing projection against the approved accounting records. The attached reproduction is only one affected batch.

@@ -109,5 +109,5 @@ def test_invalid_recovery_still_fails(tmp_path, monkeypatch, spec, recovery):
 
 
 def test_workflow_grading_revision_is_versioned():
-    assert SUITES["capability"]["version"] == "1.3"
-    assert SUITES["long-horizon"]["version"] == "1.3"
+    assert SUITES["capability"]["version"] == "1.2"
+    assert SUITES["long-horizon"]["version"] == "1.2"

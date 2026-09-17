@@ -70,9 +70,7 @@ def build(root):
                 for k, v in metadata.items()
             )
             + f'\n[agent]\nuser = "agent"\ntimeout_sec = {DEFAULT_HARD_TIMEOUT_SECONDS + 90}\n'
-            + '[verifier]\nuser = "root"\n'
-            + f"timeout_sec = {float(spec.get('verifier_timeout_seconds', 45))}\n"
-            + 'environment_mode = "separate"\n[verifier.environment]\nnetwork_mode = "public"\ncpus = 2\nmemory_mb = 2048\n'
+            + '[verifier]\nuser = "root"\ntimeout_sec = 45.0\nenvironment_mode = "separate"\n[verifier.environment]\nnetwork_mode = "public"\ncpus = 2\nmemory_mb = 2048\n'
             + '[environment]\n# Egress is enforced by the internal Compose network and model-only proxy.\nnetwork_mode = "public"\ncpus = 2\nmemory_mb = 2048\nbuild_timeout_sec = 600.0\n'
         )
         (task / "task.toml").write_text(config)

@@ -1,1 +1,0 @@
-Revision winner is selected by (tenant,id) over the entire input, BEFORE filtering deleted or at > as_of. Never fall back to an older revision. Replay winners in ascending (at,tenant,id) order. Include a zero balance for every tenant with a surviving event, even an ineffective refund; exclude tenants with none. Inputs can be shuffled.

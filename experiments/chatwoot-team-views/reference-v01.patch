@@ -1,0 +1,833 @@
+diff --git a/app/controllers/api/v1/accounts/custom_filters_controller.rb b/app/controllers/api/v1/accounts/custom_filters_controller.rb
+index b4345bb..5312fa3 100644
+--- a/app/controllers/api/v1/accounts/custom_filters_controller.rb
++++ b/app/controllers/api/v1/accounts/custom_filters_controller.rb
+@@ -1,4 +1,5 @@
+ class Api::V1::Accounts::CustomFiltersController < Api::V1::Accounts::BaseController
++  before_action :validate_filter_payload, only: [:create, :update]
+   before_action :check_authorization
+   before_action :fetch_custom_filters, only: [:index]
+   before_action :fetch_custom_filter, only: [:show, :update, :destroy]
+@@ -9,13 +10,18 @@ class Api::V1::Accounts::CustomFiltersController < Api::V1::Accounts::BaseContro
+   def show; end
+ 
+   def create
++    return unless validate_sharing
++
+     @custom_filter = Current.account.custom_filters.create!(
+-      permitted_payload.merge(user: Current.user)
++      permitted_payload.merge(user: Current.user, query_user: Current.user)
+     )
+     render json: { error: @custom_filter.errors.messages }, status: :unprocessable_entity and return unless @custom_filter.valid?
+   end
+ 
+   def update
++    return unless validate_sharing
++
++    @custom_filter.query_user = Current.user
+     @custom_filter.update!(permitted_payload)
+   end
+ 
+@@ -27,22 +33,59 @@ class Api::V1::Accounts::CustomFiltersController < Api::V1::Accounts::BaseContro
+   private
+ 
+   def fetch_custom_filters
+-    @custom_filters = Current.account.custom_filters.where(
+-      user: Current.user,
++    @custom_filters = Current.account.custom_filters.visible_to(Current.user, Current.account).where(
+       filter_type: permitted_params[:filter_type] || DEFAULT_FILTER_TYPE
+     )
+   end
+ 
+   def fetch_custom_filter
+-    @custom_filter = Current.account.custom_filters.where(
+-      user: Current.user
+-    ).find(permitted_params[:id])
++    @custom_filter = Current.account.custom_filters.visible_to(Current.user, Current.account).find(permitted_params[:id])
++    return if action_name == 'show' || @custom_filter.manageable_by?(Current.user)
++
++    render json: { error: I18n.t('errors.custom_filters.not_authorized') }, status: :forbidden
++  end
++
++  def validate_filter_payload
++    payload = params.require(:custom_filter)
++    valid_type = !payload.key?(:filter_type) || (CustomFilter.filter_types.keys + CustomFilter.filter_types.values).include?(payload[:filter_type])
++    valid_query = !payload.key?(:query) || payload[:query].is_a?(ActionController::Parameters)
++    valid_name = !payload.key?(:name) || payload[:name].is_a?(String)
++    return if valid_type && valid_query && valid_name
++
++    render json: { error: I18n.t('errors.custom_filters.invalid_payload') }, status: :unprocessable_entity
++  end
++
++  def validate_sharing
++    payload = params.require(:custom_filter)
++    return true unless payload.key?(:team_id)
++
++    team_id = payload[:team_id]
++    unless team_id.nil? || team_id.is_a?(Integer)
++      render json: { error: I18n.t('errors.custom_filters.invalid_team_type') }, status: :unprocessable_entity
++      return false
++    end
++    return true if team_id.nil? || action_name == 'update'
++
++    validate_sharing_creation(team_id)
++  end
++
++  def validate_sharing_creation(team_id)
++    team = Current.account.teams.find_by(id: team_id)
++    unless team
++      render json: { error: I18n.t('errors.custom_filters.invalid_team') }, status: :unprocessable_entity
++      return false
++    end
++    return true if Current.account_user.administrator? || team.team_members.exists?(user_id: Current.user.id)
++
++    render json: { error: I18n.t('errors.custom_filters.not_authorized') }, status: :forbidden
++    false
+   end
+ 
+   def permitted_payload
+     params.require(:custom_filter).permit(
+       :name,
+       :filter_type,
++      :team_id,
+       query: {}
+     )
+   end
+diff --git a/app/javascript/dashboard/components-next/filter/SaveCustomView.vue b/app/javascript/dashboard/components-next/filter/SaveCustomView.vue
+index bcccf16..916c0a5 100644
+--- a/app/javascript/dashboard/components-next/filter/SaveCustomView.vue
++++ b/app/javascript/dashboard/components-next/filter/SaveCustomView.vue
+@@ -6,12 +6,14 @@ import { CONTACTS_EVENTS } from 'dashboard/helper/AnalyticsHelper/events';
+ import { vOnClickOutside } from '@vueuse/components';
+ import { useTrack } from 'dashboard/composables';
+ import NextButton from 'next/button/Button.vue';
++import AudienceSelect from 'dashboard/components-next/select/Select.vue';
+ import NextInput from 'dashboard/components-next/input/Input.vue';
+ 
+ export default {
+   components: {
+     NextButton,
+     NextInput,
++    AudienceSelect,
+   },
+   directives: {
+     onClickOutside: vOnClickOutside,
+@@ -38,10 +40,22 @@ export default {
+     return {
+       show: true,
+       name: '',
++      teamId: 0,
+     };
+   },
+ 
+   computed: {
++    audienceOptions() {
++      const getter =
++        this.$store.getters.getCurrentRole === 'administrator'
++          ? 'teams/getTeams'
++          : 'teams/getMyTeams';
++      const teams = this.$store.getters[getter] || [];
++      return [
++        { value: 0, label: this.$t('FILTER.SHARING.PERSONAL') },
++        ...teams.map(team => ({ value: team.id, label: team.name })),
++      ];
++    },
+     isButtonDisabled() {
+       return this.v$.name.$invalid;
+     },
+@@ -68,12 +82,14 @@ export default {
+           name: this.name,
+           filter_type: this.filterType,
+           query: this.customViewsQuery,
++          ...(this.filterType === 0 ? { team_id: this.teamId || null } : {}),
+         });
+         this.alertMessage =
+           this.filterType === 0
+             ? this.$t('FILTER.CUSTOM_VIEWS.ADD.API_FOLDERS.SUCCESS_MESSAGE')
+             : this.$t('FILTER.CUSTOM_VIEWS.ADD.API_SEGMENTS.SUCCESS_MESSAGE');
+         this.onClose();
++        this.openLastSavedItem();
+ 
+         useTrack(CONTACTS_EVENTS.SAVE_FILTER, {
+           type: this.filterType === 0 ? 'folder' : 'segment',
+@@ -81,13 +97,13 @@ export default {
+       } catch (error) {
+         const errorMessage = error?.message;
+         this.alertMessage =
+-          errorMessage || this.filterType === 0
+-            ? errorMessage
+-            : this.$t('FILTER.CUSTOM_VIEWS.ADD.API_SEGMENTS.ERROR_MESSAGE');
++          errorMessage ||
++          (this.filterType === 0
++            ? this.$t('FILTER.CUSTOM_VIEWS.ADD.API_FOLDERS.ERROR_MESSAGE')
++            : this.$t('FILTER.CUSTOM_VIEWS.ADD.API_SEGMENTS.ERROR_MESSAGE'));
+       } finally {
+         useAlert(this.alertMessage);
+       }
+-      this.openLastSavedItem();
+     },
+   },
+ };
+@@ -105,6 +121,16 @@ export default {
+       {{ $t('FILTER.CUSTOM_VIEWS.ADD.TITLE') }}
+     </h3>
+     <form class="w-full grid gap-6" @submit.prevent="saveCustomViews">
++      <div v-if="filterType === 0" class="grid gap-2">
++        <span class="text-sm text-n-slate-12">{{
++          $t('FILTER.SHARING.AUDIENCE')
++        }}</span>
++        <AudienceSelect
++          v-model="teamId"
++          :options="audienceOptions"
++          :aria-label="$t('FILTER.SHARING.AUDIENCE')"
++        />
++      </div>
+       <NextInput
+         v-model="name"
+         :placeholder="$t('FILTER.CUSTOM_VIEWS.ADD.PLACEHOLDER')"
+diff --git a/app/javascript/dashboard/components-next/sidebar/Sidebar.vue b/app/javascript/dashboard/components-next/sidebar/Sidebar.vue
+index 0239435..830c91c 100644
+--- a/app/javascript/dashboard/components-next/sidebar/Sidebar.vue
++++ b/app/javascript/dashboard/components-next/sidebar/Sidebar.vue
+@@ -425,7 +425,9 @@ const menuItems = computed(() => {
+           showTreeLine: true,
+           children: sortedFolders.value.map(view => ({
+             name: `${view.name}-${view.id}`,
+-            label: view.name,
++            label: view.team_id
++              ? `${view.name} · ${view.team_name}`
++              : view.name,
+             badgeCount: hasFilteredUnreadCounts.value
+               ? getFolderUnreadCount.value(view.id)
+               : 0,
+diff --git a/app/javascript/dashboard/components/ChatList.vue b/app/javascript/dashboard/components/ChatList.vue
+index 4819a39..7a6e039 100644
+--- a/app/javascript/dashboard/components/ChatList.vue
++++ b/app/javascript/dashboard/components/ChatList.vue
+@@ -288,7 +288,10 @@ const pageTitle = computed(() => {
+     return t('CHAT_LIST.UNATTENDED_HEADING');
+   }
+   if (hasActiveFolders.value) {
+-    return activeFolder.value.name;
++    const folder = activeFolder.value;
++    return folder.team_id
++      ? `${folder.name} · ${folder.team_name}`
++      : folder.name;
+   }
+   return t('CHAT_LIST.TAB_HEADING');
+ });
+@@ -431,15 +434,19 @@ function closeAdvanceFiltersModal() {
+   appliedFilter.value = [];
+ }
+ 
+-function onUpdateSavedFilter(payload, folderName) {
++async function onUpdateSavedFilter(payload, folderName) {
+   const transformedPayload = useSnakeCase(payload);
+   const payloadData = {
+     ...unref(activeFolder),
+     name: unref(folderName),
+     query: filterQueryGenerator(transformedPayload),
+   };
+-  store.dispatch('customViews/update', payloadData);
+-  closeAdvanceFiltersModal();
++  try {
++    await store.dispatch('customViews/update', payloadData);
++    closeAdvanceFiltersModal();
++  } catch (error) {
++    useAlert(error.message || t('FILTER.SHARING.UPDATE_ERROR'));
++  }
+ }
+ 
+ function onClickOpenAddFoldersModal() {
+@@ -888,6 +895,7 @@ watch(appliedFilters, () => resetBulkActions());
+       :contact-filter="appliedContactFilter"
+       :has-applied-filters="hasAppliedFilters"
+       :has-active-folders="hasActiveFolders"
++      :can-manage-folder="activeFolder?.can_manage !== false"
+       :active-status="activeStatus"
+       :is-on-expanded-layout="isOnExpandedLayout"
+       :conversation-stats="conversationStats"
+diff --git a/app/javascript/dashboard/components/ChatListHeader.vue b/app/javascript/dashboard/components/ChatListHeader.vue
+index 21ba33a..024f349 100644
+--- a/app/javascript/dashboard/components/ChatListHeader.vue
++++ b/app/javascript/dashboard/components/ChatListHeader.vue
+@@ -9,6 +9,7 @@ import SwitchLayout from 'dashboard/routes/dashboard/conversation/search/SwitchL
+ import NextButton from 'dashboard/components-next/button/Button.vue';
+ 
+ const props = defineProps({
++  canManageFolder: { type: Boolean, default: true },
+   pageTitle: { type: String, required: true },
+   contactFilter: { type: Object, default: null },
+   hasAppliedFilters: { type: Boolean, required: true },
+@@ -113,6 +114,7 @@ const toggleConversationLayout = () => {
+         <div class="relative">
+           <NextButton
+             v-tooltip.top-end="$t('FILTER.CUSTOM_VIEWS.ADD.SAVE_BUTTON')"
++            :aria-label="$t('FILTER.CUSTOM_VIEWS.ADD.SAVE_BUTTON')"
+             icon="i-lucide-save"
+             slate
+             xs
+@@ -126,11 +128,12 @@ const toggleConversationLayout = () => {
+           />
+         </div>
+       </template>
+-      <template v-if="hasActiveFolders">
++      <template v-if="hasActiveFolders && canManageFolder">
+         <div class="relative">
+           <NextButton
+             id="toggleConversationFilterButton"
+             v-tooltip.top-end="$t('FILTER.CUSTOM_VIEWS.EDIT.EDIT_BUTTON')"
++            :aria-label="$t('FILTER.CUSTOM_VIEWS.EDIT.EDIT_BUTTON')"
+             icon="i-lucide-pen-line"
+             slate
+             xs
+@@ -146,6 +149,7 @@ const toggleConversationLayout = () => {
+         <NextButton
+           id="toggleConversationFilterButton"
+           v-tooltip.top-end="$t('FILTER.CUSTOM_VIEWS.DELETE.DELETE_BUTTON')"
++          :aria-label="$t('FILTER.CUSTOM_VIEWS.DELETE.DELETE_BUTTON')"
+           icon="i-lucide-trash-2"
+           ruby
+           xs
+@@ -153,7 +157,7 @@ const toggleConversationLayout = () => {
+           @click="emit('deleteFolders')"
+         />
+       </template>
+-      <div v-else-if="!isContactScoped" class="relative">
++      <div v-else-if="!isContactScoped && !hasActiveFolders" class="relative">
+         <NextButton
+           id="toggleConversationFilterButton"
+           v-tooltip.right="$t('FILTER.TOOLTIP_LABEL')"
+diff --git a/app/javascript/dashboard/i18n/locale/en/advancedFilters.json b/app/javascript/dashboard/i18n/locale/en/advancedFilters.json
+index 26d7903..070ea07 100644
+--- a/app/javascript/dashboard/i18n/locale/en/advancedFilters.json
++++ b/app/javascript/dashboard/i18n/locale/en/advancedFilters.json
+@@ -119,6 +119,11 @@
+           "ERROR_MESSAGE": "Error while deleting segment."
+         }
+       }
++    },
++    "SHARING": {
++      "PERSONAL": "Personal (only me)",
++      "AUDIENCE": "View audience",
++      "UPDATE_ERROR": "Could not update the folder. Your changes have been kept."
+     }
+   }
+ }
+diff --git a/app/javascript/dashboard/routes/dashboard/customviews/DeleteCustomViews.vue b/app/javascript/dashboard/routes/dashboard/customviews/DeleteCustomViews.vue
+index 3bcbcbd..eaeb581 100644
+--- a/app/javascript/dashboard/routes/dashboard/customviews/DeleteCustomViews.vue
++++ b/app/javascript/dashboard/routes/dashboard/customviews/DeleteCustomViews.vue
+@@ -71,6 +71,7 @@ export default {
+         const filterType = this.activeCustomViews;
+         await this.$store.dispatch('customViews/delete', { id, filterType });
+         this.closeDeletePopup();
++        this.openLastItemAfterDelete();
+         useAlert(
+           this.activeFilterType === 0
+             ? this.$t('FILTER.CUSTOM_VIEWS.DELETE.API_FOLDERS.SUCCESS_MESSAGE')
+@@ -81,14 +82,12 @@ export default {
+         });
+       } catch (error) {
+         const errorMessage =
+-          error?.response?.message || this.activeFilterType === 0
+-            ? this.$t('FILTER.CUSTOM_VIEWS.DELETE.API_FOLDERS.SUCCESS_MESSAGE')
+-            : this.$t(
+-                'FILTER.CUSTOM_VIEWS.DELETE.API_SEGMENTS.SUCCESS_MESSAGE'
+-              );
++          error?.message ||
++          (this.activeFilterType === 0
++            ? this.$t('FILTER.CUSTOM_VIEWS.DELETE.API_FOLDERS.ERROR_MESSAGE')
++            : this.$t('FILTER.CUSTOM_VIEWS.DELETE.API_SEGMENTS.ERROR_MESSAGE'));
+         useAlert(errorMessage);
+       }
+-      this.openLastItemAfterDelete();
+     },
+     closeDeletePopup() {
+       this.$emit('close');
+diff --git a/app/models/custom_filter.rb b/app/models/custom_filter.rb
+index 6e2461a..50a97d4 100644
+--- a/app/models/custom_filter.rb
++++ b/app/models/custom_filter.rb
+@@ -9,19 +9,52 @@
+ #  created_at  :datetime         not null
+ #  updated_at  :datetime         not null
+ #  account_id  :bigint           not null
+-#  user_id     :bigint           not null
++#  team_id     :bigint
++#  user_id     :bigint
+ #
+ # Indexes
+ #
+ #  index_custom_filters_on_account_id  (account_id)
++#  index_custom_filters_on_team_id     (team_id)
+ #  index_custom_filters_on_user_id     (user_id)
+ #
++# Foreign Keys
++#
++#  fk_rails_...  (team_id => teams.id) ON DELETE => cascade
++#
+ class CustomFilter < ApplicationRecord
+-  belongs_to :user
++  belongs_to :user, optional: true
++  belongs_to :team, optional: true
++  attr_accessor :query_user
++
+   belongs_to :account
+ 
+   enum filter_type: { conversation: 0, contact: 1, report: 2 }
++  validates :user, presence: true, unless: :shared?
++  validates :name, presence: true, if: :shared?
++  validate :validate_team_view
++  validate :validate_shared_query, if: :shared?
+   validate :validate_number_of_filters
++
++  scope :visible_to, lambda { |viewer, current_account|
++    membership = current_account.account_users.find_by(user_id: viewer.id)
++    if membership
++      teams = current_account.teams
++      teams = teams.where(id: viewer.team_members.select(:team_id)) unless membership.administrator?
++      where(team_id: nil, user_id: viewer.id).or(where(team_id: teams.select(:id)))
++    else
++      none
++    end
++  }
++
++  def shared? = team_id.present?
++
++  def manageable_by?(viewer)
++    return user_id == viewer.id unless shared?
++
++    account.account_users.exists?(user_id: viewer.id, role: :administrator) ||
++      (user_id == viewer.id && team&.team_members&.exists?(user_id: viewer.id))
++  end
+   after_create_commit :invalidate_filtered_unread_count_create
+   after_update_commit :invalidate_filtered_unread_count_update
+   after_destroy_commit :invalidate_filtered_unread_count_destroy
+@@ -34,15 +67,43 @@ class CustomFilter < ApplicationRecord
+ 
+   private
+ 
++  def validate_team_view
++    errors.add(:team_id, :immutable) if persisted? && will_save_change_to_team_id?
++    return unless shared?
++
++    errors.add(:team_id, :invalid) unless team&.account_id == account_id
++    errors.add(:filter_type, :inclusion) unless conversation?
++  end
++
++  def validate_shared_query
++    unless query.is_a?(Hash) && query['payload'].is_a?(Array) && query['payload'].present?
++      errors.add(:query, :invalid)
++      return
++    end
++    count = Conversations::UnreadCounts::FilterQueryCounter.new(account: account, user: query_user || user, query: query).perform
++    errors.add(:query, :invalid) if count.nil?
++  rescue CustomExceptions::CustomFilter::InvalidAttribute,
++         CustomExceptions::CustomFilter::InvalidOperator,
++         CustomExceptions::CustomFilter::InvalidQueryOperator,
++         CustomExceptions::CustomFilter::InvalidValue
++    errors.add(:query, :invalid)
++  end
++
+   def invalidate_filtered_unread_count_create
++    return if shared?
++
+     filtered_count_invalidator.custom_filter_created!(self)
+   end
+ 
+   def invalidate_filtered_unread_count_update
++    return if shared?
++
+     filtered_count_invalidator.custom_filter_updated!(self)
+   end
+ 
+   def invalidate_filtered_unread_count_destroy
++    return if shared?
++
+     filtered_count_invalidator.custom_filter_destroyed!(self)
+   end
+ 
+diff --git a/app/models/team.rb b/app/models/team.rb
+index b19f215..2515ce3 100644
+--- a/app/models/team.rb
++++ b/app/models/team.rb
+@@ -21,6 +21,7 @@ class Team < ApplicationRecord
+   include AccountCacheRevalidator
+ 
+   belongs_to :account
++  has_many :custom_filters, dependent: :destroy
+   has_many :team_members, dependent: :destroy_async
+   has_many :members, through: :team_members, source: :user
+   has_many :conversations, dependent: :nullify
+diff --git a/app/models/user.rb b/app/models/user.rb
+index a5a9e33..6ffec9e 100644
+--- a/app/models/user.rb
++++ b/app/models/user.rb
+@@ -103,6 +103,12 @@ class User < ApplicationRecord
+ 
+   has_many :user_sessions, dependent: :destroy
+   has_many :custom_filters, dependent: :destroy_async
++
++  def retain_team_views
++    # Shared views belong to the team even after their creator is deleted.
++    custom_filters.where.not(team_id: nil).update_all(user_id: nil) # rubocop:disable Rails/SkipsModelValidations
++    association(:custom_filters).reset
++  end
+   has_many :dashboard_apps, dependent: :nullify
+   has_many :mentions, dependent: :destroy_async
+   has_many :notes, dependent: :nullify
+@@ -118,6 +124,7 @@ class User < ApplicationRecord
+   # rubocop:enable Rails/HasManyOrHasOneDependent
+ 
+   before_validation :set_password_and_uid, on: :create
++  before_destroy :retain_team_views, prepend: true
+   after_destroy :remove_macros
+   after_save :sync_user_sessions, if: :saved_change_to_tokens?
+ 
+diff --git a/app/services/conversations/unread_counts/filtered_counter.rb b/app/services/conversations/unread_counts/filtered_counter.rb
+index 1194951..77bb20d 100644
+--- a/app/services/conversations/unread_counts/filtered_counter.rb
++++ b/app/services/conversations/unread_counts/filtered_counter.rb
+@@ -36,11 +36,10 @@ class Conversations::UnreadCounts::FilteredCounter
+   def counts_from_built_in_snapshot(snapshot) = snapshot&.fetch(:counts, nil)&.slice(:mentions_count, :participating_count, :unattended_count)
+ 
+   def folder_counts
+-    folder_index = folder_index_snapshot
+-    return {} if folder_index.blank?
++    filter_ids = folder_index_snapshot&.fetch(:filter_ids, []) || []
+ 
+     @inline_filter_builds = 0
+-    folder_index[:filter_ids].each_with_object({}) do |filter_id, counts|
++    filter_ids.each_with_object(Conversations::UnreadCounts::SharedFolderCounter.new(account: account, user: user).perform) do |filter_id, counts|
+       count = filter_count(filter_id)
+       counts[filter_id.to_s] = count if count.to_i.positive?
+     end
+@@ -126,10 +125,10 @@ class Conversations::UnreadCounts::FilteredCounter
+     store.folder_index(account_id: account.id, user_id: user.id)
+   end
+ 
+-  def folder_filter_ids_from_database = account.custom_filters.where(user_id: user.id, filter_type: :conversation).pluck(:id)
++  def folder_filter_ids_from_database = account.custom_filters.where(user_id: user.id, team_id: nil, filter_type: :conversation).pluck(:id)
+ 
+   def build_filter_count!(filter_id, versions)
+-    custom_filter = account.custom_filters.find_by(id: filter_id, user_id: user.id, filter_type: :conversation)
++    custom_filter = account.custom_filters.find_by(id: filter_id, user_id: user.id, team_id: nil, filter_type: :conversation)
+     return delete_filter_count!(filter_id) if custom_filter.blank?
+ 
+     count = filter_query_count(custom_filter)
+diff --git a/app/services/conversations/unread_counts/shared_folder_counter.rb b/app/services/conversations/unread_counts/shared_folder_counter.rb
+new file mode 100644
+index 0000000..4bf26b6
+--- /dev/null
++++ b/app/services/conversations/unread_counts/shared_folder_counter.rb
+@@ -0,0 +1,15 @@
++class Conversations::UnreadCounts::SharedFolderCounter
++  def initialize(account:, user:)
++    @account = account
++    @user = user
++  end
++
++  def perform
++    # The personal cache is keyed by filter ID, not viewer. Read shared views
++    # and permissions afresh so membership changes cannot leak stale results.
++    @account.custom_filters.visible_to(@user, @account).conversation.where.not(team_id: nil).each_with_object({}) do |filter, counts|
++      count = Conversations::UnreadCounts::FilterQueryCounter.new(account: @account, user: @user, query: filter.query).perform
++      counts[filter.id.to_s] = count if count.to_i.positive?
++    end
++  end
++end
+diff --git a/app/views/api/v1/models/_custom_filter.json.jbuilder b/app/views/api/v1/models/_custom_filter.json.jbuilder
+index 473f2d2..ed1a870 100644
+--- a/app/views/api/v1/models/_custom_filter.json.jbuilder
++++ b/app/views/api/v1/models/_custom_filter.json.jbuilder
+@@ -4,3 +4,6 @@ json.filter_type resource.filter_type
+ json.query resource.query
+ json.created_at resource.created_at
+ json.updated_at resource.updated_at
++json.team_id resource.team_id
++json.team_name resource.team&.name
++json.can_manage resource.manageable_by?(Current.user)
+diff --git a/config/locales/team_views.en.yml b/config/locales/team_views.en.yml
+new file mode 100644
+index 0000000..df88b3b
+--- /dev/null
++++ b/config/locales/team_views.en.yml
+@@ -0,0 +1,14 @@
++en:
++  errors:
++    custom_filters:
++      invalid_team: "Invalid team"
++      invalid_team_type: "Team must be an integer or null"
++      invalid_payload: "Invalid filter payload"
++      not_authorized: "Not authorized"
++  activerecord:
++    errors:
++      models:
++        custom_filter:
++          attributes:
++            team_id:
++              immutable: "cannot change after creation"
+diff --git a/db/migrate/20260917000000_add_team_to_custom_filters.rb b/db/migrate/20260917000000_add_team_to_custom_filters.rb
+new file mode 100644
+index 0000000..4c645f1
+--- /dev/null
++++ b/db/migrate/20260917000000_add_team_to_custom_filters.rb
+@@ -0,0 +1,6 @@
++class AddTeamToCustomFilters < ActiveRecord::Migration[7.2]
++  def change
++    add_reference :custom_filters, :team, foreign_key: { on_delete: :cascade }
++    change_column_null :custom_filters, :user_id, true
++  end
++end
+diff --git a/db/schema.rb b/db/schema.rb
+index a6711fe..369dd54 100644
+--- a/db/schema.rb
++++ b/db/schema.rb
+@@ -10,7 +10,7 @@
+ #
+ # It's strongly recommended that you check this file into your version control system.
+ 
+-ActiveRecord::Schema[7.1].define(version: 2026_08_31_000000) do
++ActiveRecord::Schema[7.1].define(version: 2026_09_17_000000) do
+   # These extensions should be enabled to support this database
+   enable_extension "pg_stat_statements"
+   enable_extension "pg_trgm"
+@@ -975,10 +975,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_31_000000) do
+     t.integer "filter_type", default: 0, null: false
+     t.jsonb "query", default: "{}", null: false
+     t.bigint "account_id", null: false
+-    t.bigint "user_id", null: false
++    t.bigint "user_id"
+     t.datetime "created_at", null: false
+     t.datetime "updated_at", null: false
++    t.bigint "team_id"
+     t.index ["account_id"], name: "index_custom_filters_on_account_id"
++    t.index ["team_id"], name: "index_custom_filters_on_team_id"
+     t.index ["user_id"], name: "index_custom_filters_on_user_id"
+   end
+ 
+@@ -1602,6 +1604,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_31_000000) do
+   add_foreign_key "campaign_recipients", "campaigns", on_delete: :cascade
+   add_foreign_key "campaign_recipients", "contacts", on_delete: :cascade
+   add_foreign_key "campaign_recipients", "inboxes", on_delete: :cascade
++  add_foreign_key "custom_filters", "teams", on_delete: :cascade
+   add_foreign_key "inboxes", "portals"
+   add_foreign_key "user_sessions", "users"
+   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
+diff --git a/spec/requests/team_shared_filters_spec.rb b/spec/requests/team_shared_filters_spec.rb
+new file mode 100644
+index 0000000..4a12304
+--- /dev/null
++++ b/spec/requests/team_shared_filters_spec.rb
+@@ -0,0 +1,210 @@
++# Public contract regression coverage for team-shared conversation folders.
++require 'rails_helper'
++
++RSpec.describe 'Team views public requirements', type: :request do
++  let(:account) { create(:account) }
++  let(:alice) { create(:user, account: account, role: :agent) }
++  let(:bob) { create(:user, account: account, role: :agent) }
++  let(:admin) { create(:user, account: account, role: :administrator) }
++  let(:outsider) { create(:user, account: account, role: :agent) }
++  let(:team) { create(:team, account: account) }
++  let(:query) { { 'payload' => [{ 'attribute_key' => 'status', 'filter_operator' => 'equal_to', 'values' => ['open'], 'query_operator' => nil }] } }
++  let(:path) { "/api/v1/accounts/#{account.id}/custom_filters" }
++  let(:alice_headers) { alice.create_new_auth_token }
++  let(:bob_headers) { bob.create_new_auth_token }
++  let(:admin_headers) { admin.create_new_auth_token }
++  let(:view_id) do
++    team.add_members([alice.id, bob.id])
++    post path, headers: alice_headers, params: { custom_filter: { name: 'Team open', query: query, filter_type: 'conversation', team_id: team.id } },
++               as: :json
++    response.parsed_body.fetch('id')
++  end
++
++  it 'keeps shared views after creator deletion, even with a loaded association' do
++    id = view_id
++    alice.custom_filters.load
++    perform_enqueued_jobs(only: ActiveRecord::DestroyAssociationAsyncJob) { alice.destroy! }
++    get "#{path}/#{id}", headers: bob_headers
++    expect(response).to have_http_status(:success)
++    expect(response.parsed_body['team_id']).to eq(team.id)
++    patch "#{path}/#{id}", headers: admin_headers, params: { custom_filter: { name: 'Maintained' } }, as: :json
++    expect(response).to have_http_status(:success)
++    expect(response.parsed_body['name']).to eq('Maintained')
++  end
++
++  it 'retains shared views after account removal and the account cleanup job' do
++    id = view_id
++    alice.account_users.find_by!(account: account).destroy!
++    Agents::DestroyJob.perform_now(account, alice)
++    get "#{path}/#{id}", headers: alice_headers
++    expect(response.status).to be_in([401, 403, 404])
++    get "#{path}/#{id}", headers: bob_headers
++    expect(response).to have_http_status(:success)
++    patch "#{path}/#{id}", headers: admin_headers, params: { custom_filter: { name: 'Retained' } }, as: :json
++    expect(response).to have_http_status(:success)
++  end
++
++  it 'uses fresh membership within an existing login session, including creator rejoining' do
++    id = view_id
++    get "#{path}/#{id}", headers: alice_headers
++    expect(response).to have_http_status(:success)
++    team.remove_members([alice.id])
++    get "#{path}/#{id}", headers: alice_headers
++    expect(response).to have_http_status(:not_found)
++    patch "#{path}/#{id}", headers: alice_headers, params: { custom_filter: { name: 'Denied' } }, as: :json
++    expect(response).to have_http_status(:not_found)
++    get "#{path}/#{id}", headers: bob_headers
++    expect(response.parsed_body['name']).to eq('Team open')
++    team.add_members([alice.id])
++    patch "#{path}/#{id}", headers: alice_headers, params: { custom_filter: { name: 'Rejoined' } }, as: :json
++    expect(response).to have_http_status(:success)
++  end
++
++  it 'allows newly added members and revokes removed members immediately' do
++    id = view_id
++    headers = outsider.create_new_auth_token
++    get "#{path}/#{id}", headers: headers
++    expect(response).to have_http_status(:not_found)
++    team.add_members([outsider.id])
++    get "#{path}/#{id}", headers: headers
++    expect(response).to have_http_status(:success)
++    team.remove_members([outsider.id])
++    get path, headers: headers
++    expect(response.parsed_body.map { |row| row['id'] }).not_to include(id)
++  end
++
++  it 'does not expose deleted teams or disturb personal and unrelated shared views' do
++    id = view_id
++    personal = create(:custom_filter, account: account, user: bob)
++    other_team = create(:team, account: account)
++    post path, headers: admin_headers,
++               params: { custom_filter: { name: 'Other', query: query, filter_type: 'conversation', team_id: other_team.id } }, as: :json
++    other_id = response.parsed_body.fetch('id')
++    team.destroy!
++    get "#{path}/#{id}", headers: admin_headers
++    expect(response).to have_http_status(:not_found)
++    get "#{path}/#{personal.id}", headers: bob_headers
++    expect(response).to have_http_status(:success)
++    get "#{path}/#{other_id}", headers: admin_headers
++    expect(response).to have_http_status(:success)
++  end
++
++  it 'allows administrator creation without membership and avoids duplicate lists' do
++    id = view_id
++    get path, headers: admin_headers
++    expect(response.parsed_body.count { |row| row['id'] == id }).to eq(1)
++    team.add_members([admin.id])
++    get path, headers: admin_headers
++    expect(response.parsed_body.count { |row| row['id'] == id }).to eq(1)
++  end
++
++  it 'does not grant administrators access to personal filters' do
++    personal = create(:custom_filter, account: account, user: alice)
++    get "#{path}/#{personal.id}", headers: admin_headers
++    expect(response).to have_http_status(:not_found)
++    get path, headers: admin_headers
++    expect(response.parsed_body.map { |row| row['id'] }).not_to include(personal.id)
++  end
++
++  it 'does not let a reader delete the view' do
++    id = view_id
++    delete "#{path}/#{id}", headers: bob_headers
++    expect(response).to have_http_status(:forbidden)
++    get "#{path}/#{id}", headers: alice_headers
++    expect(response).to have_http_status(:success)
++    delete "#{path}/#{id}", headers: admin_headers
++    expect(response).to have_http_status(:no_content)
++    get "#{path}/#{id}", headers: alice_headers
++    expect(response).to have_http_status(:not_found)
++  end
++
++  it 'rejects invalid shared query shapes without creating a record' do
++    team.add_members([alice.id])
++    [nil, {}, { payload: [] }, { payload: [{ attribute_key: 'nonexistent', filter_operator: 'equal_to', values: ['x'] }] }].each do |invalid_query|
++      expect do
++        post path, headers: alice_headers,
++                   params: { custom_filter: { name: 'Invalid', filter_type: 'conversation', team_id: team.id, query: invalid_query } }, as: :json
++      end.not_to change(CustomFilter, :count)
++      expect(response).to have_http_status(:unprocessable_entity)
++    end
++  end
++
++  it 'does not let the caller forge ownership or change audience' do
++    id = view_id
++    patch "#{path}/#{id}", headers: alice_headers,
++                           params: { custom_filter: { user_id: bob.id, account_id: create(:account).id } }, as: :json
++    expect(response).to have_http_status(:success)
++    patch "#{path}/#{id}", headers: bob_headers, params: { custom_filter: { name: 'Forged' } }, as: :json
++    expect(response).to have_http_status(:forbidden)
++    patch "#{path}/#{id}", headers: alice_headers, params: { custom_filter: { team_id: team.id } }, as: :json
++    expect(response).to have_http_status(:success)
++    patch "#{path}/#{id}", headers: alice_headers, params: { custom_filter: { team_id: nil } }, as: :json
++    expect(response).to have_http_status(:unprocessable_entity)
++  end
++
++  it 'keeps unread badges viewer-specific after warming caches and revoking permissions' do
++    id = view_id
++    account.enable_features!(:conversation_unread_counts, :unread_count_for_filters)
++    general = create(:inbox, account: account)
++    restricted = create(:inbox, account: account)
++    [alice, bob].each { |user| create(:inbox_member, inbox: general, user: user) }
++    create(:inbox_member, inbox: restricted, user: alice)
++    create_unread_conversation(account: account, inbox: general)
++    hidden = create_unread_conversation(account: account, inbox: restricted)
++    unread_path = "/api/v1/accounts/#{account.id}/conversations/unread_counts"
++    [alice_headers, bob_headers, alice_headers, bob_headers].zip([2, 1, 2, 1]).each do |headers, expected|
++      get unread_path, headers: headers
++      expect(response.parsed_body.dig('payload', 'folders', id.to_s)).to eq(expected)
++    end
++    get "/api/v1/accounts/#{account.id}/conversations/#{hidden.display_id}", headers: bob_headers
++    expect(response.status).to be_in([401, 403, 404])
++    team.remove_members([bob.id])
++    get unread_path, headers: bob_headers
++    expect(response.parsed_body.dig('payload', 'folders')).not_to have_key(id.to_s)
++    team.add_members([bob.id])
++    InboxMember.find_by!(inbox: general, user: bob).destroy!
++    get unread_path, headers: bob_headers
++    expect(response.parsed_body.dig('payload', 'folders')).not_to have_key(id.to_s)
++    get "#{path}/#{id}", headers: bob_headers
++    expect(response).to have_http_status(:success)
++    post "/api/v1/accounts/#{account.id}/conversations/filter", headers: bob_headers, params: response.parsed_body['query'], as: :json
++    expect(response.parsed_body['payload']).to be_empty
++    expect(response.parsed_body.dig('meta', 'all_count')).to eq(0)
++  end
++
++  it 'preserves AND/OR conditions and paginates only authorized conversations' do
++    id = view_id
++    general = create(:inbox, account: account)
++    hidden = create(:inbox, account: account)
++    create(:inbox_member, inbox: general, user: bob)
++    visible = create_list(:conversation, 26, account: account, inbox: general, status: :open)
++    create(:conversation, account: account, inbox: general, status: :resolved)
++    create(:conversation, account: account, inbox: hidden, status: :open)
++    combined = { payload: [
++      { attribute_key: 'status', filter_operator: 'equal_to', values: ['open'], query_operator: 'AND' },
++      { attribute_key: 'inbox_id', filter_operator: 'equal_to', values: [general.id], query_operator: nil }
++    ] }
++    patch "#{path}/#{id}", headers: alice_headers, params: { custom_filter: { query: combined } }, as: :json
++    expect(response).to have_http_status(:success)
++    get "#{path}/#{id}", headers: bob_headers
++    stored = response.parsed_body['query']
++    expect(stored).to eq(combined.deep_stringify_keys)
++    found = []
++    (1..5).each do |page|
++      post "/api/v1/accounts/#{account.id}/conversations/filter", headers: bob_headers, params: stored.merge('page' => page), as: :json
++      expect(response).to have_http_status(:success)
++      expect(response.parsed_body.dig('meta', 'all_count')).to eq(26)
++      rows = response.parsed_body['payload']
++      break if rows.empty?
++
++      found.concat(rows.pluck('id'))
++    end
++    expect(found).to match_array(visible.map { |conversation| conversation.reload.display_id })
++    combined[:payload][0][:query_operator] = 'OR'
++    combined[:payload][1] = { attribute_key: 'status', filter_operator: 'equal_to', values: ['resolved'], query_operator: nil }
++    patch "#{path}/#{id}", headers: alice_headers, params: { custom_filter: { query: combined } }, as: :json
++    expect(response).to have_http_status(:success)
++    post "/api/v1/accounts/#{account.id}/conversations/filter", headers: bob_headers, params: combined, as: :json
++    expect(response.parsed_body.dig('meta', 'all_count')).to eq(27)
++  end
++end

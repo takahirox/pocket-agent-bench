@@ -1,0 +1,821 @@
+{
+  "kind": "complete-engineering-task-qualification",
+  "task_id": "chatwoot-team-views",
+  "task_version": "0.2",
+  "recorded_at": "2026-09-17T11:00:06.532801+00:00",
+  "qualification_status": "all seven expected outcomes observed",
+  "source_commit": "5b7038b950b763e230df2d544df9b87b8752fef3",
+  "reference_patch_sha256": "c6d5bf1a375bd3d188785b4dbd6871c721308212a20616ce7321f0380a2bbed9",
+  "reference_patch_applies_to_baseline": true,
+  "reference_worktree_matches_submitted_source": true,
+  "source_file_count": 9284,
+  "observed_image_ids": {
+    "app": "sha256:d0c58aba4fafb00a5fbbf427b905b4a749ce52e19760ff10da3bba47e00a931d",
+    "seed": "sha256:d0c58aba4fafb00a5fbbf427b905b4a749ce52e19760ff10da3bba47e00a931d",
+    "postgres": "sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b",
+    "redis": "sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf",
+    "proxy": "sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236",
+    "browser": "sha256:b2bd19e0e255a68d8cfeff7e4527320e2ee03d69111bb4e8b8b111f0198e687a"
+  },
+  "browser": "141.0.7390.37",
+  "resource_limits": {
+    "app": {
+      "mem_limit": "3g",
+      "cpus": 2,
+      "pids_limit": 512
+    },
+    "seed": {
+      "mem_limit": "3g",
+      "cpus": 2,
+      "pids_limit": 512
+    },
+    "postgres": {
+      "mem_limit": "512m"
+    },
+    "redis": {
+      "mem_limit": "128m"
+    },
+    "proxy": {
+      "mem_limit": "128m"
+    },
+    "build": {
+      "mem_limit": "5g",
+      "cpus": 3,
+      "pids_limit": 512
+    },
+    "worker": {
+      "mem_limit": "1g",
+      "cpus": 1,
+      "pids_limit": 512
+    },
+    "browser": {
+      "mem_limit": "2g",
+      "cpus": 2,
+      "pids_limit": 512
+    }
+  },
+  "cases": [
+    {
+      "kind": "reference",
+      "artifact_sha256": "0a9b5e0fb803994934f83ce32369c73de80c756c9c2b45dbb4e6f38ef859f73a",
+      "qualified": true,
+      "automated_correctness": "pass",
+      "expected_check": null,
+      "observed_failure": [],
+      "elapsed_seconds": 227.8,
+      "reward": 1,
+      "evaluator_set_sha256": "9d9abf93fda877138541ac0c15ee6d04adff96e61ed8321fad9cafa983b1517c",
+      "ui_map_sha256": "7ba01bce763f3d9e7be79ce81ad95503510d5d41e70f96329b0cf8c84aa2781c",
+      "stage_results": {
+        "submission": "pass",
+        "services": "pass",
+        "baseline-schema": "pass",
+        "fixture": "pass",
+        "migration": "pass",
+        "legacy-data": "pass",
+        "fresh-install": "pass",
+        "test-schema": "pass",
+        "ruby-regression": "pass",
+        "added-ruby-tests": "pass",
+        "frontend-regression": "pass",
+        "ruby-lint": "pass",
+        "frontend-lint": "pass",
+        "production-build": "pass",
+        "application": "pass",
+        "container-boundary": "pass",
+        "api": "pass",
+        "behavior": "pass",
+        "restart": "pass",
+        "verifier-input-container": "pass",
+        "browser": "pass",
+        "worker": "pass",
+        "lifecycle": "pass",
+        "cleanup": "pass"
+      },
+      "human_review": "not_performed",
+      "ruby-regression": {
+        "status": "pass",
+        "summary": {
+          "duration": 24.493781414,
+          "example_count": 148,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "added-ruby-tests": {
+        "status": "pass",
+        "summary": {
+          "duration": 8.745330074,
+          "example_count": 13,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "frontend-regression": {
+        "status": "pass",
+        "tests": 184,
+        "passed": 184
+      },
+      "api": {
+        "status": "pass",
+        "checks": {
+          "pass": 45
+        }
+      },
+      "behavior": {
+        "status": "pass",
+        "checks": {
+          "pass": 24
+        }
+      },
+      "browser": {
+        "status": "pass",
+        "checks": 11,
+        "browser": "141.0.7390.37"
+      },
+      "lifecycle": {
+        "status": "pass",
+        "checks": {
+          "pass": 4
+        }
+      }
+    },
+    {
+      "kind": "baseline",
+      "artifact_sha256": "48870dee017d4b0518a76c5fb922446cfefb67cefb58353fd33ddf29f32862e7",
+      "qualified": true,
+      "automated_correctness": "fail",
+      "expected_check": "shared.create",
+      "observed_failure": [
+        {
+          "name": "shared.create",
+          "requirement": "R2/R6",
+          "status": "fail",
+          "detail": "Shared team_id not persisted/exposed"
+        }
+      ],
+      "elapsed_seconds": 160.47,
+      "reward": 0,
+      "evaluator_set_sha256": "0967fbdb273f1e07a1d6ccc4ac40acd53a5c1949d1be3a4012954e94b05cc80e",
+      "ui_map_sha256": "7ba01bce763f3d9e7be79ce81ad95503510d5d41e70f96329b0cf8c84aa2781c",
+      "stage_results": {
+        "submission": "fail",
+        "services": "pass",
+        "baseline-schema": "pass",
+        "fixture": "pass",
+        "migration": "pass",
+        "legacy-data": "pass",
+        "fresh-install": "pass",
+        "test-schema": "pass",
+        "ruby-regression": "pass",
+        "frontend-regression": "pass",
+        "ruby-lint": "pass",
+        "frontend-lint": "pass",
+        "production-build": "pass",
+        "application": "pass",
+        "container-boundary": "pass",
+        "api": "fail",
+        "behavior": "blocked",
+        "restart": "blocked",
+        "browser": "blocked",
+        "lifecycle": "blocked",
+        "cleanup": "pass"
+      },
+      "human_review": "not_performed",
+      "ruby-regression": {
+        "status": "pass",
+        "summary": {
+          "duration": 25.685128388,
+          "example_count": 148,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "frontend-regression": {
+        "status": "pass",
+        "tests": 184,
+        "passed": 184
+      },
+      "api": {
+        "status": "fail",
+        "checks": {
+          "pass": 31,
+          "fail": 20
+        }
+      },
+      "behavior": {
+        "status": "blocked",
+        "reason": "Basic shared-view API did not pass"
+      },
+      "browser": {
+        "status": "blocked",
+        "reason": "Basic shared-view API did not pass"
+      },
+      "lifecycle": {
+        "status": "blocked",
+        "reason": "Basic shared-view API did not pass"
+      }
+    },
+    {
+      "kind": "reader_can_manage",
+      "artifact_sha256": "7f1e046c2b04f81d2494e7ad08cd818e956d8c45b1c1161d9e57d0f7648293f6",
+      "qualified": true,
+      "automated_correctness": "fail",
+      "expected_check": "shared.denied_update.bob",
+      "observed_failure": [
+        {
+          "name": "shared.denied_update.bob",
+          "requirement": "R3",
+          "status": "fail",
+          "detail": "Forbidden update HTTP 200"
+        }
+      ],
+      "elapsed_seconds": 188.7,
+      "reward": 0,
+      "evaluator_set_sha256": "0967fbdb273f1e07a1d6ccc4ac40acd53a5c1949d1be3a4012954e94b05cc80e",
+      "ui_map_sha256": "7ba01bce763f3d9e7be79ce81ad95503510d5d41e70f96329b0cf8c84aa2781c",
+      "stage_results": {
+        "submission": "pass",
+        "services": "pass",
+        "baseline-schema": "pass",
+        "fixture": "pass",
+        "migration": "pass",
+        "legacy-data": "pass",
+        "fresh-install": "pass",
+        "test-schema": "pass",
+        "ruby-regression": "pass",
+        "added-ruby-tests": "fail",
+        "frontend-regression": "pass",
+        "ruby-lint": "pass",
+        "frontend-lint": "pass",
+        "production-build": "pass",
+        "application": "pass",
+        "container-boundary": "pass",
+        "api": "fail",
+        "behavior": "blocked",
+        "restart": "blocked",
+        "browser": "blocked",
+        "lifecycle": "blocked",
+        "cleanup": "pass"
+      },
+      "human_review": "not_performed",
+      "ruby-regression": {
+        "status": "pass",
+        "summary": {
+          "duration": 22.848223497,
+          "example_count": 148,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "added-ruby-tests": {
+        "status": "fail",
+        "summary": {
+          "duration": 7.090858004,
+          "example_count": 13,
+          "failure_count": 2,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "frontend-regression": {
+        "status": "pass",
+        "tests": 184,
+        "passed": 184
+      },
+      "api": {
+        "status": "fail",
+        "checks": {
+          "pass": 43,
+          "fail": 2
+        }
+      },
+      "behavior": {
+        "status": "blocked",
+        "reason": "Basic shared-view API did not pass"
+      },
+      "browser": {
+        "status": "blocked",
+        "reason": "Basic shared-view API did not pass"
+      },
+      "lifecycle": {
+        "status": "blocked",
+        "reason": "Basic shared-view API did not pass"
+      }
+    },
+    {
+      "kind": "creator_deletes_shared",
+      "artifact_sha256": "3958c9caa318b7b1bdc8300591e56eac4424c340e126b6009ccad2c756a3f63d",
+      "qualified": true,
+      "automated_correctness": "fail",
+      "expected_check": "shared.creator_deleted",
+      "observed_failure": [
+        {
+          "name": "shared.creator_deleted",
+          "requirement": "R5",
+          "status": "fail",
+          "detail": "GET returned HTTP 404; expected [200]"
+        }
+      ],
+      "elapsed_seconds": 255.64,
+      "reward": 0,
+      "evaluator_set_sha256": "37d0f36830dbeade1926d72a0720383bd62262b47ed43703a5fda8ee0d06485d",
+      "ui_map_sha256": "7ba01bce763f3d9e7be79ce81ad95503510d5d41e70f96329b0cf8c84aa2781c",
+      "stage_results": {
+        "submission": "pass",
+        "services": "pass",
+        "baseline-schema": "pass",
+        "fixture": "pass",
+        "migration": "pass",
+        "legacy-data": "pass",
+        "fresh-install": "pass",
+        "test-schema": "pass",
+        "ruby-regression": "pass",
+        "added-ruby-tests": "fail",
+        "frontend-regression": "pass",
+        "ruby-lint": "pass",
+        "frontend-lint": "pass",
+        "production-build": "pass",
+        "application": "pass",
+        "container-boundary": "pass",
+        "api": "pass",
+        "behavior": "pass",
+        "restart": "pass",
+        "verifier-input-container": "pass",
+        "browser": "pass",
+        "worker": "pass",
+        "lifecycle": "fail",
+        "cleanup": "pass"
+      },
+      "human_review": "not_performed",
+      "ruby-regression": {
+        "status": "pass",
+        "summary": {
+          "duration": 24.410328789,
+          "example_count": 148,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "added-ruby-tests": {
+        "status": "fail",
+        "summary": {
+          "duration": 6.932302045,
+          "example_count": 13,
+          "failure_count": 1,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "frontend-regression": {
+        "status": "pass",
+        "tests": 184,
+        "passed": 184
+      },
+      "api": {
+        "status": "pass",
+        "checks": {
+          "pass": 45
+        }
+      },
+      "behavior": {
+        "status": "pass",
+        "checks": {
+          "pass": 24
+        }
+      },
+      "browser": {
+        "status": "pass",
+        "checks": 11,
+        "browser": "141.0.7390.37"
+      },
+      "lifecycle": {
+        "status": "fail",
+        "checks": {
+          "pass": 3,
+          "fail": 1
+        }
+      }
+    },
+    {
+      "kind": "creator_unread_counts",
+      "artifact_sha256": "baddd80bf9076bd7bc7981c9a91678ec23ae0c0a88737319e474b60a4b3b2477",
+      "qualified": true,
+      "automated_correctness": "fail",
+      "expected_check": "shared.viewer_counts_and_inbox_changes",
+      "observed_failure": [
+        {
+          "name": "shared.viewer_counts_and_inbox_changes",
+          "requirement": "R4/R5",
+          "status": "fail",
+          "detail": "Wrong unread count for bob: expected 3, got 5"
+        }
+      ],
+      "elapsed_seconds": 240.55,
+      "reward": 0,
+      "evaluator_set_sha256": "37d0f36830dbeade1926d72a0720383bd62262b47ed43703a5fda8ee0d06485d",
+      "ui_map_sha256": "7ba01bce763f3d9e7be79ce81ad95503510d5d41e70f96329b0cf8c84aa2781c",
+      "stage_results": {
+        "submission": "pass",
+        "services": "pass",
+        "baseline-schema": "pass",
+        "fixture": "pass",
+        "migration": "pass",
+        "legacy-data": "pass",
+        "fresh-install": "pass",
+        "test-schema": "pass",
+        "ruby-regression": "pass",
+        "added-ruby-tests": "fail",
+        "frontend-regression": "pass",
+        "ruby-lint": "pass",
+        "frontend-lint": "pass",
+        "production-build": "pass",
+        "application": "pass",
+        "container-boundary": "pass",
+        "api": "pass",
+        "behavior": "fail",
+        "restart": "pass",
+        "verifier-input-container": "pass",
+        "browser": "pass",
+        "worker": "pass",
+        "lifecycle": "pass",
+        "cleanup": "pass"
+      },
+      "human_review": "not_performed",
+      "ruby-regression": {
+        "status": "pass",
+        "summary": {
+          "duration": 24.891306039,
+          "example_count": 148,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "added-ruby-tests": {
+        "status": "fail",
+        "summary": {
+          "duration": 7.747993337,
+          "example_count": 13,
+          "failure_count": 1,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "frontend-regression": {
+        "status": "pass",
+        "tests": 184,
+        "passed": 184
+      },
+      "api": {
+        "status": "pass",
+        "checks": {
+          "pass": 45
+        }
+      },
+      "behavior": {
+        "status": "fail",
+        "checks": {
+          "pass": 23,
+          "fail": 1
+        }
+      },
+      "browser": {
+        "status": "pass",
+        "checks": 11,
+        "browser": "141.0.7390.37"
+      },
+      "lifecycle": {
+        "status": "pass",
+        "checks": {
+          "pass": 4
+        }
+      }
+    },
+    {
+      "kind": "stale_membership",
+      "artifact_sha256": "74049d8fd9dcdcc68196732e0d269b829c87e3bfc4bd3fd46fb23272d521f26e",
+      "qualified": true,
+      "automated_correctness": "fail",
+      "expected_check": "shared.membership_changes",
+      "observed_failure": [
+        {
+          "name": "shared.membership_changes",
+          "requirement": "R3/R5",
+          "status": "fail",
+          "detail": "GET returned HTTP 200; expected [401, 403, 404]"
+        }
+      ],
+      "elapsed_seconds": 244.28,
+      "reward": 0,
+      "evaluator_set_sha256": "37d0f36830dbeade1926d72a0720383bd62262b47ed43703a5fda8ee0d06485d",
+      "ui_map_sha256": "7ba01bce763f3d9e7be79ce81ad95503510d5d41e70f96329b0cf8c84aa2781c",
+      "stage_results": {
+        "submission": "pass",
+        "services": "pass",
+        "baseline-schema": "pass",
+        "fixture": "pass",
+        "migration": "pass",
+        "legacy-data": "pass",
+        "fresh-install": "pass",
+        "test-schema": "pass",
+        "ruby-regression": "pass",
+        "added-ruby-tests": "pass",
+        "frontend-regression": "pass",
+        "ruby-lint": "pass",
+        "frontend-lint": "pass",
+        "production-build": "pass",
+        "application": "pass",
+        "container-boundary": "pass",
+        "api": "pass",
+        "behavior": "fail",
+        "restart": "pass",
+        "verifier-input-container": "pass",
+        "browser": "fail",
+        "worker": "pass",
+        "lifecycle": "pass",
+        "cleanup": "pass"
+      },
+      "human_review": "not_performed",
+      "ruby-regression": {
+        "status": "pass",
+        "summary": {
+          "duration": 23.711882663,
+          "example_count": 148,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "added-ruby-tests": {
+        "status": "pass",
+        "summary": {
+          "duration": 7.999300588,
+          "example_count": 13,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "frontend-regression": {
+        "status": "pass",
+        "tests": 184,
+        "passed": 184
+      },
+      "api": {
+        "status": "pass",
+        "checks": {
+          "pass": 45
+        }
+      },
+      "behavior": {
+        "status": "fail",
+        "checks": {
+          "pass": 22,
+          "fail": 2
+        }
+      },
+      "browser": {
+        "status": "fail"
+      },
+      "lifecycle": {
+        "status": "pass",
+        "checks": {
+          "pass": 4
+        }
+      }
+    },
+    {
+      "kind": "valid_join_and_wording",
+      "artifact_sha256": "9dde8d7f6d4f69df94f1cf844f6eaa9ea9278f6f2c853a7eef12b0fcb4e9b452",
+      "qualified": true,
+      "automated_correctness": "pass",
+      "expected_check": null,
+      "observed_failure": [],
+      "elapsed_seconds": 267.98,
+      "reward": 1,
+      "evaluator_set_sha256": "37d0f36830dbeade1926d72a0720383bd62262b47ed43703a5fda8ee0d06485d",
+      "ui_map_sha256": "ae8d7195f7235278d6127b6a6aab57dba267751ecbf009613da782438c144438",
+      "stage_results": {
+        "submission": "pass",
+        "services": "pass",
+        "baseline-schema": "pass",
+        "fixture": "pass",
+        "migration": "pass",
+        "legacy-data": "pass",
+        "fresh-install": "pass",
+        "test-schema": "pass",
+        "ruby-regression": "pass",
+        "added-ruby-tests": "pass",
+        "frontend-regression": "pass",
+        "ruby-lint": "pass",
+        "frontend-lint": "pass",
+        "production-build": "pass",
+        "application": "pass",
+        "container-boundary": "pass",
+        "api": "pass",
+        "behavior": "pass",
+        "restart": "pass",
+        "verifier-input-container": "pass",
+        "browser": "pass",
+        "worker": "pass",
+        "lifecycle": "pass",
+        "cleanup": "pass"
+      },
+      "human_review": "not_performed",
+      "ruby-regression": {
+        "status": "pass",
+        "summary": {
+          "duration": 24.096360831,
+          "example_count": 148,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "added-ruby-tests": {
+        "status": "pass",
+        "summary": {
+          "duration": 8.064768337,
+          "example_count": 13,
+          "failure_count": 0,
+          "pending_count": 0,
+          "errors_outside_of_examples_count": 0
+        }
+      },
+      "frontend-regression": {
+        "status": "pass",
+        "tests": 184,
+        "passed": 184
+      },
+      "api": {
+        "status": "pass",
+        "checks": {
+          "pass": 45
+        }
+      },
+      "behavior": {
+        "status": "pass",
+        "checks": {
+          "pass": 24
+        }
+      },
+      "browser": {
+        "status": "pass",
+        "checks": 11,
+        "browser": "141.0.7390.37"
+      },
+      "lifecycle": {
+        "status": "pass",
+        "checks": {
+          "pass": 4
+        }
+      }
+    }
+  ],
+  "evaluator_sets": {
+    "9d9abf93fda877138541ac0c15ee6d04adff96e61ed8321fad9cafa983b1517c": {
+      "task.py": "ec39a204e40adf2b7bd035d11a2f7dc175dbd7637a2d64417a40bb08fa730995",
+      "acceptance_spec.rb": "74af7d2309ad18727c62faedc2d8737fde15a4ac7ee0b8aa86be8fe445edd833",
+      "reference-ui-map.json": "2453b49fe40bd6eef73d0cfae461d8a8282b6e4fa1a6493e93aafb20db082ad0",
+      "browser-baseline.cjs": "dfc03649726d62cc5ec1dd240b88cd76ce75eb2a982960a2be26ef73f58b2018",
+      "ui-map.cjs": "accf129affddc151e5fa1c2e11a1b627e1b618fbe9568d13025bb29d52327521",
+      "task-ui-map.json": "7ba01bce763f3d9e7be79ce81ad95503510d5d41e70f96329b0cf8c84aa2781c",
+      "variants.py": "b3173e5c15796c20768d64192e29d25cf3e1fb9ba818ec9af815c8bc9fb4c4e9",
+      "artifact.py": "8ffe3056de80656e1bd258f6203b774ac0553a1d75ca9ef4aeae8b1b387f1086",
+      "behavior.py": "5182c31418973c5d1104ee7a0e6915af754b5c0178b0783f91a59ad6cb69b3ae",
+      "agent_workspace.py": "8128ee1d259d90f43bf7f5db1e4cb3724fa95776e981ebe311c77c05f15503c0",
+      "initialize.py": "6f670f9eb085567b399f74044ea448adb57f4911bad1d571b51b7a5d3298e245",
+      "task.json": "55dd62ce9c23ba5084b35ed9fe5a8bacae55378868dfc520198ed4e2f0926fa5",
+      "browser-mapped.cjs": "41088d6a3a2e3d37bddac131966cf585c0ec312549ef1de16e50a1490965ffef",
+      "isolated.py": "b4065699ef608780984956770cf523fad313d2815ca4d3f686068ad29f063f4f",
+      "negative_control.rb": "2e21eb38eabced87f18878579736fa2225a73bf56fa8d8cca72c462a91854fa4",
+      "checks.json": "d177430b9d62a242f1fc61c12047cf76bd06f72708b17a429bd701fe0e7dc71f",
+      "restart_probe.py": "c218807143c9ad7820a968ecf8a796bf09663cc59a3615ed159950e1b99d5535",
+      "ui-map.test.cjs": "0fa29cc20260b8307473627601901bb59d6bb5de98439acfc220a136b2f6d830",
+      "browser-shared.cjs": "7db75b21871a288957d4bdc29c3f7169ce119f4748184634d08e6e2ea1595d70",
+      "migration_probe.py": "0c576848d2f0d47d2b7bfc0f0f452f7a50aa1ce6017d713709c7e89d499ba99a",
+      "probe.py": "944d495e6e579a4df8e3097339495c8a0ea98726fc88a0d4d23cda96093a3d7f",
+      "execution_guard.py": "8a80328042275bf52ff15f4aa292b8d940f5079f0294a589c30edd641156dcb1",
+      "browser-task.cjs": "792546b1fd94a08650e601bbd31ea25396e382536df8b69250938150bfc9ed36",
+      "fixture.rb": "29e732fac1b8058f127ce84cb32d006899f1f46f80681471cf26612b79a5070b",
+      "check_controls.py": "7199b23e90d08bf0544d96effe85f0eeb9918cbf9acf4950ea79e90a4646624c",
+      "prepare.py": "affd4eee548072100eba863d2bd0d1b28de7b2d125be21860bb2ce4dbd6d18b4",
+      "qualify.py": "958361da720e22a5df00b9bd7cad4cc99e01758b755dd10ee66a1a4d98356b83"
+    },
+    "0967fbdb273f1e07a1d6ccc4ac40acd53a5c1949d1be3a4012954e94b05cc80e": {
+      "task.py": "ec39a204e40adf2b7bd035d11a2f7dc175dbd7637a2d64417a40bb08fa730995",
+      "acceptance_spec.rb": "74af7d2309ad18727c62faedc2d8737fde15a4ac7ee0b8aa86be8fe445edd833",
+      "reference-ui-map.json": "2453b49fe40bd6eef73d0cfae461d8a8282b6e4fa1a6493e93aafb20db082ad0",
+      "browser-baseline.cjs": "dfc03649726d62cc5ec1dd240b88cd76ce75eb2a982960a2be26ef73f58b2018",
+      "ui-map.cjs": "accf129affddc151e5fa1c2e11a1b627e1b618fbe9568d13025bb29d52327521",
+      "task-ui-map.json": "7ba01bce763f3d9e7be79ce81ad95503510d5d41e70f96329b0cf8c84aa2781c",
+      "variants.py": "b3173e5c15796c20768d64192e29d25cf3e1fb9ba818ec9af815c8bc9fb4c4e9",
+      "artifact.py": "8ffe3056de80656e1bd258f6203b774ac0553a1d75ca9ef4aeae8b1b387f1086",
+      "behavior.py": "5182c31418973c5d1104ee7a0e6915af754b5c0178b0783f91a59ad6cb69b3ae",
+      "agent_workspace.py": "75c578d230acf12146c532582b63bad2abf1a29c4873d4e8293d85874f40689c",
+      "initialize.py": "6f670f9eb085567b399f74044ea448adb57f4911bad1d571b51b7a5d3298e245",
+      "task.json": "55dd62ce9c23ba5084b35ed9fe5a8bacae55378868dfc520198ed4e2f0926fa5",
+      "browser-mapped.cjs": "41088d6a3a2e3d37bddac131966cf585c0ec312549ef1de16e50a1490965ffef",
+      "isolated.py": "b4065699ef608780984956770cf523fad313d2815ca4d3f686068ad29f063f4f",
+      "negative_control.rb": "2e21eb38eabced87f18878579736fa2225a73bf56fa8d8cca72c462a91854fa4",
+      "checks.json": "d177430b9d62a242f1fc61c12047cf76bd06f72708b17a429bd701fe0e7dc71f",
+      "restart_probe.py": "c218807143c9ad7820a968ecf8a796bf09663cc59a3615ed159950e1b99d5535",
+      "ui-map.test.cjs": "0fa29cc20260b8307473627601901bb59d6bb5de98439acfc220a136b2f6d830",
+      "browser-shared.cjs": "7db75b21871a288957d4bdc29c3f7169ce119f4748184634d08e6e2ea1595d70",
+      "migration_probe.py": "0c576848d2f0d47d2b7bfc0f0f452f7a50aa1ce6017d713709c7e89d499ba99a",
+      "probe.py": "944d495e6e579a4df8e3097339495c8a0ea98726fc88a0d4d23cda96093a3d7f",
+      "execution_guard.py": "8a80328042275bf52ff15f4aa292b8d940f5079f0294a589c30edd641156dcb1",
+      "browser-task.cjs": "792546b1fd94a08650e601bbd31ea25396e382536df8b69250938150bfc9ed36",
+      "fixture.rb": "29e732fac1b8058f127ce84cb32d006899f1f46f80681471cf26612b79a5070b",
+      "check_controls.py": "7199b23e90d08bf0544d96effe85f0eeb9918cbf9acf4950ea79e90a4646624c",
+      "prepare.py": "affd4eee548072100eba863d2bd0d1b28de7b2d125be21860bb2ce4dbd6d18b4",
+      "qualify.py": "958361da720e22a5df00b9bd7cad4cc99e01758b755dd10ee66a1a4d98356b83"
+    },
+    "37d0f36830dbeade1926d72a0720383bd62262b47ed43703a5fda8ee0d06485d": {
+      "task.py": "c9e0866ee31f4fac5c45edf4eabe8bc3d1ec031b465938dee70bd624e93ba540",
+      "acceptance_spec.rb": "74af7d2309ad18727c62faedc2d8737fde15a4ac7ee0b8aa86be8fe445edd833",
+      "reference-ui-map.json": "2453b49fe40bd6eef73d0cfae461d8a8282b6e4fa1a6493e93aafb20db082ad0",
+      "browser-baseline.cjs": "dfc03649726d62cc5ec1dd240b88cd76ce75eb2a982960a2be26ef73f58b2018",
+      "ui-map.cjs": "accf129affddc151e5fa1c2e11a1b627e1b618fbe9568d13025bb29d52327521",
+      "task-ui-map.json": "7ba01bce763f3d9e7be79ce81ad95503510d5d41e70f96329b0cf8c84aa2781c",
+      "variants.py": "b3173e5c15796c20768d64192e29d25cf3e1fb9ba818ec9af815c8bc9fb4c4e9",
+      "artifact.py": "8ffe3056de80656e1bd258f6203b774ac0553a1d75ca9ef4aeae8b1b387f1086",
+      "behavior.py": "5182c31418973c5d1104ee7a0e6915af754b5c0178b0783f91a59ad6cb69b3ae",
+      "agent_workspace.py": "75c578d230acf12146c532582b63bad2abf1a29c4873d4e8293d85874f40689c",
+      "initialize.py": "6f670f9eb085567b399f74044ea448adb57f4911bad1d571b51b7a5d3298e245",
+      "task.json": "55dd62ce9c23ba5084b35ed9fe5a8bacae55378868dfc520198ed4e2f0926fa5",
+      "browser-mapped.cjs": "41088d6a3a2e3d37bddac131966cf585c0ec312549ef1de16e50a1490965ffef",
+      "isolated.py": "e402b2512d84cb43d8ebc0da15e403145ceb5d4dfee5e29ffd602e877594f475",
+      "negative_control.rb": "2e21eb38eabced87f18878579736fa2225a73bf56fa8d8cca72c462a91854fa4",
+      "checks.json": "d177430b9d62a242f1fc61c12047cf76bd06f72708b17a429bd701fe0e7dc71f",
+      "restart_probe.py": "c218807143c9ad7820a968ecf8a796bf09663cc59a3615ed159950e1b99d5535",
+      "ui-map.test.cjs": "0fa29cc20260b8307473627601901bb59d6bb5de98439acfc220a136b2f6d830",
+      "browser-shared.cjs": "7db75b21871a288957d4bdc29c3f7169ce119f4748184634d08e6e2ea1595d70",
+      "migration_probe.py": "0c576848d2f0d47d2b7bfc0f0f452f7a50aa1ce6017d713709c7e89d499ba99a",
+      "probe.py": "944d495e6e579a4df8e3097339495c8a0ea98726fc88a0d4d23cda96093a3d7f",
+      "execution_guard.py": "8a80328042275bf52ff15f4aa292b8d940f5079f0294a589c30edd641156dcb1",
+      "browser-task.cjs": "792546b1fd94a08650e601bbd31ea25396e382536df8b69250938150bfc9ed36",
+      "fixture.rb": "29e732fac1b8058f127ce84cb32d006899f1f46f80681471cf26612b79a5070b",
+      "check_controls.py": "7199b23e90d08bf0544d96effe85f0eeb9918cbf9acf4950ea79e90a4646624c",
+      "prepare.py": "affd4eee548072100eba863d2bd0d1b28de7b2d125be21860bb2ce4dbd6d18b4",
+      "qualify.py": "958361da720e22a5df00b9bd7cad4cc99e01758b755dd10ee66a1a4d98356b83"
+    }
+  },
+  "preparation_revision_note": "During qualification, public development documentation was added and baseline dependency-image selection/manifest metadata were separated. Behavioral checks and scoring logic were unchanged across these seven runs. Each actual evaluator file set is retained above.",
+  "tooling_tests": {
+    "pytest_passed": 310,
+    "ui_protocol_node_tests_passed": 6,
+    "ruff": "pass",
+    "reference_patch_apply_check": "pass"
+  },
+  "public_workspace_smoke": {
+    "base_commit": "5b7038b950b763e230df2d544df9b87b8752fef3",
+    "tracked_source_unchanged": true,
+    "reference_provided": false,
+    "public_files": [
+      "TASK.md",
+      "UI-PROTOCOL.md",
+      "CHECKS.json",
+      "DEVELOPMENT.md",
+      "REVIEW.md",
+      "UI-MAP.example.json",
+      "BENCHMARK_FIXTURE.json"
+    ],
+    "baseline_api": {
+      "pass": 11
+    },
+    "ruby_smoke": {
+      "example_count": 4,
+      "failure_count": 0,
+      "pending_count": 0
+    },
+    "frontend_smoke": {
+      "status": "pass",
+      "command": "NODE_ENV=test pnpm test app/javascript/dashboard/components/specs/ChatListHeader.spec.js --minWorkers=1 --maxWorkers=2",
+      "exit_code": 0
+    }
+  },
+  "agent_trials": 0,
+  "agent_difficulty": "unmeasured",
+  "human_review": "not_performed; separate published rubric",
+  "limitations": [
+    "The valid JOIN/wording control is a localized variation, not an independently authored implementation.",
+    "Finite automated checks do not establish exhaustive correctness, test quality or human UX/accessibility approval.",
+    "Raw probe totals include maintenance cleanup; they are not a proportional feature score.",
+    "The operational four-hour agent stop guard is enforced by the caller that launches an agent; this command prepares and grades source only."
+  ],
+  "excluded_attempts": [
+    {
+      "local_report": "local/team-views-final-qualification-v01/reference/runtime/grade.json",
+      "automated_correctness": "inconclusive",
+      "reason": "Upstream assets:precompile waited for interactive pnpm reinstall; stopped and fixed the published offline build command before rerunning all controls."
+    }
+  ],
+  "local_full_evidence": "local/team-views-final-qualification-v02"
+}

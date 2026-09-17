@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "audience_kind": "select",
+  "prepare_create": ["filter_toggle", "filter_apply", "save_open"],
+  "locators": {
+    "filter_toggle": {"by":"css","value":"#toggleConversationFilterButton"},
+    "filter_apply": {"by":"role","role":"button","value":"Apply filters"},
+    "save_open": {"by":"role","role":"button","value":"Save filter"},
+    "audience": {"by":"label","value":"View audience"},
+    "name": {"by":"placeholder","value":"Name your filter to refer it later."},
+    "save": {"by":"role","role":"button","value":"Save filter","scope":"#saveFilterTeleportTarget"},
+    "save_error": {"by":"text","value":"Fixture rejected save"},
+    "view_heading": {"by":"role","role":"heading","value":"{view_name} · {team_name}"},
+    "view_link": {"by":"text","value":"{view_name} · {team_name}","scope":"aside"},
+    "edit": {"by":"role","role":"button","value":"Edit folder"},
+    "edit_name": {"by":"placeholder","value":"Enter value"},
+    "edit_save": {"by":"role","role":"button","value":"Update folder"},
+    "delete": {"by":"role","role":"button","value":"Delete filter"},
+    "delete_confirm": {"by":"role","role":"button","value":"Yes, delete"}
+  }
+}

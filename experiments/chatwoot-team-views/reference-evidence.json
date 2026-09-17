@@ -1,0 +1,120 @@
+{
+  "recorded_at": "2026-09-17T08:28:06.735973+00:00",
+  "kind": "reference-qualification",
+  "source_commit": "5b7038b950b763e230df2d544df9b87b8752fef3",
+  "qualified_for_agent_comparison": false,
+  "qualification_status": "recorded scenarios passed",
+  "observed_image_ids": {
+    "pocket-chatwoot-feasibility:5b7038b": "sha256:d0c58aba4fafb00a5fbbf427b905b4a749ce52e19760ff10da3bba47e00a931d",
+    "nginx:1.28-alpine": "sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236",
+    "pgvector/pgvector:pg16": "sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b",
+    "redis:7.4-alpine": "sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf"
+  },
+  "backend": {
+    "existing_examples": 148,
+    "maintainer_examples": 12,
+    "total": 160,
+    "failures": 0
+  },
+  "public_reference_tests": {
+    "examples": 12,
+    "failures": 0,
+    "overlaps_maintainer_scenarios": true
+  },
+  "frontend": {
+    "tests": 184,
+    "files": 8,
+    "failures": 0
+  },
+  "http_probe": {
+    "pass": 45
+  },
+  "migration": {
+    "kind": "populated-upgrade-legacy-data",
+    "rows_checked": 4,
+    "status": "pass"
+  },
+  "restart": {
+    "kind": "application-restart-persistence",
+    "status": "pass"
+  },
+  "browser": {
+    "kind": "reference-ui-qualification",
+    "browser": "152.0.7977.83",
+    "runtime_errors": 0,
+    "checks": [
+      {
+        "name": "successful save",
+        "status": "pass"
+      },
+      {
+        "name": "creator edit",
+        "status": "pass"
+      },
+      {
+        "name": "member read only",
+        "status": "pass"
+      },
+      {
+        "name": "member empty result",
+        "status": "pass"
+      },
+      {
+        "name": "administrator delete confirmation",
+        "status": "pass"
+      }
+    ]
+  },
+  "negative_controls": [
+    {
+      "variant": "reader_can_manage",
+      "expected_assertion_verified": true
+    },
+    {
+      "variant": "creator_deletes_shared",
+      "expected_assertion_verified": true
+    },
+    {
+      "variant": "creator_unread_counts",
+      "expected_assertion_verified": true
+    },
+    {
+      "variant": "stale_membership",
+      "expected_assertion_verified": true
+    }
+  ],
+  "valid_variation": {
+    "name": "join_visibility",
+    "examples": 12,
+    "failures": 0,
+    "independently_authored_implementation": false
+  },
+  "build": {
+    "status": "pass",
+    "node_heap_mb": 4096,
+    "container_memory_gib": 5,
+    "dependency_install_skipped": true
+  },
+  "lint": {
+    "ruby": "pass",
+    "ui_errors": 0,
+    "existing_ui_warnings": 3
+  },
+  "tooling_unit_tests": {
+    "passed": 13
+  },
+  "remaining_gates": [
+    "clean candidate transfer and isolated verifier integration",
+    "layout-independent public UI automation protocol",
+    "full runner control validation before task registration"
+  ],
+  "sha256": {
+    "reference.patch": "52278b462d9b41b59498e914b3f6f562e763fe187e1de4fd7cc7c582d27a2de0",
+    "acceptance_spec.rb": "74af7d2309ad18727c62faedc2d8737fde15a4ac7ee0b8aa86be8fe445edd833",
+    "negative_control.rb": "2e21eb38eabced87f18878579736fa2225a73bf56fa8d8cca72c462a91854fa4",
+    "check_controls.py": "7199b23e90d08bf0544d96effe85f0eeb9918cbf9acf4950ea79e90a4646624c",
+    "browser-shared.cjs": "7db75b21871a288957d4bdc29c3f7169ce119f4748184634d08e6e2ea1595d70",
+    "migration_probe.py": "0c576848d2f0d47d2b7bfc0f0f452f7a50aa1ce6017d713709c7e89d499ba99a",
+    "restart_probe.py": "d9d9d85265912e76d0fc45c82f34f709de5bc34aa2b143fb29ba22bb8d41ef87"
+  }
+}

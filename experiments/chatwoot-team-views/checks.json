@@ -1,0 +1,34 @@
+{
+  "version": "0.2",
+  "ruby_regression": [
+    "spec/models/custom_filter_spec.rb",
+    "spec/controllers/api/v1/accounts/custom_filters_controller_spec.rb",
+    "spec/models/team_spec.rb",
+    "spec/models/team_member_spec.rb",
+    "spec/controllers/api/v1/accounts/teams_controller_spec.rb",
+    "spec/controllers/api/v1/accounts/team_members_controller_spec.rb",
+    "spec/services/conversations/filter_service_spec.rb",
+    "spec/services/conversations/permission_filter_service_spec.rb",
+    "spec/services/conversations/unread_counts/filtered_counter_spec.rb",
+    "spec/services/conversations/unread_counts/filtered_count_invalidator_spec.rb"
+  ],
+  "frontend_regression": [
+    "app/javascript/dashboard/helper/specs/filterQueryGenerator.spec.js",
+    "app/javascript/dashboard/store/modules/conversations/helpers/specs/filterHelpers.spec.js",
+    "app/javascript/dashboard/components-next/filter/helper/filterHelper.spec.js",
+    "app/javascript/dashboard/components/specs/ChatListHeader.spec.js",
+    "app/javascript/dashboard/store/modules/specs/customViews/actions.spec.js",
+    "app/javascript/dashboard/store/modules/specs/customViews/mutations.spec.js",
+    "app/javascript/dashboard/store/modules/specs/customViews/getters.spec.js",
+    "app/javascript/dashboard/helper/specs/customViewsHelper.spec.js"
+  ],
+  "production_build": ["/bin/sh", "-c", "pnpm run build:sdk && bundle exec rails vite:build_all"],
+  "ruby_lint": ["bundle", "exec", "rubocop", "--format", "json"],
+  "frontend_lint": ["pnpm", "exec", "eslint", "--format", "json"],
+  "baseline_exceptions": [
+    "Build SDK and Vite entrypoints directly: upstream assets:precompile unconditionally runs interactive pnpm install; dependencies are already prepared and manifest-checked before isolated grading.",
+    "Existing dynamic translation-key warnings in ChatList.vue/ChatListHeader.vue are warnings, not lint errors.",
+    "The base has no symbolic current-user assignee operator; literal IDs retain their literal meaning.",
+    "The missing-feature baseline is expected to fail shared-view checks and the submission-notes/new-tests requirement."
+  ]
+}

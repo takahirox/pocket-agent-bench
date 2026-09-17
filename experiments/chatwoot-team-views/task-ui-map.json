@@ -1,0 +1,122 @@
+{
+  "version": 2,
+  "audience_kind": "select",
+  "prepare_create": [
+    "filter_toggle",
+    "filter_apply",
+    "save_open"
+  ],
+  "locators": {
+    "filter_toggle": {
+      "by": "css",
+      "value": "#toggleConversationFilterButton"
+    },
+    "filter_apply": {
+      "by": "role",
+      "role": "button",
+      "value": "Apply filters"
+    },
+    "save_open": {
+      "by": "role",
+      "role": "button",
+      "value": "Save filter"
+    },
+    "audience": {
+      "by": "label",
+      "value": "View audience"
+    },
+    "name": {
+      "by": "placeholder",
+      "value": "Name your filter to refer it later."
+    },
+    "save": {
+      "by": "role",
+      "role": "button",
+      "value": "Save filter",
+      "scope": "#saveFilterTeleportTarget"
+    },
+    "save_error": {
+      "by": "text",
+      "value": "Fixture rejected save"
+    },
+    "view_heading": {
+      "by": "role",
+      "role": "heading",
+      "value": "{view_name} \u00b7 {team_name}"
+    },
+    "view_link": {
+      "by": "text",
+      "value": "{view_name} \u00b7 {team_name}",
+      "scope": "aside"
+    },
+    "edit": {
+      "by": "role",
+      "role": "button",
+      "value": "Edit folder"
+    },
+    "edit_name": {
+      "by": "placeholder",
+      "value": "Enter value"
+    },
+    "edit_save": {
+      "by": "role",
+      "role": "button",
+      "value": "Update folder"
+    },
+    "delete": {
+      "by": "role",
+      "role": "button",
+      "value": "Delete filter"
+    },
+    "delete_confirm": {
+      "by": "role",
+      "role": "button",
+      "value": "Yes, delete"
+    },
+    "query_values": {
+      "by": "role",
+      "role": "button",
+      "value": "Open",
+      "scope": "#conversationFilterTeleportTarget"
+    },
+    "query_open": {
+      "by": "text",
+      "value": "Open",
+      "scope": "#conversationFilterTeleportTarget .n-dropdown-item"
+    },
+    "query_resolved": {
+      "by": "text",
+      "value": "Resolved",
+      "scope": "#conversationFilterTeleportTarget .n-dropdown-item"
+    },
+    "edit_error": {
+      "by": "text",
+      "value": "Fixture rejected update"
+    },
+    "delete_error": {
+      "by": "text",
+      "value": "AxiosError: Request failed with status code 422"
+    },
+    "delete_cancel": {
+      "by": "role",
+      "role": "button",
+      "value": "No, keep it"
+    },
+    "personal_link": {
+      "by": "text",
+      "value": "{view_name}",
+      "scope": "aside"
+    },
+    "personal_heading": {
+      "by": "role",
+      "role": "heading",
+      "value": "{view_name}"
+    }
+  },
+  "set_resolved": [
+    "query_values",
+    "query_open",
+    "query_resolved",
+    "edit_name"
+  ]
+}

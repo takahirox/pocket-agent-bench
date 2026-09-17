@@ -1,0 +1,67 @@
+{
+  "recorded_at": "2026-09-17T07:51:10.070922+00:00",
+  "kind": "maintainer-baseline-qualification",
+  "source_commit": "5b7038b950b763e230df2d544df9b87b8752fef3",
+  "observed_image_ids": {
+    "pocket-chatwoot-feasibility:5b7038b": "sha256:d0c58aba4fafb00a5fbbf427b905b4a749ce52e19760ff10da3bba47e00a931d",
+    "nginx:1.28-alpine": "sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236",
+    "pgvector/pgvector:pg16": "sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b",
+    "redis:7.4-alpine": "sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf"
+  },
+  "fixture_version": 1,
+  "http": {
+    "baseline": {
+      "pass": 11
+    },
+    "shared": {
+      "fail": 20,
+      "pass": 13
+    },
+    "cleanup": {
+      "pass": 7
+    }
+  },
+  "browser": {
+    "kind": "maintainer-browser-baseline",
+    "browser": "152.0.7977.83",
+    "checks": [
+      {
+        "actor": "alice",
+        "status": "pass",
+        "visible_conversations": 5
+      },
+      {
+        "actor": "bob",
+        "status": "pass",
+        "visible_conversations": 3
+      }
+    ]
+  },
+  "unit_tests": {
+    "command": ".venv/bin/pytest -q tests/test_team_views_qualification.py",
+    "passed": 12
+  },
+  "correctness": "unscored",
+  "qualified_for_agent_comparison": false,
+  "missing_coverage": [
+    "populated upgrade and restart",
+    "membership/cache lifecycle",
+    "creator/account/team deletion",
+    "unread and pagination",
+    "compound/current-user queries",
+    "browser workflows",
+    "build/lint and expanded regression",
+    "reference and negative-control validation",
+    "isolated final-verifier integration"
+  ],
+  "sha256": {
+    "experiments/chatwoot-team-views/initialize.py": "d568695a78b5167652269995098910d1c5178b7225bc8677519f2f34df48a215",
+    "experiments/chatwoot-team-views/prepare.py": "affd4eee548072100eba863d2bd0d1b28de7b2d125be21860bb2ce4dbd6d18b4",
+    "experiments/chatwoot-team-views/probe.py": "944d495e6e579a4df8e3097339495c8a0ea98726fc88a0d4d23cda96093a3d7f",
+    "experiments/chatwoot-team-views/fixture.rb": "e2ae6d41d590255ba34a6580a2f490810286dc1352a780ffdcff3c0c77c93601",
+    "experiments/chatwoot-team-views/browser-baseline.cjs": "dfc03649726d62cc5ec1dd240b88cd76ce75eb2a982960a2be26ef73f58b2018",
+    "experiments/chatwoot-team-views/Dockerfile": "6edefa429c4652c5eafc89f2431c08523e975d69b51ce88727589f1b6412260c",
+    "experiments/chatwoot-team-views/nginx.conf": "2cd9bdb98cfc64b4870e373b62a9959f96a82608f90390393aa9eafeaf8a894c",
+    "tests/test_team_views_qualification.py": "13a0b46da7efb9c4bf400c9edf3385a5b72190b968203bfeb0a0743cc26890f7"
+  }
+}

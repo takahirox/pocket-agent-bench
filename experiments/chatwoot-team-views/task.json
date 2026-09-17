@@ -1,0 +1,17 @@
+{
+  "id": "chatwoot-team-views",
+  "suite": "engineering-experimental",
+  "version": "0.2",
+  "status": "qualified-experimental",
+  "source": "https://github.com/chatwoot/chatwoot",
+  "source_commit": "5b7038b950b763e230df2d544df9b87b8752fef3",
+  "instruction": "../../docs/task-proposals/chatwoot-team-views/instruction.md",
+  "checks": "checks.json",
+  "entrypoint": "task.py",
+  "correctness": "required automated checks all pass; human review reported separately",
+  "agent_stop_guard_seconds": 14400,
+  "elapsed_time_is_correctness": false,
+  "agent_difficulty": "unmeasured",
+  "required_services": ["app", "postgres", "redis", "worker", "browser"],
+  "reference_is_agent_input": false
+}

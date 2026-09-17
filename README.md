@@ -14,6 +14,11 @@ Twelve intentionally small original tasks cover data processing, coding, local-d
 research and mock API workflows. Tasks and graders are automatically tested, not
 human-certified. See [the goal](docs/GOAL.md) and [evaluation design](docs/DESIGN.md).
 
+For a substantial existing-application task, see the experimental
+[Chatwoot engineering task](docs/ENGINEERING.md). Its separate Docker grader
+checks a source submission across the API, UI, migrations, regressions and build;
+agent difficulty has not yet been measured.
+
 The [initial real comparison](docs/VALIDATION.md) ran 72 trials, but a later audit
 found benchmark-adapter defects affecting all six My AI Employee API trials. Those
 six are invalidated for comparison; **the original 17/24 is not a fair product score**.

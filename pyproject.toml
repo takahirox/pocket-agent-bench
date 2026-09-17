@@ -14,6 +14,7 @@ dev = ["pytest>=8", "ruff>=0.9"]
 
 [project.scripts]
 pocket-bench = "pocket_bench.cli:main"
+pocket-engineering = "pocket_bench.engineering:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

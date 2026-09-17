@@ -1,0 +1,233 @@
+{
+  "kind": "isolated-submission-qualification",
+  "date": "2026-09-17",
+  "correctness": "unscored",
+  "qualified_for_agent_comparison": false,
+  "source_commit": "5b7038b950b763e230df2d544df9b87b8752fef3",
+  "images": {
+    "app": "sha256:d0c58aba4fafb00a5fbbf427b905b4a749ce52e19760ff10da3bba47e00a931d",
+    "postgres": "sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b",
+    "redis": "sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf",
+    "proxy": "sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236"
+  },
+  "runs": {
+    "reference": {
+      "artifact_sha256": "888b93fefab78a56ca93509595aa110d14f860a73395d57a2d6fad041c5433f0",
+      "runner": {
+        "correctness": "unscored",
+        "qualified_for_agent_comparison": false,
+        "stages": [
+          {
+            "name": "services",
+            "status": "pass",
+            "seconds": 3.79
+          },
+          {
+            "name": "baseline-schema",
+            "status": "pass",
+            "seconds": 7.86
+          },
+          {
+            "name": "fixture",
+            "status": "pass",
+            "seconds": 5.42
+          },
+          {
+            "name": "migration",
+            "status": "pass",
+            "seconds": 9.8
+          },
+          {
+            "name": "legacy-data",
+            "status": "pass",
+            "seconds": 0.23
+          },
+          {
+            "name": "application",
+            "status": "pass",
+            "seconds": 0.23
+          },
+          {
+            "name": "container-boundary",
+            "status": "pass"
+          },
+          {
+            "name": "http",
+            "status": "pass",
+            "seconds": 4.57
+          },
+          {
+            "name": "restart",
+            "status": "pass",
+            "seconds": 6.92
+          },
+          {
+            "name": "browser",
+            "status": "pass",
+            "seconds": 66.24
+          }
+        ],
+        "remaining_gates": [
+          "generic UI evaluation",
+          "full regression/build integration",
+          "full runner controls and task registration"
+        ],
+        "ui_map_sha256": "2453b49fe40bd6eef73d0cfae461d8a8282b6e4fa1a6493e93aafb20db082ad0",
+        "cleanup": "pass"
+      },
+      "http_summary": {
+        "pass": 45
+      },
+      "legacy_data": {
+        "kind": "populated-upgrade-legacy-data",
+        "rows_checked": 4,
+        "status": "pass"
+      },
+      "boundary": {
+        "status": "pass",
+        "user": "1000:1000",
+        "host_mounts": 0,
+        "volume_names": [
+          "pocket-tv-isolated-v03_candidate",
+          "pocket-tv-isolated-v03_dependencies"
+        ],
+        "internal_network": true,
+        "privileged": false,
+        "capabilities_dropped": [
+          "ALL"
+        ]
+      }
+    },
+    "baseline": {
+      "artifact_sha256": "fe90b78c967a8f2f10b6b84a4cf5a739fa3365db826c6c7492625860cbd1d3a5",
+      "runner": {
+        "correctness": "unscored",
+        "qualified_for_agent_comparison": false,
+        "stages": [
+          {
+            "name": "services",
+            "status": "pass",
+            "seconds": 4.7
+          },
+          {
+            "name": "baseline-schema",
+            "status": "pass",
+            "seconds": 9.28
+          },
+          {
+            "name": "fixture",
+            "status": "pass",
+            "seconds": 7.27
+          },
+          {
+            "name": "migration",
+            "status": "pass",
+            "seconds": 9.66
+          },
+          {
+            "name": "legacy-data",
+            "status": "pass",
+            "seconds": 0.18
+          },
+          {
+            "name": "application",
+            "status": "pass",
+            "seconds": 0.39
+          },
+          {
+            "name": "container-boundary",
+            "status": "pass"
+          },
+          {
+            "name": "http",
+            "status": "fail",
+            "seconds": 4.26
+          }
+        ],
+        "remaining_gates": [
+          "generic UI evaluation",
+          "full regression/build integration",
+          "full runner controls and task registration"
+        ],
+        "stopped": "http: fail",
+        "cleanup": "pass"
+      },
+      "http_summary": {
+        "pass": 31,
+        "fail": 20
+      },
+      "legacy_data": {
+        "kind": "populated-upgrade-legacy-data",
+        "rows_checked": 4,
+        "status": "pass"
+      },
+      "boundary": {
+        "status": "pass",
+        "user": "1000:1000",
+        "host_mounts": 0,
+        "volume_names": [
+          "pocket-tv-isolated-base_candidate",
+          "pocket-tv-isolated-base_dependencies"
+        ],
+        "internal_network": true,
+        "privileged": false,
+        "capabilities_dropped": [
+          "ALL"
+        ]
+      }
+    }
+  },
+  "latest_browser_check": {
+    "kind": "mapped-ui-qualification",
+    "browser": "152.0.7977.83",
+    "runtime_errors": 0,
+    "checks": [
+      {
+        "name": "successful save",
+        "status": "pass"
+      },
+      {
+        "name": "creator edit",
+        "status": "pass"
+      },
+      {
+        "name": "member read only",
+        "status": "pass"
+      },
+      {
+        "name": "member empty result",
+        "status": "pass"
+      },
+      {
+        "name": "administrator delete confirmation",
+        "status": "pass"
+      }
+    ]
+  },
+  "browser_recheck_note": "The full runner passed; after adding explicit visible name/team assertions, the final browser script was rerun separately against the same isolated artifact and passed.",
+  "tooling_tests": {
+    "python_passed": 39,
+    "node_passed": 4,
+    "ruff": "pass"
+  },
+  "tooling_sha256_at_recording": {
+    "artifact.py": "8ffe3056de80656e1bd258f6203b774ac0553a1d75ca9ef4aeae8b1b387f1086",
+    "isolated.py": "460f95b5255325fa0741f533a7f49acc837aafd4844bab401deeb8137fb1f95b",
+    "browser-mapped.cjs": "41088d6a3a2e3d37bddac131966cf585c0ec312549ef1de16e50a1490965ffef",
+    "ui-map.cjs": "c3d7dd5c8c5bdabd7cf334ecf5e02f93c74a6153cfc9d2ef66aa0afa5b21f5a6",
+    "reference-ui-map.json": "2453b49fe40bd6eef73d0cfae461d8a8282b6e4fa1a6493e93aafb20db082ad0",
+    "ui-map.test.cjs": "b4feebcec6af9b74080e899764ab7b416d87d4caba9f77aab61d57326d716c48"
+  },
+  "limitations": [
+    "Partial R1-R8 coverage; not a scored task",
+    "Pinned packaged browser still pending",
+    "Full regression/build/lint and lifecycle checks not yet integrated into isolated runner",
+    "Alternative UI layouts and UI wrong controls still need qualification",
+    "Earlier process-local incorrect and valid controls are not counted as full isolated runner controls"
+  ],
+  "preparation_fixes": [
+    "v01 proxy read-only volume copy failed; fixed by preparing volume through trusted seed container",
+    "v02 HTTP checks passed but Vite cache ownership blocked UI; fixed dependency-volume ownership before candidate transfer in v03",
+    "Reject dot root archive path in addition to traversal and symlink paths; both real artifacts revalidated"
+  ]
+}
